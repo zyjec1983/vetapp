@@ -1,0 +1,63 @@
+/* Reset básico */
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen;
+}
+
+/* Fondo principal */
+body {
+    background-image: url('../img/login-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Overlay oscuro */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.25);
+    z-index: -1;
+}
+
+/* Wrapper para centrar */
+.login-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* Card transparente */
+.login-card {
+    width: 100%;
+    max-width: 400px;
+    background: rgba(255, 255, 255, 0.10);
+    backdrop-filter: blur(8px);
+    border-radius: 14px;
+}
+
+/* Inputs */
+.login-card .form-control {
+    border-radius: 8px;
+}
+
+/* Botón */
+.login-card .btn-primary {
+    border-radius: 25px;
+    font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .login-card {
+        max-width: 100%;
+    }
+}
