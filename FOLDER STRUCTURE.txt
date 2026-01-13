@@ -1,0 +1,97 @@
+vetapp/
+│
+├── app/
+│   ├── config/
+│   │   ├── Database.php
+│   │   └── config.php
+│   │
+│   ├── controllers/
+│   │   ├── auth/
+│   │   │   └── AuthController.php
+│   │   │
+│   │   ├── users/
+│   │   │   └── UserController.php
+│   │   │
+│   │   ├── clients/
+│   │   │   └── ClientController.php
+│   │   │
+│   │   ├── pets/
+│   │   │   └── PetController.php
+│   │   │
+│   │   ├── consultations/
+│   │   │   └── ConsultationController.php
+│   │   │
+│   │   ├── medications/
+│   │   │   └── MedicationController.php
+│   │   │
+│   │   └── sales/
+│   │       └── SaleController.php
+│   │
+│   ├── models/
+│   │   ├── User.php
+│   │   ├── Client.php
+│   │   ├── Pet.php
+│   │   ├── Consultation.php
+│   │   ├── Medication.php
+│   │   └── Sale.php
+│   │
+│   ├── views/
+│   │   ├── auth/
+│   │   │   ├── login.php
+│   │   │   └── logout.php
+│   │   │
+│   │   ├── dashboard/
+│   │   │   └── index.php
+│   │   │
+│   │   ├── users/
+│   │   │   ├── index.php
+│   │   │   ├── create.php
+│   │   │   └── edit.php
+│   │   │
+│   │   ├── clients/
+│   │   │   ├── index.php
+│   │   │   ├── create.php
+│   │   │   └── edit.php
+│   │   │
+│   │   ├── pets/
+│   │   │   ├── index.php
+│   │   │   ├── create.php
+│   │   │   └── edit.php
+│   │   │
+│   │   ├── consultations/
+│   │   │   ├── index.php
+│   │   │   └── create.php
+│   │   │
+│   │   ├── medications/
+│   │   │   ├── index.php
+│   │   │   └── create.php
+│   │   │
+│   │   └── sales/
+│   │       ├── index.php
+│   │       └── create.php
+│   │
+│   └── helpers/
+│       ├── auth.php
+│       └── redirect.php
+│
+├── database/
+│   └── vetapp.sql
+│
+├── public/
+│   ├── css/
+│   │   └── styles.css
+│   │
+│   ├── js/
+│   │   └── app.js
+│   │
+│   ├── img/
+│   │
+│   └── index.php
+│
+├── storage/
+│   ├── uploads/
+│   └── logs/
+│
+├── .htaccess
+└── README.md
+
