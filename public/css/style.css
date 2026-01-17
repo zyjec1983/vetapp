@@ -11,7 +11,8 @@ html, body {
 
 /* Fondo principal */
 body {
-    background-image: url('../img/login-bg.jpg');
+    /*background-image: url('../img/login-bg.jpg');*/
+    background-image: url('../img/login-bg-my-pets.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -26,23 +27,23 @@ body::before {
     z-index: -1;
 }
 
-/* Wrapper para centrar */
 .login-wrapper {
     min-height: 100vh;
     display: flex;
     align-items: center;
-    justify-content: center;
-    padding: 20px;
+    justify-content: flex-end;
 }
 
-/* Card transparente */
 .login-card {
-    width: 100%;
     max-width: 400px;
-    background: rgba(255, 255, 255, 0.10);
+    width: 100%;
+    margin-right: 40px;
+    background: rgba(255,255,255,0.10);
     backdrop-filter: blur(8px);
     border-radius: 14px;
 }
+
+
 
 /* Inputs */
 .login-card .form-control {

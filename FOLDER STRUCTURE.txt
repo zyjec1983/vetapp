@@ -1,97 +1,104 @@
+
 vetapp/
 │
 ├── app/
 │   ├── config/
-│   │   ├── Database.php
-│   │   └── config.php
+│   │   ├── Database.php			<-- completada
+│   │   └── config.php 				<-- sin iniciar
 │   │
 │   ├── controllers/
 │   │   ├── auth/
-│   │   │   └── AuthController.php
+│   │   │   └── AuthController.php		<-- sin iniciar
 │   │   │
 │   │   ├── users/
-│   │   │   └── UserController.php
+│   │   │   └── UserController.php		<-- sin iniciar
 │   │   │
 │   │   ├── clients/
-│   │   │   └── ClientController.php
+│   │   │   └── ClientController.php		<-- sin iniciar
 │   │   │
 │   │   ├── pets/
-│   │   │   └── PetController.php
+│   │   │   └── PetController.php		<-- sin iniciar
 │   │   │
 │   │   ├── consultations/
-│   │   │   └── ConsultationController.php
+│   │   │   └── ConsultationController.php	<-- sin iniciar
 │   │   │
 │   │   ├── medications/
-│   │   │   └── MedicationController.php
+│   │   │   └── MedicationController.php	<-- sin iniciar
 │   │   │
 │   │   └── sales/
-│   │       └── SaleController.php
+│   │       └── SaleController.php		<-- sin iniciar
+│   │
+│   ├── middleware/
+│   │   ├── AuthMiddleware.php			<-- sin iniciar
+│   │   └── RoleMiddleware.php			<-- sin iniciar
 │   │
 │   ├── models/
-│   │   ├── User.php
-│   │   ├── Client.php
-│   │   ├── Pet.php
-│   │   ├── Consultation.php
-│   │   ├── Medication.php
-│   │   └── Sale.php
+│   │   ├── User.php				<-- sin iniciar
+│   │   ├── Client.php				<-- sin iniciar
+│   │   ├── Pet.php				<-- sin iniciar
+│   │   ├── Consultation.php			<-- sin iniciar
+│   │   ├── Medication.php			<-- sin iniciar
+│   │   └── Sale.php				<-- sin iniciar
 │   │
 │   ├── views/
 │   │   ├── auth/
-│   │   │   ├── login.php
-│   │   │   └── logout.php
+│   │   │   ├── login.php			<-- sin iniciar
+│   │   │   └── logout.php			<-- sin iniciar
 │   │   │
 │   │   ├── dashboard/
-│   │   │   └── index.php
+│   │   │   └── index.php			<-- sin iniciar
 │   │   │
 │   │   ├── users/
-│   │   │   ├── index.php
-│   │   │   ├── create.php
-│   │   │   └── edit.php
+│   │   │   ├── index.php			<-- sin iniciar
+│   │   │   ├── create.php			<-- sin iniciar
+│   │   │   └── edit.php			<-- sin iniciar
 │   │   │
 │   │   ├── clients/
-│   │   │   ├── index.php
-│   │   │   ├── create.php
-│   │   │   └── edit.php
+│   │   │   ├── index.php			<-- sin iniciar
+│   │   │   ├── create.php			<-- sin iniciar
+│   │   │   └── edit.php			<-- sin iniciar
 │   │   │
 │   │   ├── pets/
-│   │   │   ├── index.php
-│   │   │   ├── create.php
-│   │   │   └── edit.php
+│   │   │   ├── index.php			<-- sin iniciar
+│   │   │   ├── create.php			<-- sin iniciar
+│   │   │   └── edit.php			<-- sin iniciar
 │   │   │
 │   │   ├── consultations/
-│   │   │   ├── index.php
-│   │   │   └── create.php
+│   │   │   ├── index.php			<-- sin iniciar
+│   │   │   └── create.php			<-- sin iniciar
 │   │   │
 │   │   ├── medications/
-│   │   │   ├── index.php
-│   │   │   └── create.php
+│   │   │   ├── index.php			<-- sin iniciar
+│   │   │   └── create.php			<-- sin iniciar
 │   │   │
 │   │   └── sales/
-│   │       ├── index.php
-│   │       └── create.php
+│   │       ├── index.php			<-- sin iniciar
+│   │       └── create.php			<-- sin iniciar		
 │   │
 │   └── helpers/
-│       ├── auth.php
-│       └── redirect.php
+│       ├── auth.php				<-- sin iniciar
+│       └── redirect.php			<-- sin iniciar
+│
+├── repositories/
+│        └── UserRepository.php	
 │
 ├── database/
-│   └── vetapp.sql
+│   └── vetapp.sql				<-- listo
 │
 ├── public/
 │   ├── css/
-│   │   └── styles.css
+│   │   └── styles.css				<-- descargada bootswatch "https://bootswatch.com/litera/"
 │   │
 │   ├── js/
-│   │   └── app.js
+│   │   └── app.js				<-- descargada la version desde bootstrap
 │   │
-│   ├── img/
+│   ├── img/					<-- imagenes cargadas para el login
 │   │
-│   └── index.php
+│   └── index.php				<-- creada la vista del index con el formulario
 │
 ├── storage/
-│   ├── uploads/
-│   └── logs/
+│   ├── uploads/				<-- sin iniciar
+│   └── logs/					<-- sin iniciar
 │
-├── .htaccess
-└── README.md
-
+├── .htaccess					<-- sin iniciar
+└── README.md					<-- sin iniciar

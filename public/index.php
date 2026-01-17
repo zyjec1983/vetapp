@@ -1,4 +1,8 @@
 <?php
+/**
+ * Location: vetapp/public/index.php
+ */
+
 session_start();
 
 if (isset($_SESSION['user'])) {
@@ -8,6 +12,7 @@ if (isset($_SESSION['user'])) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>VetApp | Login</title>
@@ -22,37 +27,34 @@ if (isset($_SESSION['user'])) {
 <body>
 
 <div class="login-wrapper">
-    <div class="card login-card shadow-lg border-0">
+    <div class="login-card card shadow-lg border-0">
         <div class="card-body p-4">
-            <h4 class="text-center mb-4 fw-bold">VetApp Login</h4>
 
-            <?php if (isset($_GET['error'])): ?>
-                <div class="alert alert-danger">
-                    Invalid username or password
-                </div>
-            <?php endif; ?>
+            <h4 class="text-center text-white mb-4">VetApp Login</h4>
 
             <form method="POST" action="../app/controllers/auth/AuthController.php">
 
                 <div class="mb-3">
-                    <label class="form-label">Username</label>
+                    <label class="form-label text-white">Username</label>
                     <input type="text" name="username" class="form-control" required>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Password</label>
+                    <label class="form-label text-white">Password</label>
                     <input type="password" name="password" class="form-control" required>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100 mt-3">
+                <button type="submit" class="btn btn-primary w-100">
                     Login
                 </button>
 
             </form>
+
         </div>
     </div>
 </div>
 
-<script src="js/bootstrap.bundle.min.js"></script>
 </body>
+
+
 </html>
