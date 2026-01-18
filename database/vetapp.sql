@@ -1,4 +1,4 @@
--- DROP DATABASE vetapp;
+DROP DATABASE vetapp;
 -- =========================================
 -- DATABASE CREATION
 -- =========================================
@@ -13,15 +13,47 @@ USE vetapp;
 -- =========================================
 CREATE TABLE users (
     id_user INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
+
     name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE,
-    role ENUM('admin','veterinarian','pharmacy') NOT NULL,
+    middlename VARCHAR(100),
+    lastname1 VARCHAR(100) NOT NULL,
+    lastname2 VARCHAR(100),
+
     phone VARCHAR(20),
     active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- =========================================
+-- ROELS
+-- =========================================
+ 
+CREATE TABLE roles (
+    id_role INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL,
+    description VARCHAR(100)
+);
+
+-- =========================================
+-- USER_ROEL (INTERMEDIARY TABLE)
+-- =========================================
+CREATE TABLE user_roles (
+    id_user INT NOT NULL,
+    id_role INT NOT NULL,
+    PRIMARY KEY (id_user, id_role),
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE CASCADE,
+    FOREIGN KEY (id_role) REFERENCES roles(id_role) ON DELETE CASCADE
+);
+
+-- =========================================
+-- POPULATE TABLE
+-- =========================================
+INSERT INTO roles (name, description) VALUES
+('admin','Administrador del sistema'),
+('veterinarian','Veterinario'),
+('pharmacy','Farmacia');
 
 -- =========================================
 -- CLIENTS (PET OWNERS)

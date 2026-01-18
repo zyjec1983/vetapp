@@ -9,6 +9,14 @@
  * - Usa Repository + Entity
  */
 
+// echo '<pre>';
+// var_dump($_POST);
+// echo '</pre>';
+// exit;
+
+
+
+
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../config/Database.php';
 require_once __DIR__ . '/../../repositories/UserRepository.php';
