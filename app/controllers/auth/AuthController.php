@@ -1,14 +1,15 @@
 <?php
 /**
  * Location: vetapp/app/controllers/auth/AuthController.php
+ *
  * Responsibility:
  * - Coordina el proceso de autenticación
  * - NO accede directamente a la base de datos
  * - NO contiene SQL
+ * - Usa Repository + Entity
  */
 
-session_start();
-
+require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../config/Database.php';
 require_once __DIR__ . '/../../repositories/UserRepository.php';
 
@@ -21,7 +22,7 @@ class AuthController
     {
         // ************* VALIDAR MÉTODO *************
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /login');
+            header('Location: ' . BASE_URL . '/login.php');
             exit;
         }
 
@@ -32,7 +33,7 @@ class AuthController
         // ************* VALIDACIONES BÁSICAS *************
         if ($email === '' || $password === '') {
             $_SESSION['error'] = 'Email y contraseña son obligatorios';
-            header('Location: /login');
+            header('Location: ' . BASE_URL . '/login.php');
             exit;
         }
 
@@ -45,21 +46,21 @@ class AuthController
 
         if ($user === null) {
             $_SESSION['error'] = 'Credenciales inválidas';
-            header('Location: /login');
+            header('Location: ' . BASE_URL . '/login.php');
             exit;
         }
 
         // ************* VERIFICAR ESTADO *************
         if (!$user->isActive()) {
             $_SESSION['error'] = 'Usuario desactivado';
-            header('Location: /login');
+            header('Location: ' . BASE_URL . '/login.php');
             exit;
         }
 
         // ************* VERIFICAR PASSWORD *************
         if (!$user->verifyPassword($password)) {
             $_SESSION['error'] = 'Credenciales inválidas';
-            header('Location: /login');
+            header('Location: ' . BASE_URL . '/login.php');
             exit;
         }
 
@@ -67,7 +68,7 @@ class AuthController
         // LOGIN EXITOSO
         // =====================================================
 
-        // ************* REGENERAR SESIÓN *************
+        // ************* SEGURIDAD DE SESIÓN *************
         session_regenerate_id(true);
 
         // ************* GUARDAR USUARIO EN SESIÓN *************
@@ -78,24 +79,9 @@ class AuthController
             'role'  => $user->getRole()
         ];
 
-        // ************* REDIRECCIÓN POR ROL *************
-        switch ($user->getRole()) {
-            case 'admin':
-                header('Location: /admin/dashboard');
-                break;
-
-            case 'veterinarian':
-                header('Location: /vet/dashboard');
-                break;
-
-            case 'pharmacy':
-                header('Location: /pharmacy/dashboard');
-                break;
-
-            default:
-                header('Location: /');
-        }
-
+        // ************* REDIRECCIÓN (TEMPORAL ÚNICA) *************
+        // La autorización por rol se manejará con middleware
+        header('Location: ' . BASE_URL . 'dashboard/index.php');
         exit;
     }
 
@@ -104,11 +90,10 @@ class AuthController
     // =====================================================
     public function logout(): void
     {
-        session_start();
         session_unset();
         session_destroy();
 
-        header('Location: /login');
+        header('Location: ' . BASE_URL . '/login.php');
         exit;
     }
 }

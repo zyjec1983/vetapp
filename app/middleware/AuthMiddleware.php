@@ -1,59 +1,39 @@
 <?php
 /**
  * Location: vetapp/app/middleware/AuthMiddleware.php
- * Responsibility: Protect routes and views
+ * Responsibility:
+ * - Verifica si el usuario está autenticado
+ * - Protege vistas y controladores
  */
+
+declare(strict_types=1);
+
+require_once __DIR__ . '/../config/config.php';
 
 class AuthMiddleware
 {
-    // ************* SESSION CHECK *************
-    public static function check(): void
+    // =====================================================
+    // VERIFICA SI HAY SESIÓN ACTIVA
+    // =====================================================
+    public static function handle(): void
     {
+        // Iniciar sesión si no existe
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
 
+        // Verificar autenticación
         if (!isset($_SESSION['user'])) {
             self::redirectToLogin();
         }
     }
 
-    // ************* ROLE CHECK *************
-    public static function requireRole(array $allowedRoles): void
-    {
-        self::check();
-
-        $userRole = $_SESSION['user']['role'] ?? null;
-
-        if (!in_array($userRole, $allowedRoles)) {
-            self::forbidden();
-        }
-    }
-
-    // ************* LOGOUT *************
-    public static function logout(): void
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        session_unset();
-        session_destroy();
-
-        self::redirectToLogin();
-    }
-
-    // ************* REDIRECT HELPERS *************
+    // =====================================================
+    // REDIRECCIÓN AL LOGIN
+    // =====================================================
     private static function redirectToLogin(): void
     {
-        header('Location: ' . BASE_URL . 'login.php');
-        exit;
-    }
-
-    private static function forbidden(): void
-    {
-        http_response_code(403);
-        echo "Acceso denegado";
+        header('Location: ' . BASE_URL . '/login.php');
         exit;
     }
 }

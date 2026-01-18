@@ -22,7 +22,7 @@ define('STORAGE_PATH', ROOT_PATH . '/storage');
 define('PUBLIC_PATH', ROOT_PATH . '/public');
 
 // ***************** BASE URL DEL SISTEMA *****************
-define('BASE_URL', 'http://localhost/vetapp/public/');
+define('BASE_URL', 'http://localhost/vetapp/public');
 
 // ***************** ENTORNO *****************
 define('ENV', 'development'); // production

@@ -1,104 +1,83 @@
-
 vetapp/
 │
 ├── app/
 │   ├── config/
-│   │   ├── Database.php			<-- completada
-│   │   └── config.php 				<-- sin iniciar
+│   │   ├── Database.php          ✔ LISTO
+│   │   └── config.php            ✔ LISTO (BASE_URL, paths, sesiones)
 │   │
 │   ├── controllers/
 │   │   ├── auth/
-│   │   │   └── AuthController.php		<-- sin iniciar
+│   │   │   └── AuthController.php        ⏳ pendiente
 │   │   │
 │   │   ├── users/
-│   │   │   └── UserController.php		<-- sin iniciar
+│   │   │   └── UserController.php        ⏳ pendiente
 │   │   │
 │   │   ├── clients/
-│   │   │   └── ClientController.php		<-- sin iniciar
+│   │   │   └── ClientController.php      ⏳ pendiente
 │   │   │
 │   │   ├── pets/
-│   │   │   └── PetController.php		<-- sin iniciar
+│   │   │   └── PetController.php         ⏳ pendiente
 │   │   │
 │   │   ├── consultations/
-│   │   │   └── ConsultationController.php	<-- sin iniciar
+│   │   │   └── ConsultationController.php ⏳ pendiente
 │   │   │
 │   │   ├── medications/
-│   │   │   └── MedicationController.php	<-- sin iniciar
+│   │   │   └── MedicationController.php  ⏳ pendiente
 │   │   │
 │   │   └── sales/
-│   │       └── SaleController.php		<-- sin iniciar
+│   │       └── SaleController.php        ⏳ pendiente
 │   │
 │   ├── middleware/
-│   │   ├── AuthMiddleware.php			<-- sin iniciar
-│   │   └── RoleMiddleware.php			<-- sin iniciar
+│   │   ├── AuthMiddleware.php            ⏳ pendiente
+│   │   └── RoleMiddleware.php            ⏳ pendiente
 │   │
 │   ├── models/
-│   │   ├── User.php				<-- sin iniciar
-│   │   ├── Client.php				<-- sin iniciar
-│   │   ├── Pet.php				<-- sin iniciar
-│   │   ├── Consultation.php			<-- sin iniciar
-│   │   ├── Medication.php			<-- sin iniciar
-│   │   └── Sale.php				<-- sin iniciar
+│   │   ├── User.php                      ⏳ pendiente
+│   │   ├── Client.php                    ⏳ pendiente
+│   │   ├── Pet.php                       ⏳ pendiente
+│   │   ├── Consultation.php              ⏳ pendiente
+│   │   ├── Medication.php                ⏳ pendiente
+│   │   └── Sale.php                      ⏳ pendiente
 │   │
 │   ├── views/
 │   │   ├── auth/
-│   │   │   ├── login.php			<-- sin iniciar
-│   │   │   └── logout.php			<-- sin iniciar
+│   │   │   ├── login.php                 ⏳ pendiente
+│   │   │   └── logout.php                ⏳ pendiente
 │   │   │
 │   │   ├── dashboard/
-│   │   │   └── index.php			<-- sin iniciar
+│   │   │   └── index.php                 ⏳ pendiente
 │   │   │
 │   │   ├── users/
-│   │   │   ├── index.php			<-- sin iniciar
-│   │   │   ├── create.php			<-- sin iniciar
-│   │   │   └── edit.php			<-- sin iniciar
-│   │   │
 │   │   ├── clients/
-│   │   │   ├── index.php			<-- sin iniciar
-│   │   │   ├── create.php			<-- sin iniciar
-│   │   │   └── edit.php			<-- sin iniciar
-│   │   │
 │   │   ├── pets/
-│   │   │   ├── index.php			<-- sin iniciar
-│   │   │   ├── create.php			<-- sin iniciar
-│   │   │   └── edit.php			<-- sin iniciar
-│   │   │
 │   │   ├── consultations/
-│   │   │   ├── index.php			<-- sin iniciar
-│   │   │   └── create.php			<-- sin iniciar
-│   │   │
 │   │   ├── medications/
-│   │   │   ├── index.php			<-- sin iniciar
-│   │   │   └── create.php			<-- sin iniciar
-│   │   │
 │   │   └── sales/
-│   │       ├── index.php			<-- sin iniciar
-│   │       └── create.php			<-- sin iniciar		
 │   │
 │   └── helpers/
-│       ├── auth.php				<-- sin iniciar
-│       └── redirect.php			<-- sin iniciar
+│       ├── auth.php                      ⏳ pendiente
+│       └── redirect.php                  ⏳ pendiente
 │
 ├── repositories/
-│        └── UserRepository.php	
+│   └── UserRepository.php                ✔ LISTO
 │
 ├── database/
-│   └── vetapp.sql				<-- listo
+│   └── vetapp.sql                        ✔ LISTO
 │
 ├── public/
 │   ├── css/
-│   │   └── styles.css				<-- descargada bootswatch "https://bootswatch.com/litera/"
+│   │   └── styles.css                    ✔ LISTO
 │   │
 │   ├── js/
-│   │   └── app.js				<-- descargada la version desde bootstrap
+│   │   └── app.js                        ✔ LISTO
 │   │
-│   ├── img/					<-- imagenes cargadas para el login
+│   ├── img/                              ✔ LISTO
 │   │
-│   └── index.php				<-- creada la vista del index con el formulario
+│   └── index.php                         ✔ LOGIN (vista pública)
 │
 ├── storage/
-│   ├── uploads/				<-- sin iniciar
-│   └── logs/					<-- sin iniciar
+│   ├── uploads/                          ⏳ pendiente
+│   └── logs/                             ⏳ pendiente
 │
-├── .htaccess					<-- sin iniciar
-└── README.md					<-- sin iniciar
+├── .htaccess                             ⏳ pendiente
+└── README.md                             ⏳ pendiente
