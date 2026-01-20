@@ -4,7 +4,7 @@ vetapp/
 ├── app/
 │   ├── config/
 │   │   ├── Database.php			<-- completada
-│   │   └── config.php 				<-- sin iniciar
+│   │   └── config.php 				<-- completada
 │   │
 │   ├── controllers/
 │   │   ├── auth/
@@ -29,8 +29,8 @@ vetapp/
 │   │       └── SaleController.php		<-- sin iniciar
 │   │
 │   ├── middleware/
-│   │   ├── AuthMiddleware.php			<-- sin iniciar
-│   │   └── RoleMiddleware.php			<-- sin iniciar
+│   │   ├── AuthMiddleware.php			<-- completada
+│   │   └── RoleMiddleware.php			<-- completada
 │   │
 │   ├── models/
 │   │   ├── User.php				<-- sin iniciar
