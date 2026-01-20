@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../config/Database.php';
+
 class UserRepository
 {
     private PDO $db;
@@ -10,54 +12,52 @@ class UserRepository
     }
 
     // =====================================================
-    // FIND USER BY EMAIL (WITH ROLES)
+    // BUSCAR USUARIO POR EMAIL + ROLES
     // =====================================================
-    public function findByEmail(string $email): ?array
+    public function findByEmailWithRoles(string $email): ?array
     {
-        // 1️⃣ Obtener usuario
-        $sql = "
+        // 1️⃣ Buscar usuario
+        $sqlUser = "
             SELECT 
-                u.id_user,
-                u.email,
-                u.password,
-                u.name,
-                u.middlename,
-                u.lastname1,
-                u.lastname2,
-                u.phone,
-                u.active
-            FROM users u
-            WHERE u.email = :email
+                id_user,
+                email,
+                password,
+                name,
+                active
+            FROM users
+            WHERE email = :email
             LIMIT 1
         ";
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(':email', $email);
-        $stmt->execute();
-
+        $stmt = $this->db->prepare($sqlUser);
+        $stmt->execute(['email' => $email]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$user) {
             return null;
         }
 
-        // 2️⃣ Obtener roles del usuario
-        $rolesSql = "
+        // 2️⃣ Buscar roles del usuario
+        $sqlRoles = "
             SELECT r.name
             FROM roles r
             INNER JOIN user_roles ur ON ur.id_role = r.id_role
             WHERE ur.id_user = :id_user
         ";
 
-        $rolesStmt = $this->db->prepare($rolesSql);
-        $rolesStmt->bindValue(':id_user', $user['id_user']);
-        $rolesStmt->execute();
+        $stmtRoles = $this->db->prepare($sqlRoles);
+        $stmtRoles->execute(['id_user' => $user['id_user']]);
 
-        $roles = $rolesStmt->fetchAll(PDO::FETCH_COLUMN);
+        $roles = $stmtRoles->fetchAll(PDO::FETCH_COLUMN);
 
-        // 3️⃣ Agregar roles al array de usuario
-        $user['roles'] = $roles;
-
-        return $user;
+        // 3️⃣ Armar estructura final
+        return [
+            'id_user' => (int)$user['id_user'],
+            'email'   => $user['email'],
+            'password'=> $user['password'],
+            'name'    => $user['name'],
+            'active'  => (bool)$user['active'],
+            'roles'   => $roles
+        ];
     }
 }

@@ -1,11 +1,16 @@
 <?php
 /**
  * Location: vetapp/app/controllers/auth/AuthController.php
- * Responsibility: Handle authentication logic
+ * Responsibility:
+ * - Manejar login y logout
+ * - NO SQL
+ * - NO config
+ * - NO session_start
  */
 
-require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../repositories/UserRepository.php';
+declare(strict_types=1);
+
+require_once __DIR__ . '/../../bootstrap.php';
 
 class AuthController
 {
@@ -17,75 +22,73 @@ class AuthController
         $this->userRepository = new UserRepository($db);
     }
 
-    /**
-     * LOGIN PROCESS
-     */
+    // =====================================================
+    // LOGIN
+    // =====================================================
     public function login(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: ' . BASE_URL . 'index.php');
-            exit;
+            $this->redirectToLogin();
         }
 
-        $email = trim($_POST['email'] ?? '');
+        $email    = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
 
         if ($email === '' || $password === '') {
-            $_SESSION['error'] = 'Email y contraseña requeridos';
-            header('Location: ' . BASE_URL . 'index.php');
-            exit;
+            $_SESSION['error'] = 'Email y contraseña son obligatorios';
+            $this->redirectToLogin();
         }
 
-        $user = $this->userRepository->findByEmail($email);
+        // Buscar usuario
+        $user = $this->userRepository->findByEmailWithRoles($email);
 
         if (!$user) {
-            $_SESSION['error'] = 'Usuario no encontrado';
-            header('Location: ' . BASE_URL . 'index.php');
-            exit;
+            $_SESSION['error'] = 'Credenciales inválidas';
+            $this->redirectToLogin();
         }
 
         if (!$user['active']) {
             $_SESSION['error'] = 'Usuario inactivo';
-            header('Location: ' . BASE_URL . 'index.php');
-            exit;
+            $this->redirectToLogin();
         }
 
         if (!password_verify($password, $user['password'])) {
-            $_SESSION['error'] = 'Contraseña incorrecta';
-            header('Location: ' . BASE_URL . 'index.php');
-            exit;
+            $_SESSION['error'] = 'Credenciales inválidas';
+            $this->redirectToLogin();
         }
 
+        // ================= LOGIN OK =================
+        session_regenerate_id(true);
+
         $_SESSION['user'] = [
-            'id' => $user['id_user'],
+            'id'    => $user['id_user'],
             'email' => $user['email'],
-            'name' => $user['name'],
-            'roles' => $user['roles']
+            'name'  => $user['name'],
+            'roles' => $user['roles'], // ARRAY
         ];
 
         header('Location: ' . BASE_URL . 'dashboard.php');
         exit;
     }
 
-
-    /**
-     * LOGOUT
-     */
+    // =====================================================
+    // LOGOUT
+    // =====================================================
     public function logout(): void
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
         session_unset();
         session_destroy();
 
         header('Location: ' . BASE_URL . 'index.php');
         exit;
     }
+
+    // =====================================================
+    // HELPERS
+    // =====================================================
+    private function redirectToLogin(): void
+    {
+        header('Location: ' . BASE_URL . 'index.php');
+        exit;
+    }
 }
-
-/**
- * Ejecutar login directamente si se llama desde el formulario
- */
-
