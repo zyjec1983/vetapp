@@ -1,107 +1,91 @@
 <?php
 /**
  * Location: vetapp/app/controllers/auth/AuthController.php
- *
- * Responsibility:
- * - Coordina el proceso de autenticación
- * - NO accede directamente a la base de datos
- * - NO contiene SQL
- * - Usa Repository + Entity
+ * Responsibility: Handle authentication logic
  */
 
-// echo '<pre>';
-// var_dump($_POST);
-// echo '</pre>';
-// exit;
-
-
-
-
-require_once __DIR__ . '/../../config/config.php';
-require_once __DIR__ . '/../../config/Database.php';
+require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../repositories/UserRepository.php';
 
 class AuthController
 {
-    // =====================================================
-    // LOGIN
-    // =====================================================
+    private UserRepository $userRepository;
+
+    public function __construct()
+    {
+        $db = Database::getInstance()->getConnection();
+        $this->userRepository = new UserRepository($db);
+    }
+
+    /**
+     * LOGIN PROCESS
+     */
     public function login(): void
     {
-        // ************* VALIDAR MÉTODO *************
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: ' . BASE_URL . '/login.php');
+            header('Location: ' . BASE_URL . 'index.php');
             exit;
         }
 
-        // ************* OBTENER DATOS *************
-        $email    = trim($_POST['email'] ?? '');
+        $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
 
-        // ************* VALIDACIONES BÁSICAS *************
         if ($email === '' || $password === '') {
-            $_SESSION['error'] = 'Email y contraseña son obligatorios';
-            header('Location: ' . BASE_URL . '/login.php');
+            $_SESSION['error'] = 'Email y contraseña requeridos';
+            header('Location: ' . BASE_URL . 'index.php');
             exit;
         }
 
-        // ************* INICIALIZAR REPOSITORY *************
-        $db = Database::getInstance()->getConnection();
-        $userRepository = new UserRepository($db);
+        $user = $this->userRepository->findByEmail($email);
 
-        // ************* BUSCAR USUARIO *************
-        $user = $userRepository->findByEmail($email);
-
-        if ($user === null) {
-            $_SESSION['error'] = 'Credenciales inválidas';
-            header('Location: ' . BASE_URL . '/login.php');
+        if (!$user) {
+            $_SESSION['error'] = 'Usuario no encontrado';
+            header('Location: ' . BASE_URL . 'index.php');
             exit;
         }
 
-        // ************* VERIFICAR ESTADO *************
-        if (!$user->isActive()) {
-            $_SESSION['error'] = 'Usuario desactivado';
-            header('Location: ' . BASE_URL . '/login.php');
+        if (!$user['active']) {
+            $_SESSION['error'] = 'Usuario inactivo';
+            header('Location: ' . BASE_URL . 'index.php');
             exit;
         }
 
-        // ************* VERIFICAR PASSWORD *************
-        if (!$user->verifyPassword($password)) {
-            $_SESSION['error'] = 'Credenciales inválidas';
-            header('Location: ' . BASE_URL . '/login.php');
+        if (!password_verify($password, $user['password'])) {
+            $_SESSION['error'] = 'Contraseña incorrecta';
+            header('Location: ' . BASE_URL . 'index.php');
             exit;
         }
 
-        // =====================================================
-        // LOGIN EXITOSO
-        // =====================================================
-
-        // ************* SEGURIDAD DE SESIÓN *************
-        session_regenerate_id(true);
-
-        // ************* GUARDAR USUARIO EN SESIÓN *************
         $_SESSION['user'] = [
-            'id'    => $user->getId(),
-            'email' => $user->getEmail(),
-            'name'  => $user->getFullName(),
-            'role'  => $user->getRole()
+            'id' => $user['id_user'],
+            'email' => $user['email'],
+            'name' => $user['name'],
+            'roles' => $user['roles']
         ];
 
-        // ************* REDIRECCIÓN (TEMPORAL ÚNICA) *************
-        // La autorización por rol se manejará con middleware
-        header('Location: ' . BASE_URL . 'dashboard/index.php');
+        header('Location: ' . BASE_URL . 'dashboard.php');
         exit;
     }
 
-    // =====================================================
-    // LOGOUT
-    // =====================================================
+
+    /**
+     * LOGOUT
+     */
     public function logout(): void
     {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
         session_unset();
         session_destroy();
 
-        header('Location: ' . BASE_URL . '/login.php');
+        header('Location: ' . BASE_URL . 'index.php');
         exit;
     }
 }
+
+/**
+ * Ejecutar login directamente si se llama desde el formulario
+ */
+

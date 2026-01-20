@@ -1,61 +1,62 @@
 <?php
-/**
- * Location: vetapp/app/repositories/UserRepository.php
- */
 
-require_once __DIR__ . '/../config/Database.php';
-require_once __DIR__ . '/../models/User.php';
-
-class UserRepository {
-
+class UserRepository
+{
     private PDO $db;
 
-    public function __construct(PDO $db){
+    public function __construct(PDO $db)
+    {
         $this->db = $db;
     }
 
-    public function findByEmail(string $email): ?User {
-
+    // =====================================================
+    // FIND USER BY EMAIL (WITH ROLES)
+    // =====================================================
+    public function findByEmail(string $email): ?array
+    {
+        // 1️⃣ Obtener usuario
         $sql = "
             SELECT 
-                id_user,
-                email,
-                password,
-                name,
-                middlename,
-                lastname1,
-                lastname2,
-                role,
-                phone,
-                active
-            FROM users
-            WHERE email = :email
+                u.id_user,
+                u.email,
+                u.password,
+                u.name,
+                u.middlename,
+                u.lastname1,
+                u.lastname2,
+                u.phone,
+                u.active
+            FROM users u
+            WHERE u.email = :email
             LIMIT 1
         ";
 
         $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(':email', strtolower($email), PDO::PARAM_STR);
+        $stmt->bindValue(':email', $email);
         $stmt->execute();
 
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$row) {
+        if (!$user) {
             return null;
         }
 
-        $user = new User();
+        // 2️⃣ Obtener roles del usuario
+        $rolesSql = "
+            SELECT r.name
+            FROM roles r
+            INNER JOIN user_roles ur ON ur.id_role = r.id_role
+            WHERE ur.id_user = :id_user
+        ";
 
-        // 🔒 Hydration controlada
-        $user->setId((int)$row['id_user']);
-        $user->setEmail($row['email']);
-        $user->setHashedPassword($row['password']);
-        $user->setName($row['name']);
-        $user->setMiddlename($row['middlename']);
-        $user->setLastname1($row['lastname1']);
-        $user->setLastname2($row['lastname2']);
-        $user->setRole($row['role']);
-        $user->setPhone($row['phone']);
-        $user->setActive((bool)$row['active']);
+        $rolesStmt = $this->db->prepare($rolesSql);
+        $rolesStmt->bindValue(':id_user', $user['id_user']);
+        $rolesStmt->execute();
+
+        $roles = $rolesStmt->fetchAll(PDO::FETCH_COLUMN);
+
+        // 3️⃣ Agregar roles al array de usuario
+        $user['roles'] = $roles;
 
         return $user;
     }

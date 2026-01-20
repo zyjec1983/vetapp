@@ -1,83 +1,204 @@
+
 vetapp/
 │
 ├── app/
 │   ├── config/
-│   │   ├── Database.php          ✔ LISTO
-│   │   └── config.php            ✔ LISTO (BASE_URL, paths, sesiones)
+│   │   ├── Database.php			<-- completada
+│   │   └── config.php 				<-- sin iniciar
 │   │
 │   ├── controllers/
 │   │   ├── auth/
-│   │   │   └── AuthController.php        ⏳ pendiente
+│   │   │   └── AuthController.php		<-- sin iniciar
 │   │   │
 │   │   ├── users/
-│   │   │   └── UserController.php        ⏳ pendiente
+│   │   │   └── UserController.php		<-- sin iniciar
 │   │   │
 │   │   ├── clients/
-│   │   │   └── ClientController.php      ⏳ pendiente
+│   │   │   └── ClientController.php		<-- sin iniciar
 │   │   │
 │   │   ├── pets/
-│   │   │   └── PetController.php         ⏳ pendiente
+│   │   │   └── PetController.php		<-- sin iniciar
 │   │   │
 │   │   ├── consultations/
-│   │   │   └── ConsultationController.php ⏳ pendiente
+│   │   │   └── ConsultationController.php	<-- sin iniciar
 │   │   │
 │   │   ├── medications/
-│   │   │   └── MedicationController.php  ⏳ pendiente
+│   │   │   └── MedicationController.php	<-- sin iniciar
 │   │   │
 │   │   └── sales/
-│   │       └── SaleController.php        ⏳ pendiente
+│   │       └── SaleController.php		<-- sin iniciar
 │   │
 │   ├── middleware/
-│   │   ├── AuthMiddleware.php            ⏳ pendiente
-│   │   └── RoleMiddleware.php            ⏳ pendiente
+│   │   ├── AuthMiddleware.php			<-- sin iniciar
+│   │   └── RoleMiddleware.php			<-- sin iniciar
 │   │
 │   ├── models/
-│   │   ├── User.php                      ⏳ pendiente
-│   │   ├── Client.php                    ⏳ pendiente
-│   │   ├── Pet.php                       ⏳ pendiente
-│   │   ├── Consultation.php              ⏳ pendiente
-│   │   ├── Medication.php                ⏳ pendiente
-│   │   └── Sale.php                      ⏳ pendiente
+│   │   ├── User.php				<-- sin iniciar
+│   │   ├── Client.php				<-- sin iniciar
+│   │   ├── Pet.php				<-- sin iniciar
+│   │   ├── Consultation.php			<-- sin iniciar
+│   │   ├── Medication.php			<-- sin iniciar
+│   │   └── Sale.php				<-- sin iniciar
 │   │
 │   ├── views/
 │   │   ├── auth/
-│   │   │   ├── login.php                 ⏳ pendiente
-│   │   │   └── logout.php                ⏳ pendiente
+│   │   │   ├── login.php			<-- sin iniciar
+│   │   │   └── logout.php			<-- sin iniciar
 │   │   │
 │   │   ├── dashboard/
-│   │   │   └── index.php                 ⏳ pendiente
+│   │   │   └── index.php			<-- sin iniciar
 │   │   │
 │   │   ├── users/
+│   │   │   ├── index.php			<-- sin iniciar
+│   │   │   ├── create.php			<-- sin iniciar
+│   │   │   └── edit.php			<-- sin iniciar
+│   │   │
 │   │   ├── clients/
+│   │   │   ├── index.php			<-- sin iniciar
+│   │   │   ├── create.php			<-- sin iniciar
+│   │   │   └── edit.php			<-- sin iniciar
+│   │   │
 │   │   ├── pets/
+│   │   │   ├── index.php			<-- sin iniciar
+│   │   │   ├── create.php			<-- sin iniciar
+│   │   │   └── edit.php			<-- sin iniciar
+│   │   │
 │   │   ├── consultations/
+│   │   │   ├── index.php			<-- sin iniciar
+│   │   │   └── create.php			<-- sin iniciar
+│   │   │
 │   │   ├── medications/
+│   │   │   ├── index.php			<-- sin iniciar
+│   │   │   └── create.php			<-- sin iniciar
+│   │   │
 │   │   └── sales/
+│   │       ├── index.php			<-- sin iniciar
+│   │       └── create.php			<-- sin iniciar		
 │   │
-│   └── helpers/
-│       ├── auth.php                      ⏳ pendiente
-│       └── redirect.php                  ⏳ pendiente
+│   ├── helpers/
+│   │    ├── auth.php				<-- sin iniciar
+│   │    └── redirect.php			<-- sin iniciar
+│   │
+│   └── repositories/
+│        └── UserRepository.php	
 │
-├── repositories/
-│   └── UserRepository.php                ✔ LISTO
+│
 │
 ├── database/
-│   └── vetapp.sql                        ✔ LISTO
+│   └── vetapp.sql				<-- listo
 │
 ├── public/
 │   ├── css/
-│   │   └── styles.css                    ✔ LISTO
+│   │   └── styles.css				<-- descargada bootswatch "https://bootswatch.com/litera/"
 │   │
 │   ├── js/
-│   │   └── app.js                        ✔ LISTO
+│   │   └── app.js				<-- descargada la version desde bootstrap
 │   │
-│   ├── img/                              ✔ LISTO
+│   ├── img/					<-- imagenes cargadas para el login
 │   │
-│   └── index.php                         ✔ LOGIN (vista pública)
+│   └── index.php				<-- creada la vista del index con el formulario
 │
 ├── storage/
-│   ├── uploads/                          ⏳ pendiente
-│   └── logs/                             ⏳ pendiente
+│   ├── uploads/				<-- sin iniciar
+│   └── logs/					<-- sin iniciar
 │
-├── .htaccess                             ⏳ pendiente
-└── README.md                             ⏳ pendiente
+├── .htaccess					<-- sin iniciar
+└── README.md					<-- sin iniciar
+
+
+----------------------------------------------------------------------
+flujo de autenticacion:
+
+🧠 FLUJO CORRECTO DEL LOGIN (MVC limpio)
+1️) La VISTA (login.php)
+
+📌 Responsabilidad:
+Solo mostrar el formulario y enviar datos.
+
+➡️ Destino: AuthController
+
+2️) El CONTROLADOR (AuthController)
+
+👉 llama a: UserRepository
+
+3) El REPOSITORY (UserRepository)
+
+📌 Responsabilidad:
+Hablar exclusivamente con la base de datos.
+
+Hace solo esto:
+
+Busca el usuario por email
+
+ * Convierte el registro en un objeto User
+
+ * Devuelve el objeto al controlador
+
+4) De vuelta al CONTROLADOR
+
+Ahora el controlador tiene:
+
+$user = $userRepository->findByEmail($email);
+
+
+Entonces decide:
+
+❌ Si $user === null → error
+
+❌ Si $user->isActive() === false → error
+
+❌ Si $user->verifyPassword($password) === false → error
+
+✅ Si todo está bien → login OK
+
+📌 Aquí se verifica la contraseña
+
+
+5) SESIÓN (aún en el controlador)
+
+Si todo fue correcto:
+
+Se crea $_SESSION['user']
+
+Se guarda:
+
+id
+
+nombre completo
+
+rol
+
+📌 La sesión NO vive en el modelo
+📌 La sesión NO vive en el repository
+
+6) REDIRECCIÓN (final)
+
+El controlador decide:
+
+Admin → dashboard admin
+
+Veterinario → dashboard vet
+
+Pharmacy → ventas
+
+➡️ Redirige a la vista correspondiente
+
+🔁 RESUMEN EN UNA SOLA LÍNEA
+VISTA → CONTROLADOR → REPOSITORY → CONTROLADOR → SESIÓN → VISTA
+
+🧩 QUIÉN HACE QUÉ (regla que no se rompe)
+Capa	Hace
+Vista	Formulario, HTML
+Controlador	Coordina, valida, decide
+Repository	BD ↔ objetos
+Modelo (User)	Reglas del dominio
+Sesión	Solo controlador
+🚨 ERROR COMÚN (que tú YA superaste)
+
+
+
+🔜 SIGUIENTE PASO LÓGICO
+
+👉 Construir AuthController limpio con PDO + UserRepository
+
+Cuando quieras, seguimos desde cero, sin copiar código viejo 👍
