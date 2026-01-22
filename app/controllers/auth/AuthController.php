@@ -31,7 +31,7 @@ class AuthController
             $this->redirectToLogin();
         }
 
-        $email    = trim($_POST['email'] ?? '');
+        $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
 
         if ($email === '' || $password === '') {
@@ -43,9 +43,12 @@ class AuthController
         $user = $this->userRepository->findByEmailWithRoles($email);
 
         if (!$user) {
-            $_SESSION['error'] = 'Credenciales inválidas';
-            $this->redirectToLogin();
+            $_SESSION['error'] = 'Usuario no encontrado';
+            header('Location: ' . BASE_URL . 'index.php');
+            exit;
         }
+
+
 
         if (!$user['active']) {
             $_SESSION['error'] = 'Usuario inactivo';
@@ -61,14 +64,16 @@ class AuthController
         session_regenerate_id(true);
 
         $_SESSION['user'] = [
-            'id'    => $user['id_user'],
+            'id' => $user['id_user'],
             'email' => $user['email'],
-            'name'  => $user['name'],
+            'name' => $user['name'],
             'roles' => $user['roles'], // ARRAY
         ];
 
-        header('Location: ' . BASE_URL . 'dashboard.php');
+        // ********* Redirigir al dashboard *********
+        header('Location: ../app/views/dashboard/index.php');
         exit;
+
     }
 
     // =====================================================

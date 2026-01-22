@@ -2,109 +2,118 @@
 vetapp/
 │
 ├── app/
+│   ├── bootstrap.php
+│   │
 │   ├── config/
-│   │   ├── Database.php			<-- completada
-│   │   └── config.php 				<-- completada
+│   │   ├── config.php
+│   │   └── Database.php
 │   │
 │   ├── controllers/
 │   │   ├── auth/
-│   │   │   └── AuthController.php		<-- sin iniciar
+│   │   │   └── AuthController.php
 │   │   │
 │   │   ├── users/
-│   │   │   └── UserController.php		<-- sin iniciar
+│   │   │   └── UserController.php
 │   │   │
 │   │   ├── clients/
-│   │   │   └── ClientController.php		<-- sin iniciar
+│   │   │   └── ClientController.php
 │   │   │
 │   │   ├── pets/
-│   │   │   └── PetController.php		<-- sin iniciar
+│   │   │   └── PetController.php
 │   │   │
 │   │   ├── consultations/
-│   │   │   └── ConsultationController.php	<-- sin iniciar
+│   │   │   └── ConsultationController.php
 │   │   │
 │   │   ├── medications/
-│   │   │   └── MedicationController.php	<-- sin iniciar
+│   │   │   └── MedicationController.php
 │   │   │
 │   │   └── sales/
-│   │       └── SaleController.php		<-- sin iniciar
-│   │
+│   │       └── SaleController.php
+│
 │   ├── middleware/
-│   │   ├── AuthMiddleware.php			<-- completada
-│   │   └── RoleMiddleware.php			<-- completada
+│   │   ├── AuthMiddleware.php
+│   │   └── RoleMiddleware.php
 │   │
 │   ├── models/
-│   │   ├── User.php				<-- sin iniciar
-│   │   ├── Client.php				<-- sin iniciar
-│   │   ├── Pet.php				<-- sin iniciar
-│   │   ├── Consultation.php			<-- sin iniciar
-│   │   ├── Medication.php			<-- sin iniciar
-│   │   └── Sale.php				<-- sin iniciar
+│   │   ├── User.php
+│   │   ├── Client.php
+│   │   ├── Pet.php
+│   │   ├── Consultation.php
+│   │   ├── Medication.php
+│   │   └── Sale.php
 │   │
-│   ├── views/
-│   │   ├── auth/
-│   │   │   ├── login.php			<-- sin iniciar
-│   │   │   └── logout.php			<-- sin iniciar
-│   │   │
-│   │   ├── dashboard/
-│   │   │   └── index.php			<-- sin iniciar
-│   │   │
-│   │   ├── users/
-│   │   │   ├── index.php			<-- sin iniciar
-│   │   │   ├── create.php			<-- sin iniciar
-│   │   │   └── edit.php			<-- sin iniciar
-│   │   │
-│   │   ├── clients/
-│   │   │   ├── index.php			<-- sin iniciar
-│   │   │   ├── create.php			<-- sin iniciar
-│   │   │   └── edit.php			<-- sin iniciar
-│   │   │
-│   │   ├── pets/
-│   │   │   ├── index.php			<-- sin iniciar
-│   │   │   ├── create.php			<-- sin iniciar
-│   │   │   └── edit.php			<-- sin iniciar
-│   │   │
-│   │   ├── consultations/
-│   │   │   ├── index.php			<-- sin iniciar
-│   │   │   └── create.php			<-- sin iniciar
-│   │   │
-│   │   ├── medications/
-│   │   │   ├── index.php			<-- sin iniciar
-│   │   │   └── create.php			<-- sin iniciar
-│   │   │
-│   │   └── sales/
-│   │       ├── index.php			<-- sin iniciar
-│   │       └── create.php			<-- sin iniciar		
+│   ├── repositories/
+│   │   ├── UserRepository.php
+│   │   ├── ClientRepository.php
+│   │   ├── PetRepository.php
+│   │   ├── ConsultationRepository.php
+│   │   ├── MedicationRepository.php
+│   │   └── SaleRepository.php
 │   │
 │   ├── helpers/
-│   │    ├── auth.php				<-- sin iniciar
-│   │    └── redirect.php			<-- sin iniciar
+│   │   ├── auth.php
+│   │   └── redirect.php
 │   │
-│   └── repositories/
-│        └── UserRepository.php	
-│
-│
-│
-├── database/
-│   └── vetapp.sql				<-- listo
+│   └── views/
+│       ├── layouts/
+│       │   ├── header.php
+│       │   ├── navbar.php
+│       │   └── footer.php
+│       │
+│       ├── auth/
+│       │   └── login.php
+│       │
+│       ├── dashboard/
+│       │   └── index.php
+│       │
+│       ├── users/
+│       │   ├── index.php
+│       │   ├── create.php
+│       │   └── edit.php
+│       │
+│       ├── clients/
+│       │   ├── index.php
+│       │   ├── create.php
+│       │   └── edit.php
+│       │
+│       ├── pets/
+│       │   ├── index.php
+│       │   ├── create.php
+│       │   └── edit.php
+│       │
+│       ├── consultations/
+│       │   ├── index.php
+│       │   └── create.php
+│       │
+│       ├── medications/
+│       │   ├── index.php
+│       │   └── create.php
+│       │
+│       └── sales/
+│           ├── index.php
+│           └── create.php
 │
 ├── public/
+│   ├── index.php
+│   ├── logout.php
+│   │
 │   ├── css/
-│   │   └── styles.css				<-- descargada bootswatch "https://bootswatch.com/litera/"
+│   │   └── styles.css
 │   │
 │   ├── js/
-│   │   └── app.js				<-- descargada la version desde bootstrap
+│   │   └── app.js
 │   │
-│   ├── img/					<-- imagenes cargadas para el login
-│   │
-│   └── index.php				<-- creada la vista del index con el formulario
+│   └── img/
+│
+├── database/
+│   └── vetapp.sql
 │
 ├── storage/
-│   ├── uploads/				<-- sin iniciar
-│   └── logs/					<-- sin iniciar
+│   ├── uploads/
+│   └── logs/
 │
-├── .htaccess					<-- sin iniciar
-└── README.md					<-- sin iniciar
-
+├── .htaccess
+└── README.md
 
 ----------------------------------------------------------------------
 flujo de autenticacion:
