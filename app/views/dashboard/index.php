@@ -1,13 +1,7 @@
-<?php
-/**
- * Location: vetapp/app/views/dashboard/index.php
- */
-
-require_once __DIR__ . '/../../helpers/auth.php';
-require_once __DIR__ . '/../../middleware/AuthMiddleware.php';
-
-AuthMiddleware::handle();
-?>
+<!-- 
+Ubicacion: app/views/dashboard/index.php
+Rol: Vista del dashboard principal 
+-->
 
 <!DOCTYPE html>
 <html lang="es">

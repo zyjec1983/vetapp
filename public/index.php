@@ -56,7 +56,7 @@ unset($_SESSION['error']);
                     </div>
                 <?php endif; ?>
 
-                <!-- ✅ action apunta al MISMO index -->
+                <!-- action apunta al MISMO index -->
                 <form method="POST" action="<?= htmlspecialchars($_SERVER['PHP_SELF']) ?>">
 
                     <div class="mb-3">

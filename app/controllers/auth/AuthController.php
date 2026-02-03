@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Location: vetapp/app/controllers/auth/AuthController.php
  * Responsibility:
@@ -35,7 +35,7 @@ class AuthController
         $password = $_POST['password'] ?? '';
 
         if ($email === '' || $password === '') {
-            $_SESSION['error'] = 'Email y contraseña son obligatorios';
+            $_SESSION['error'] = 'Email y contrasena son obligatorios';
             $this->redirectToLogin();
         }
 
@@ -48,15 +48,13 @@ class AuthController
             exit;
         }
 
-
-
         if (!$user['active']) {
             $_SESSION['error'] = 'Usuario inactivo';
             $this->redirectToLogin();
         }
 
         if (!password_verify($password, $user['password'])) {
-            $_SESSION['error'] = 'Credenciales inválidas';
+            $_SESSION['error'] = 'Credenciales invalidas';
             $this->redirectToLogin();
         }
 
@@ -71,9 +69,8 @@ class AuthController
         ];
 
         // ********* Redirigir al dashboard *********
-        header('Location: ../app/views/dashboard/index.php');
+        header('Location: ' . BASE_URL . 'dashboard.php');
         exit;
-
     }
 
     // =====================================================
@@ -97,3 +94,4 @@ class AuthController
         exit;
     }
 }
+

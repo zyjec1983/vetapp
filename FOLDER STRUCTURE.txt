@@ -1,213 +1,121 @@
-
-vetapp/
-│
-├── app/
-│   ├── bootstrap.php
-│   │
-│   ├── config/
-│   │   ├── config.php
-│   │   └── Database.php
-│   │
-│   ├── controllers/
-│   │   ├── auth/
-│   │   │   └── AuthController.php
-│   │   │
-│   │   ├── users/
-│   │   │   └── UserController.php
-│   │   │
-│   │   ├── clients/
-│   │   │   └── ClientController.php
-│   │   │
-│   │   ├── pets/
-│   │   │   └── PetController.php
-│   │   │
-│   │   ├── consultations/
-│   │   │   └── ConsultationController.php
-│   │   │
-│   │   ├── medications/
-│   │   │   └── MedicationController.php
-│   │   │
-│   │   └── sales/
-│   │       └── SaleController.php
-│
-│   ├── middleware/
-│   │   ├── AuthMiddleware.php
-│   │   └── RoleMiddleware.php
-│   │
-│   ├── models/
-│   │   ├── User.php
-│   │   ├── Client.php
-│   │   ├── Pet.php
-│   │   ├── Consultation.php
-│   │   ├── Medication.php
-│   │   └── Sale.php
-│   │
-│   ├── repositories/
-│   │   ├── UserRepository.php
-│   │   ├── ClientRepository.php
-│   │   ├── PetRepository.php
-│   │   ├── ConsultationRepository.php
-│   │   ├── MedicationRepository.php
-│   │   └── SaleRepository.php
-│   │
-│   ├── helpers/
-│   │   ├── auth.php
-│   │   └── redirect.php
-│   │
-│   └── views/
-│       ├── layouts/
-│       │   ├── header.php
-│       │   ├── navbar.php
-│       │   └── footer.php
-│       │
-│       ├── auth/
-│       │   └── login.php
-│       │
-│       ├── dashboard/
-│       │   └── index.php
-│       │
-│       ├── users/
-│       │   ├── index.php
-│       │   ├── create.php
-│       │   └── edit.php
-│       │
-│       ├── clients/
-│       │   ├── index.php
-│       │   ├── create.php
-│       │   └── edit.php
-│       │
-│       ├── pets/
-│       │   ├── index.php
-│       │   ├── create.php
-│       │   └── edit.php
-│       │
-│       ├── consultations/
-│       │   ├── index.php
-│       │   └── create.php
-│       │
-│       ├── medications/
-│       │   ├── index.php
-│       │   └── create.php
-│       │
-│       └── sales/
-│           ├── index.php
-│           └── create.php
-│
-├── public/
-│   ├── index.php
-│   ├── logout.php
-│   │
-│   ├── css/
-│   │   └── styles.css
-│   │
-│   ├── js/
-│   │   └── app.js
-│   │
-│   └── img/
-│
-├── database/
-│   └── vetapp.sql
-│
-├── storage/
-│   ├── uploads/
-│   └── logs/
-│
-├── .htaccess
-└── README.md
+﻿vetapp/
+|
++-- .htaccess
++-- FOLDER STRUCTURE.txt
++-- README.md
+|
++-- app/
+|   +-- bootstrap.php
+|   |
+|   +-- config/
+|   |   +-- config.php
+|   |   +-- Database.php
+|   |
+|   +-- controllers/
+|   |   +-- auth/
+|   |   |   +-- AuthController.php
+|   |   |
+|   |   +-- clients/
+|   |   |   +-- ClientController.php
+|   |   |
+|   |   +-- consultations/
+|   |   |   +-- ConsultationController.php
+|   |   |
+|   |   +-- medications/
+|   |   |   +-- MedicationController.php
+|   |   |
+|   |   +-- pets/
+|   |   |   +-- PetController.php
+|   |   |
+|   |   +-- sales/
+|   |   |   +-- SaleController.php
+|   |   |
+|   |   +-- users/
+|   |       +-- UserController.php
+|   |
+|   +-- helpers/
+|   |   +-- auth.php
+|   |   +-- redirect.php
+|   |
+|   +-- middleware/
+|   |   +-- AuthMiddleware.php
+|   |   +-- RoleMiddleware.php
+|   |
+|   +-- models/
+|   |   +-- User.php
+|   |
+|   +-- repositories/
+|   |   +-- UserRepository.php
+|   |
+|   +-- views/
+|       +-- auth/
+|       +-- clients/
+|       +-- consultations/
+|       +-- dashboard/
+|       |   +-- index.php
+|       +-- pets/
+|       +-- sales/
+|       +-- users/
+|
++-- database/
+|   +-- vetapp.sql
+|
++-- public/
+|   +-- dashboard.php
+|   +-- index.php
+|   +-- logout.php
+|   |
+|   +-- css/
+|   |   +-- bootstrap.min.css
+|   |   +-- style.css
+|   |
+|   +-- img/
+|   |   +-- img-veterinaria.jpg
+|   |   +-- login-bg-my-pets.png
+|   |   +-- login-bg.jpg
+|   |
+|   +-- js/
+|       +-- bootstrap.bundle.min.js
+|
++-- storage/
+    +-- logs/
+    +-- uploads/
 
 ----------------------------------------------------------------------
-flujo de autenticacion:
+auth flow (english - ASCII)
 
-🧠 FLUJO CORRECTO DEL LOGIN (MVC limpio)
-1️) La VISTA (login.php)
+1) VIEW (public/index.php)
+Responsibility:
+Show login form and POST to the same file.
 
-📌 Responsabilidad:
-Solo mostrar el formulario y enviar datos.
+2) CONTROLLER (app/controllers/auth/AuthController.php)
+Runs in public/index.php when POST arrives.
+Validates email and password, loads user, verifies credentials.
 
-➡️ Destino: AuthController
+3) REPOSITORY (app/repositories/UserRepository.php)
+Responsibility:
+Talk to the database and return user data + roles.
 
-2️) El CONTROLADOR (AuthController)
+4) SESSION (in the controller)
+If everything is ok:
+Create $_SESSION['user'] with id, email, name, roles.
 
-👉 llama a: UserRepository
+5) REDIRECT (final)
+Controller should redirect to the protected front controller:
+public/dashboard.php
 
-3) El REPOSITORY (UserRepository)
+6) MIDDLEWARE (app/middleware/AuthMiddleware.php)
+public/dashboard.php calls AuthMiddleware::handle()
+If no session -> redirect to public/index.php
+If session -> load the view:
+app/views/dashboard/index.php
 
-📌 Responsabilidad:
-Hablar exclusivamente con la base de datos.
+ONE LINE SUMMARY
+public/index.php -> AuthController -> UserRepository -> SESSION -> public/dashboard.php -> AuthMiddleware -> app/views/dashboard/index.php
 
-Hace solo esto:
-
-Busca el usuario por email
-
- * Convierte el registro en un objeto User
-
- * Devuelve el objeto al controlador
-
-4) De vuelta al CONTROLADOR
-
-Ahora el controlador tiene:
-
-$user = $userRepository->findByEmail($email);
-
-
-Entonces decide:
-
-❌ Si $user === null → error
-
-❌ Si $user->isActive() === false → error
-
-❌ Si $user->verifyPassword($password) === false → error
-
-✅ Si todo está bien → login OK
-
-📌 Aquí se verifica la contraseña
-
-
-5) SESIÓN (aún en el controlador)
-
-Si todo fue correcto:
-
-Se crea $_SESSION['user']
-
-Se guarda:
-
-id
-
-nombre completo
-
-rol
-
-📌 La sesión NO vive en el modelo
-📌 La sesión NO vive en el repository
-
-6) REDIRECCIÓN (final)
-
-El controlador decide:
-
-Admin → dashboard admin
-
-Veterinario → dashboard vet
-
-Pharmacy → ventas
-
-➡️ Redirige a la vista correspondiente
-
-🔁 RESUMEN EN UNA SOLA LÍNEA
-VISTA → CONTROLADOR → REPOSITORY → CONTROLADOR → SESIÓN → VISTA
-
-🧩 QUIÉN HACE QUÉ (regla que no se rompe)
-Capa	Hace
-Vista	Formulario, HTML
-Controlador	Coordina, valida, decide
-Repository	BD ↔ objetos
-Modelo (User)	Reglas del dominio
-Sesión	Solo controlador
-🚨 ERROR COMÚN (que tú YA superaste)
-
-
-
-🔜 SIGUIENTE PASO LÓGICO
-
-👉 Construir AuthController limpio con PDO + UserRepository
-
-Cuando quieras, seguimos desde cero, sin copiar código viejo 👍
+WHO DOES WHAT (do not break this rule)
+View: form, HTML
+Controller: coordinate, validate, decide
+Repository: DB -> data
+Model: domain rules
+Session: controller only
