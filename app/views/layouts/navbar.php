@@ -34,7 +34,7 @@
             </ul>
 
             <span class="navbar-text me-3">
-                👤 <?= htmlspecialchars($_SESSION['user']['name']) ?>
+                <?= htmlspecialchars($_SESSION['user']['name']) ?>
             </span>
 
             <a href="<?= BASE_URL ?>logout.php" class="btn btn-outline-light btn-sm">
