@@ -27,7 +27,7 @@ function hasRole(string $role): bool {
 //  ************ VERIFICAR SI EL USUARIO TIENE ROL  ************ 
 function hasAnyRole(array $roles): bool {
     foreach ($roles as $role) {
-        if(hasrole($role)) {
+        if(hasRole($role)) {
             return true;
         }
     }
