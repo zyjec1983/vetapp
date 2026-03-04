@@ -35,7 +35,7 @@ class AuthController
         $password = $_POST['password'] ?? '';
 
         if ($email === '' || $password === '') {
-            $_SESSION['error'] = 'Email y contrasena son obligatorios';
+            $_SESSION['error'] = 'Email y Contrasena son obligatorios';
             $this->redirectToLogin();
         }
 
