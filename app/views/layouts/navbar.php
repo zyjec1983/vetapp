@@ -18,7 +18,7 @@
 
                 <?php if (hasRole('admin')): ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= BASE_URL ?>users">Usuarios</a>
+                        <a class="nav-link" href="<?= BASE_URL ?>users.php">Usuarios</a>
                     </li>
                 <?php endif; ?>
 

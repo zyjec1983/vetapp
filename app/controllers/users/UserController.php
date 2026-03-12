@@ -4,7 +4,7 @@
  */
 declare(strict_types=1);
 
-require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../../bootstrap.php';
 
 
 class UserController
@@ -30,7 +30,7 @@ class UserController
 
         $users = $this->userRepository->findAll();
 
-        require_once __DIR__ . '/../views/users/index.php';
+        require_once __DIR__ . '/../../views/users/index.php';
     }
 }
 

@@ -1,6 +1,17 @@
 <!-- 
 Ubicacion: app/views/dashboard/index.php 
+Vista principal del dashboard, con widgets de estado y accesos rápidos según el rol del usuario.
 -->
+<?php
+require_once __DIR__ . '/../../helpers/auth.php';
+require_once __DIR__ . '/../../middleware/AuthMiddleware.php';
+
+// ********* Verificar que el usuario esté autenticado *********
+AuthMiddleware::handle();
+
+// ******** Título dinámico para el layout *********
+require_once __DIR__ . '/../layouts/navbar.php';
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>

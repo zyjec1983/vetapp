@@ -61,6 +61,7 @@ class UserRepository
         ];
     }
 
+    // ***** BUsca todos los usuarios *****
     public function findAll(): array{
         $stmt = $this->db->query("SELECT * FROM users");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

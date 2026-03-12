@@ -19,6 +19,8 @@ require_once __DIR__ . '/../layouts/navbar.php';
             <tr>
                 <th>ID</th>
                 <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Teléfono</th>
                 <th>Email</th>
                 <th>Activo</th>
             </tr>
@@ -28,6 +30,8 @@ require_once __DIR__ . '/../layouts/navbar.php';
                 <tr>
                     <td><?= $user['id_user'] ?></td>
                     <td><?= htmlspecialchars($user['name']) ?></td>
+                    <td><?= htmlspecialchars($user['lastname1']) ?></td>
+                    <td><?= htmlspecialchars($user['phone']) ?></td>
                     <td><?= htmlspecialchars($user['email']) ?></td>
                     <td>
                         <?= $user['active'] ? 'Sí' : 'No' ?>
