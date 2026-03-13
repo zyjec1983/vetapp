@@ -1,160 +1,240 @@
-<!-- 
-Ubicacion: app/views/dashboard/index.php 
-Vista principal del dashboard, con widgets de estado y accesos rápidos según el rol del usuario.
--->
 <?php
-require_once __DIR__ . '/../../helpers/auth.php';
-require_once __DIR__ . '/../../middleware/AuthMiddleware.php';
+/**
+ * location: vetapp/app/views/dashboard/index.php 
+ * Dasboard for admin
+ */
 
-// ********* Verificar que el usuario esté autenticado *********
-AuthMiddleware::handle();
+$title = "Dashboard | VetApp";
 
-// ******** Título dinámico para el layout *********
+require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/navbar.php';
 ?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>VetApp | Dashboard</title>
-    <!-- Usando Bootswatch Pulse -->
-    <link rel="stylesheet" href="<?= BASE_URL ?>css/bootstrap.min.css">
-    <!-- Iconos de Bootstrap (Indispensables para el look profesional) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net">
-</head>
 
-<body class="bg-light">
+<div class="container-fluid">
 
-    <?php require_once __DIR__ . '/../layouts/navbar.php'; ?>
+    <div class="row">
 
-    <div class="container py-4">
-        
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="text-primary">
-                <i class="bi bi-speedometer2"></i> Panel de Control
+        <?php require_once __DIR__ . '/../layouts/aside.php'; ?>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+
+            <h2 class="mt-4 mb-4">
+                <i class="bi bi-speedometer2"></i> Panel de Administración
             </h2>
-            <h3><strong><span class="badge bg-secondary p-2">Bienvenido: <?= htmlspecialchars($_SESSION['user']['name']) ?></span></strong></h3>
-        </div>
 
-        <!-- 1. WIDGETS DE ESTADO (Métricas rápidas) -->
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="card border-primary shadow-sm text-center">
-                    <div class="card-body">
-                        <h6 class="text-muted mb-1">Citas Hoy</h6>
-                        <h2 class="text-primary fw-bold">12</h2> <!-- Cambiar por variable de DB -->
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card border-danger shadow-sm text-center">
-                    <div class="card-body">
-                        <h6 class="text-muted mb-1">Stock Bajo</h6>
-                        <h2 class="text-danger fw-bold">5</h2> <!-- Cambiar por variable de DB -->
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card border-success shadow-sm text-center">
-                    <div class="card-body">
-                        <h6 class="text-muted mb-1">Ventas Semanales</h6>
-                        <h2 class="text-success fw-bold">$450.25</h2>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card border-info shadow-sm text-center">
-                    <div class="card-body">
-                        <h6 class="text-muted mb-1">Pacientes Activos</h6>
-                        <h2 class="text-info fw-bold">142</h2>
-                    </div>
-                </div>
-            </div>
-        </div>
+            <div class="row">
 
-        <!-- 2. ACCESOS DIRECTOS SEGÚN ROL -->
-        <div class="row g-4">
-            <!-- Bloque Dinámico: Cambia el 'Entrar' por acciones directas -->
-            <?php if (hasRole('admin')): ?>
-                <div class="col-md-4">
-                    <div class="card h-100 shadow-sm border-0 border-top border-4 border-primary">
+                <!-- **************** CLIENTS **************** -->
+                <div class="col-md-3 mb-3">
+                    <div class="card text-bg-primary">
                         <div class="card-body">
-                            <h5 class="card-title text-primary"><i class="bi bi-shield-lock"></i> Admin</h5>
-                            <ul class="list-unstyled mt-3">
-                                <li><a href="<?= BASE_URL ?>users" class="text-decoration-none">→ Gestionar Personal</a></li>
-                                <li><a href="<?= BASE_URL ?>reports" class="text-decoration-none">→ Reportes Contables</a></li>
-                            </ul>
+                            <h6>Clientes</h6>
+                            <h2><?= $data['totalClients'] ?></h2>
                         </div>
                     </div>
                 </div>
-            <?php endif; ?>
 
-            <?php if (hasRole('veterinarian')): ?>
-                <div class="col-md-4">
-                    <div class="card h-100 shadow-sm border-0 border-top border-4 border-success">
-                        <div class="card-body text-center">
-                            <h5 class="card-title text-success"><i class="bi bi-heart-pulse"></i> Clínica</h5>
-                            <div class="d-grid gap-2 mt-3">
-                                <a href="<?= BASE_URL ?>consultations/create" class="btn btn-success btn-md">Nueva Consulta</a>
-                                <a href="<?= BASE_URL ?>pets" class="btn btn-outline-success btn-md">Ver Mascotas</a>
+                <!-- **************** MASCOTS **************** -->
+                <div class="col-md-3 mb-3">
+                    <div class="card text-bg-success">
+                        <div class="card-body">
+                            <h6>Mascotas</h6>
+                            <h2><?= $data['totalPets'] ?></h2>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- **************** TODAY'S CONSULTATIONS **************** -->
+                <div class="col-md-3 mb-3">
+                    <div class="card text-bg-info">
+                        <div class="card-body">
+                            <h6>Consultas Hoy</h6>
+                            <h2><?= $data['todayConsultations'] ?></h2>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- **************** TODAY'S SALES **************** -->
+                <div class="col-md-3 mb-3">
+                    <div class="card text-bg-warning">
+                        <div class="card-body">
+                            <h6>Ventas Hoy</h6>
+                            <h2>$<?= number_format($data['todaySales'], 2) ?></h2>
+                        </div>
+                    </div>
+                </div>
+            </div> <!-- 🔴 CIERRA LA FILA DE TARJETAS -->
+
+            <div class="row">
+                <!-- **************** RECENT CONSULTATIONS && RECENT SALES **************** -->
+                <div class="row mt-4">
+                    <div class="col-lg-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <i class="bi bi-clipboard2-pulse"></i> Consultas recientes
+                            </div>
+                            <div class="card-body p-0">
+                                <?php if (empty($data['recentConsultations'])): ?>
+                                    <div class="p-3 text-muted">No hay consultas registradas</div>
+                                <?php else: ?>
+                                    <table class="table mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Fecha</th>
+                                                <th>Mascota</th>
+                                                <th>Cliente</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach ($data['recentConsultations'] as $c): ?>
+                                                <tr>
+                                                    <td><?= $c['consultation_date'] ?></td>
+                                                    <td><?= $c['pet_name'] ?></td>
+                                                    <td><?= $c['client_name'] ?></td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
-                </div>
-            <?php endif; ?>
 
-            <?php if (hasRole('pharmacy')): ?>
-                <div class="col-md-4">
-                    <div class="card h-100 shadow-sm border-0 border-top border-4 border-warning">
-                        <div class="card-body text-center">
-                            <h5 class="card-title text-warning"><i class="bi bi-cart4"></i> Ventas</h5>
-                            <div class="d-grid gap-2 mt-3">
-                                <a href="<?= BASE_URL ?>sales/create" class="btn btn-warning btn-md text-white">Facturar Ahora</a>
-                                <a href="<?= BASE_URL ?>medications" class="btn btn-outline-warning btn-md">Stock Farmacia</a>
+                    <div class="col-lg-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <i class="bi bi-receipt"></i> Ventas recientes
+                            </div>
+                            <div class="card-body p-0">
+                                <?php if (empty($data['recentSales'])): ?>
+                                    <div class="p-3 text-muted">No hay ventas registradas</div>
+                                <?php else: ?>
+                                    <table class="table mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Fecha</th>
+                                                <th>Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach ($data['recentSales'] as $sale): ?>
+                                                <tr>
+                                                    <td><?= $sale['sale_date'] ?></td>
+                                                    <td>$<?= number_format($sale['total'], 2) ?></td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                <?php endif; ?>
                             </div>
                         </div>
-                    </div>
-                </div>
-            <?php endif; ?>
-        </div>
-
-        <!-- 3. SECCIÓN DE ACTIVIDAD RECIENTE (TABLA) -->
-        <div class="row mt-5">
-            <div class="col-12">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-white py-3">
-                        <h5 class="mb-0 text-dark">Próximos Recordatorios de Vacunas</h5>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table align-middle table-hover mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Mascota</th>
-                                    <th>Dueño</th>
-                                    <th>Vacuna</th>
-                                    <th>Fecha</th>
-                                    <th>Acción</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Esto vendrá de tu tabla 'reminders' o 'vaccines' -->
-                                <tr>
-                                    <td><strong>Firulais</strong></td>
-                                    <td>Juan Pérez</td>
-                                    <td><span class="badge bg-light text-dark">Antirrábica</span></td>
-                                    <td>15 Oct 2026</td>
-                                    <td><button class="btn btn-sm btn-outline-primary"><i class="bi bi-whatsapp"></i> Avisar</button></td>
-                                </tr>
-                            </tbody>
-                        </table>
                     </div>
                 </div>
             </div>
-        </div>
+
+
+            <!-- **************** LOW STOCK OF MEDICINE **************** -->
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card border-warning">
+
+                        <div class="card-header bg-warning text-dark">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Medicamentos con poco stock
+                        </div>
+
+                        <div class="card-body p-0">
+                            <?php if (empty($data['lowStockMedications'])): ?>
+
+                                <div class="p-3 text-muted">
+                                    No hay medicamentos con stock bajo
+                                </div>
+
+                            <?php else: ?>
+
+                                <table class="table mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Medicamento</th>
+                                            <th>Stock</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <?php foreach ($data['lowStockMedications'] as $med): ?>
+
+                                            <tr>
+                                                <td><?= $med['name'] ?></td>
+                                                <td>
+                                                    <span class="badge bg-danger">
+                                                        <?= $med['stock'] ?>
+                                                    </span>
+                                                </td>
+                                            </tr>
+
+                                        <?php endforeach; ?>
+
+                                    </tbody>
+                                </table>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- **************** GRAPH **************** -->
+            <div class="row mt-4 mb-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="bi bi-graph-up"></i>
+                            Ventas del año
+                        </div>
+
+                        <div class="card-body">
+                            <canvas id="salesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- **************** MAIN ENDS **************** -->
+        </main>
 
     </div>
+</div>
 
-    <!-- Scripts de Bootstrap (Necesarios para dropdowns y modales) -->
-    <script src="<?= BASE_URL ?>js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<script>
+    const salesData = <?= json_encode($data['monthlySales']) ?>;
+
+    const months = [
+        "Ene", "Feb", "Mar", "Abr", "May", "Jun",
+        "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"
+    ];
+
+    let totals = new Array(12).fill(0);
+
+    salesData.forEach(sale => {
+        totals[sale.month - 1] = sale.total;
+    });
+
+    const ctx = document.getElementById('salesChart');
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Ventas ($)',
+                data: totals
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+
+</script>
+
+<?php require_once __DIR__ . '/../layouts/footer.php'; ?>

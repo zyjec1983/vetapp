@@ -5,9 +5,13 @@
  */
 ?>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="<?= BASE_URL ?>dashboard.php">VetApp</a>
+    <button class="navbar-toggler me-2 d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <a class="navbar-brand" href="<?= BASE_URL ?>dashboard.php">VetApp</a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#vetNavbar">
             <span class="navbar-toggler-icon"></span>
