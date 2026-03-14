@@ -32,6 +32,12 @@ class UserController
 
         require_once __DIR__ . '/../../views/users/index.php';
     }
+
+     public function create()
+    {
+        require __DIR__ . '/../../views/users/create.php';
+    }
+    
 }
 
 ?>

@@ -65,6 +65,7 @@ class AuthController
             'id' => $user['id_user'],
             'email' => $user['email'],
             'name' => $user['name'],
+            'lastname1' => $user['lastname1'],
             'roles' => $user['roles'], // ARRAY
         ];
 

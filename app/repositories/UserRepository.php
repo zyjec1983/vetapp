@@ -1,4 +1,7 @@
 <?php
+/**
+ * Location: Vetapp/app/repositories/UserRepository.php
+ */
 
 require_once __DIR__ . '/../config/Database.php';
 
@@ -16,13 +19,14 @@ class UserRepository
     // =====================================================
     public function findByEmailWithRoles(string $email): ?array
     {
-        // 1️⃣ Buscar usuario
+        // 1 Buscar usuario
         $sqlUser = "
             SELECT 
                 id_user,
                 email,
                 password,
                 name,
+                lastname1,
                 active
             FROM users
             WHERE email = :email
@@ -37,7 +41,7 @@ class UserRepository
             return null;
         }
 
-        // 2️⃣ Buscar roles del usuario
+        // 2 Buscar roles del usuario
         $sqlRoles = "
             SELECT r.name
             FROM roles r
@@ -50,19 +54,21 @@ class UserRepository
 
         $roles = $stmtRoles->fetchAll(PDO::FETCH_COLUMN);
 
-        // 3️⃣ Armar estructura final
+        // 3 Armar estructura final
         return [
-            'id_user' => (int)$user['id_user'],
-            'email'   => $user['email'],
-            'password'=> $user['password'],
-            'name'    => $user['name'],
-            'active'  => (bool)$user['active'],
-            'roles'   => $roles
+            'id_user' => (int) $user['id_user'],
+            'email' => $user['email'],
+            'password' => $user['password'],
+            'name' => $user['name'],
+            'lastname1' => $user['lastname1'],
+            'active' => (bool) $user['active'],
+            'roles' => $roles
         ];
     }
 
     // ***** BUsca todos los usuarios *****
-    public function findAll(): array{
+    public function findAll(): array
+    {
         $stmt = $this->db->query("SELECT * FROM users");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }

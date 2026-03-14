@@ -34,7 +34,7 @@ function hasAnyRole(array $roles): bool {
     return false;
 }
 
-// ************ OBTIENE USUARIO ACTUAL DESDE LA SESIÓ ************
+// ************ OBTIENE USUARIO ACTUAL DESDE LA SESIÓN ************
 function currentUser(): ?array {
     return $_SESSION['user'] ?? null;
 }

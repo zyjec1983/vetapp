@@ -4,6 +4,7 @@
  * Location: vetapp/views/layouts/aside.php
  */
 
+// ********* se encuentra en 
 $currentUser = currentUser() ?? [];
 ?>
 
@@ -69,7 +70,7 @@ $currentUser = currentUser() ?? [];
         <div class="px-3 text-white small">
             Usuario:
             <strong>
-                <?php echo $currentUser['name'] ?? 'Usuario'; ?>
+                <?php echo ($currentUser['name']) . ' ' . ($currentUser['lastname1']) ?? 'Usuario'; ?>
             </strong>
         </div>
 
