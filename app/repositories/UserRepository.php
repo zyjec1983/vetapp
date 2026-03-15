@@ -72,4 +72,44 @@ class UserRepository
         $stmt = $this->db->query("SELECT * FROM users");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    // ******************* crear nuevo usuario *******************
+    // ******************* insertar usuario *******************
+    public function create($data)
+    {
+
+        $sql = "INSERT INTO users 
+    (email,password,name,middlename,lastname1,lastname2,identification,phone)
+    VALUES
+    (:email,:password,:name,:middlename,:lastname1,:lastname2,:identification,:phone)";
+
+        $stmt = $this->db->prepare($sql);
+
+        $stmt->execute($data);
+
+        // ******************* devolver id del usuario *******************
+        return $this->db->lastInsertId();
+
+    }
+
+    // ******************* asignar roles a usuario *******************
+    public function assignRoles($userId, $roles)
+    {
+
+        $sql = "INSERT INTO user_roles (id_user,id_role) VALUES (:user,:role)";
+
+        $stmt = $this->db->prepare($sql);
+
+        foreach ($roles as $role) {
+
+            $stmt->execute([
+                'user' => $userId,
+                'role' => $role
+            ]);
+
+        }
+
+    }
+
+
 }

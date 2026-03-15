@@ -3,6 +3,8 @@
  * location: vetapp/app/views/layouts/navbar.php
  * Navbar común para toda la aplicación
  */
+
+$currentUser = currentUser() ?? [];
 ?>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -42,7 +44,9 @@
 
             <!-- ************** Nombre de usuario y cerrar sesión ************* -->
             <span class="navbar-text me-3 text-white">
-                <?= htmlspecialchars($_SESSION['user']['name']) ?>
+                <strong>
+                    <?php echo ($currentUser['name']) . ' ' .($currentUser['lastname1']);?>
+                </strong>                
             </span>
 
             <button type="button" class="btn btn-outline-light btn-sm" data-bs-toggle="modal"

@@ -4,7 +4,7 @@
  * Location: vetapp/views/layouts/aside.php
  */
 
-// ********* se encuentra en 
+// ********* se encuentra en -> HELPERS/AUTH.PHP
 $currentUser = currentUser() ?? [];
 ?>
 
@@ -66,13 +66,7 @@ $currentUser = currentUser() ?? [];
         </ul>
 
         <hr class="text-white">
-
-        <div class="px-3 text-white small">
-            Usuario:
-            <strong>
-                <?php echo ($currentUser['name']) . ' ' . ($currentUser['lastname1']) ?? 'Usuario'; ?>
-            </strong>
-        </div>
+        
 
     </div>
 

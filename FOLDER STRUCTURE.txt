@@ -1,0 +1,104 @@
+Listado de rutas de carpetas para el volumen WIN 10
+El n£mero de serie del volumen es 5264-97C1
+C:.
+|   .htaccess
+|   FOLDER STRUCTURE.txt
+|   generar_arbol.bat
+|   README.md
+|   SPRINTS.docx
+|   
++---app
+|   |   bootstrap.php
+|   |   
+|   +---config
+|   |       config.php
+|   |       Database.php
+|   |       
+|   +---controllers
+|   |   |   DashboardController.php
+|   |   |   
+|   |   +---auth
+|   |   |       AuthController.php
+|   |   |       
+|   |   +---clients
+|   |   |       ClientController.php
+|   |   |       
+|   |   +---consultations
+|   |   |       ConsultationController.php
+|   |   |       
+|   |   +---medications
+|   |   |       MedicationController.php
+|   |   |       
+|   |   +---pets
+|   |   |       PetController.php
+|   |   |       
+|   |   +---sales
+|   |   |       SaleController.php
+|   |   |       
+|   |   \---users
+|   |           UserController.php
+|   |           
+|   +---helpers
+|   |       auth.php
+|   |       redirect.php
+|   |       
+|   +---middleware
+|   |       AuthMiddleware.php
+|   |       RoleMiddleware.php
+|   |       
+|   +---models
+|   |       User.php
+|   |       
+|   +---repositories
+|   |       DashboardRepository.php
+|   |       UserRepository.php
+|   |       
+|   \---views
+|       +---auth
+|       |       login.php
+|       |       
+|       +---clients
+|       +---consultations
+|       +---dashboard
+|       |       index.php
+|       |       
+|       +---layouts
+|       |       aside.php
+|       |       footer.php
+|       |       header.php
+|       |       navbar.php
+|       |       
+|       +---pets
+|       |       show.php
+|       |       
+|       +---sales
+|       \---users
+|               create.php
+|               edit.php
+|               index.php
+|               
++---database
+|       vetapp.sql
+|       
++---public
+|   |   .htaccess
+|   |   dashboard.php
+|   |   index.php
+|   |   logout.php
+|   |   users.php
+|   |   
+|   +---css
+|   |       bootstrap.min.css
+|   |       style.css
+|   |       
+|   +---img
+|   |       img-veterinaria.jpg
+|   |       login-bg-my-pets.png
+|   |       login-bg.jpg
+|   |       
+|   \---js
+|           bootstrap.bundle.min.js
+|           
+\---storage
+    +---logs
+    \---uploads
