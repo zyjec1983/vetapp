@@ -21,6 +21,8 @@ $currentUser = currentUser() ?? [];
                 </a>
             </li>
 
+            <!-- ********** VISTAS MENU ASIDE PARA ADMIN - VETERINARIAN ********** -->
+            <?php if(hasRole('admin') || hasRole('veterinarian')) : ?>
             <li class="nav-item">
                 <a class="nav-link text-white" href="users.php">
                     <i class="bi bi-person-gear me-2"></i>
@@ -41,14 +43,20 @@ $currentUser = currentUser() ?? [];
                     Mascotas
                 </a>
             </li>
+            <?php endif; ?>
 
+            <!-- ********** VISTAS MENU ASIDE PARA ADMIN - VETERINARIAN - PHARMACY ********** -->
+            <?php if (hasRole('veterinarian') || hasRole('admin')) : ?>
             <li class="nav-item">
                 <a class="nav-link text-white" href="#">
                     <i class="bi bi-clipboard2-pulse me-2"></i>
                     Consultas
                 </a>
             </li>
+            <?php endif; ?>
 
+             <!-- ********** VISTAS MENU ASIDE PARA PHARMACY ********** -->
+            <?php if (hasRole('veterinarian') || hasRole('admin') || hasRole('pharmacy')) : ?>
             <li class="nav-item">
                 <a class="nav-link text-white" href="#">
                     <i class="bi bi-capsule me-2"></i>
@@ -62,6 +70,7 @@ $currentUser = currentUser() ?? [];
                     Ventas
                 </a>
             </li>
+            <?php endif; ?>
 
         </ul>
 
