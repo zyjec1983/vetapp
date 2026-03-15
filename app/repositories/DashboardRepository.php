@@ -58,22 +58,52 @@ class DashboardRepository
     }
 
     // ======================================
-    // CONSULTAS RECIENTES
+    // CONSULTAS RECIENTES + integrar numero para envio de mensaje por whatsapp
     // ======================================
     public function recentConsultations(): array
     {
         $stmt = $this->db->query("
-            SELECT 
-                c.id_consultation,
-                c.consultation_date,
-                p.name AS pet_name,
-                cl.name AS client_name
-            FROM consultations c
-            INNER JOIN pets p ON p.id_pet = c.id_pet
-            INNER JOIN clients cl ON cl.id_client = p.id_client
-            ORDER BY c.consultation_date DESC
-            LIMIT 5
-        ");
+        SELECT 
+            c.id_consultation,
+            c.consultation_date,
+            p.name AS pet_name,
+            cl.name AS client_name,
+            cl.phone AS client_phone, -- Necesario para WhatsApp
+            c.diagnosis AS motivo     -- diagnóstico como motivo de seguimiento
+        FROM consultations c
+        INNER JOIN pets p ON p.id_pet = c.id_pet
+        INNER JOIN clients cl ON cl.id_client = p.id_client
+        ORDER BY c.consultation_date DESC
+        LIMIT 5
+    ");
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // ======================================
+    // RECORDATORIOS DE HOY (WHATSAPP)
+    // ======================================
+    public function getTodayReminders(): array
+    {
+        $stmt = $this->db->query("
+        SELECT 
+            CASE 
+                WHEN r.reminder_type = 'vaccine' THEN 'Vacunación'
+                WHEN r.reminder_type = 'consultation' THEN 'Consulta'
+                WHEN r.reminder_type = 'payment' THEN 'Pago Pendiente'
+                ELSE r.reminder_type 
+            END AS motivo,
+            r.message AS detalle,
+            p.name AS pet_name,
+            p.species AS pet_species,
+            cl.name AS client_name,
+            cl.phone AS client_phone
+        FROM reminders r
+        INNER JOIN pets p ON p.id_pet = r.id_pet
+        INNER JOIN clients cl ON cl.id_client = r.id_client
+        WHERE r.reminder_date = CURDATE()
+        ORDER BY r.created_at DESC
+    ");
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }

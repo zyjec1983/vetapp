@@ -19,7 +19,8 @@ class DashboardController
             'recentConsultations' => $dashboardRepo->recentConsultations(),
             'recentSales' => $dashboardRepo->recentSales(),
             'lowStockMedications' => $dashboardRepo->lowStockMedications(),
-            'monthlySales' => $dashboardRepo->monthlySales()
+            'monthlySales' => $dashboardRepo->monthlySales(),
+            'todayReminders' => $dashboardRepo->getTodayReminders()
         ];
 
         require_once __DIR__ . '/../views/dashboard/index.php';
