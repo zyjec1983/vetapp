@@ -51,6 +51,7 @@ C:.
 |   |       
 |   +---repositories
 |   |       DashboardRepository.php
+|   |       RoleRepository.php
 |   |       UserRepository.php
 |   |       
 |   \---views
@@ -60,6 +61,7 @@ C:.
 |       +---clients
 |       +---consultations
 |       +---dashboard
+|       |       index - antiguo.php
 |       |       index.php
 |       |       
 |       +---layouts

@@ -60,39 +60,70 @@ require_once __DIR__ . '/../layouts/navbar.php';
                                         </td>
 
                                         <!-- ******************* BOTON DE ACCIÓN EDITAR/ELIMINAR ****************** -->
-                                        <td class="text-center">
+                                        <!-- <td class="text-center">
                                             <div class="btn-group" role="group">
-                                                <a href="users_edit.php?id=<?= $user['id_user'] ?>" 
-                                                   class="btn btn-outline-info btn-sm" 
-                                                   title="Editar Usuario">
+                                                <a href="<?= BASE_URL ?>users.php?action=edit&id=<?= $user['id_user'] ?>"
+                                                    class="btn btn-outline-info btn-sm" title="Editar Usuario">
                                                     <i class="bi bi-pencil-square"></i>
                                                 </a>
-                                                <button type="button" 
-                                                        class="btn btn-outline-danger btn-sm" 
-                                                        title="Eliminar Usuario"
-                                                        onclick="confirmDelete(<?= $user['id_user'] ?>)">
+                                                <button type="button" class="btn btn-outline-danger btn-sm"
+                                                    title="Eliminar Usuario"
+                                                    onclick="confirmDelete(<?= $user['id_user'] ?>)">
                                                     <i class="bi bi-trash3"></i>
                                                 </button>
-                                            </div>
+                                            </div>  -->
+
+
+                                        <td>
+                                            <!-- ******************* BOTON EDITAR USUARIO ******************* -->
+                                            <a href="<?= BASE_URL ?>users.php?action=edit&id=<?= $user['id_user'] ?>"
+                                                class="btn btn-sm btn-primary">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </a>
+
+                                            <!-- ******************* BOTON DESACTIVAR USUARIO ******************* -->
+                                            <a href="<?= BASE_URL ?>users.php?action=deactivate&id=<?= $user['id_user'] ?>"
+                                                class="btn btn-sm btn-danger btn-delete" data-name="<?= $user['name'] ?>">
+                                                <i class="bi bi-person-x"></i>
+                                            </a>
+                                        </td>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
-                    </div> </div>
+                    </div>
+                </div>
             </div>
 
         </main>
     </div>
 </div>
 
-<!-- ******** aqui usaré sweetalert luego pero eso va en el controlador para ello deberá havber unsa sesion ********-->
 <script>
-function confirmDelete(id) {
-    if(confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
-        window.location.href = 'users_delete.php?id=' + id;
-    }
-}
+    document.querySelectorAll('.btn-delete').forEach(button => {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            const url = this.href;
+            const name = this.dataset.name || 'este usuario';
+
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: `Se desactivará ${name}`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, desactivar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = url;
+                }
+            });
+        });
+    });
 </script>
 
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>

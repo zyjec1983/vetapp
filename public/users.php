@@ -31,11 +31,11 @@ switch ($action) {
         break;
 
     case 'update':
-        $controller->update($_POST['id']);
+        $controller->update();
         break;
 
-    case 'delete':
-        $controller->delete($_GET['id']);
+    case 'deactivate':
+        $controller->deactivate($_GET['id']);
         break;
 
     default:

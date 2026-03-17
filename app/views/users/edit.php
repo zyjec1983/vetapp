@@ -35,7 +35,8 @@ require_once __DIR__ . '/../layouts/navbar.php';
                 </div>
                 <div class="card-body p-4">
                     
-                    <form action="/vetapp/public/users.php?action=update&id=<?= $user['id_user'] ?>" method="POST" autocomplete="off">
+                    <form action="<?= BASE_URL ?>users.php?action=update" method="POST" autocomplete="off">
+                        <input type="hidden" name="id_user" value="<?= $formData['id_user'] ?? '' ?>">
 
                         <!-- ***************** INGRESO DE DATOS ***************** -->
                         <h6 class="text-primary text-uppercase small fw-bold mb-3">Información Personal</h6>
@@ -46,7 +47,7 @@ require_once __DIR__ . '/../layouts/navbar.php';
                                 <input type="text" 
                                        name="identification" 
                                        class="form-control" 
-                                       required 
+                                       readonly 
                                        maxlength="20"
                                        pattern="[0-9]+" 
                                        title="Solo se permiten números (0-9)"
@@ -145,6 +146,8 @@ require_once __DIR__ . '/../layouts/navbar.php';
                         <div class="p-3 border rounded bg-light mb-4">
                             <p class="small text-muted mb-3">Selecciona uno o más roles para este usuario:</p>
                             <div class="row">
+
+                            <!-- ***** BUSCAR ROLES ***** -->
                                 <?php foreach ($roles as $role): ?>
                                 <div class="col-12 col-sm-4 mb-2">
                                     <div class="form-check form-switch">
