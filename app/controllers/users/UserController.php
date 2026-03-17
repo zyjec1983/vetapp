@@ -5,13 +5,14 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../../bootstrap.php';
+require_once __DIR__ . '/../BaseController.php';
+require_once __DIR__ . '/../../repositories/UserRepository.php';
 require_once __DIR__ . '/../../repositories/RoleRepository.php';
 
 
-class UserController
+class UserController extends BaseController
 {
-    private PDO $db;
-    private UserRepository $userRepository;
+
 
     public function __construct()
     {
@@ -19,14 +20,12 @@ class UserController
             session_start();
         }
 
-        $this->db = Database::getInstance()->getConnection();
-
-        $this->userRepository = new UserRepository($this->db);
+        parent::__construct();
     }
 
     public function index(): void
     {
-        // 🔐 Solo admin
+        // ***** Solo admin *****
         if (!hasRole('admin')) {
             header('Location: ' . BASE_URL . 'dashboard.php');
             exit;
@@ -337,31 +336,31 @@ class UserController
     // =====================================================
 // DESACTIVAR USUARIO
 // =====================================================
-public function deactivate(int $id)
-{
-    // ******************* obtener id *******************
-    $id = (int) ($_GET['id'] ?? 0);
+    public function deactivate(int $id)
+    {
+        // ******************* obtener id *******************
+        $id = (int) ($_GET['id'] ?? 0);
 
-    if ($id <= 0) {
-        $_SESSION['error'] = 'ID inválido';
+        if ($id <= 0) {
+            $_SESSION['error'] = 'ID inválido';
+            header("Location: users.php");
+            exit;
+        }
+
+        // ******************* ejecutar soft delete *******************
+        $deleted = $this->userRepository->deactivate($id);
+
+        // ******************* mensaje SweetAlert *******************
+        if ($deleted) {
+            $_SESSION['success'] = 'Usuario desactivado correctamente';
+        } else {
+            $_SESSION['error'] = 'No se pudo desactivar el usuario';
+        }
+
+        // ******************* redirección *******************
         header("Location: users.php");
         exit;
     }
-
-    // ******************* ejecutar soft delete *******************
-    $deleted = $this->userRepository->deactivate($id);
-
-    // ******************* mensaje SweetAlert *******************
-    if ($deleted) {
-        $_SESSION['success'] = 'Usuario desactivado correctamente';
-    } else {
-        $_SESSION['error'] = 'No se pudo desactivar el usuario';
-    }
-
-    // ******************* redirección *******************
-    header("Location: users.php");
-    exit;
-}
 
 }
 
