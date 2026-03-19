@@ -15,6 +15,7 @@ C:.
 |   |       Database.php
 |   |       
 |   +---controllers
+|   |   |   BaseController.php
 |   |   |   DashboardController.php
 |   |   |   
 |   |   +---auth
@@ -39,6 +40,7 @@ C:.
 |   |           UserController.php
 |   |           
 |   +---helpers
+|   |       alert.php
 |   |       auth.php
 |   |       redirect.php
 |   |       

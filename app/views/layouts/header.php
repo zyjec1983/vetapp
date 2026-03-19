@@ -1,3 +1,21 @@
+<?php
+// 🔥 Mostrar errores (solo en desarrollo)
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// 🔥 Iniciar sesión SIEMPRE
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// 🔥 Cargar configuración (BASE_URL)
+require_once __DIR__ . '/../../config/config.php';
+
+// 🔥 Cargar helpers de autenticación
+require_once __DIR__ . '/../../helpers/auth.php';
+?>
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
