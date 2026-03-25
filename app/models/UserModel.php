@@ -7,7 +7,7 @@
  * - NO accede a base de datos
  */
 
-class User
+class UserModel
 {
     // ************* PROPIEDADES *************
     private int $id_user;

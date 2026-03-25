@@ -1,61 +1,117 @@
 <?php
-/**
- * Location: vetapp/app/views/pets/show.php
- * View for displaying a single pet's details
- */
+// app/views/pets/show.php
+
+$title = 'Ficha de ' . htmlspecialchars($pet->getName()) . ' | VetApp';
+
+require_once __DIR__ . '/../layouts/header.php';
+require_once __DIR__ . '/../layouts/navbar.php';
 ?>
 
-<div class="container-fluid py-4">
+<div class="container-fluid">
     <div class="row">
-        <!-- Columna Izquierda: Información de la Mascota y Dueño -->
-        <div class="col-md-4">
-            <div class="card mb-4 shadow-sm">
-                <img src="<?= $pet['picture'] ?? 'img/default-pet.png' ?>" class="card-img-top" alt="Mascota">
-                <div class="card-body">
-                    <h3 class="card-title text-primary"><?= $pet['name'] ?></h3>
-                    <p class="badge bg-info"><?= $pet['species'] ?> - <?= $pet['breed'] ?></p>
-                    <hr>
-                    <h6><i class="bi bi-person"></i> Dueño: <span class="text-muted"><?= $client['name'] ?></span></h6>
-                    <p><i class="bi bi-telephone"></i> <?= $client['phone'] ?></p>
-                    <a href="client_controller.php?id=<?= $client['id_client'] ?>" class="btn btn-outline-primary btn-sm w-100">Ver Dueño</a>
-                </div>
-            </div>
-            
-            <div class="card border-warning mb-4">
-                <div class="card-header">Alertas Médicas</div>
-                <div class="card-body">
-                    <p class="card-text text-danger"><strong>Alergias:</strong> <?= $pet['allergies'] ?? 'Ninguna' ?></p>
-                </div>
-            </div>
-        </div>
+        <?php require_once __DIR__ . '/../layouts/aside.php'; ?>
 
-        <!-- Columna Derecha: Timeline de Consultas y Vacunas -->
-        <div class="col-md-8">
-            <ul class="nav nav-tabs" role="tablist">
-                <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#history">Historial Clínico</a></li>
-                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#vaccines">Vacunas</a></li>
-            </ul>
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-4">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="<?= BASE_URL ?>pets.php">Mascotas</a></li>
+                    <li class="breadcrumb-item active" aria-current="page"><?= htmlspecialchars($pet->getName()) ?></li>
+                </ol>
+            </nav>
 
-            <div class="tab-content mt-3">
-                <div id="history" class="tab-pane fade show active">
-                    <div class="d-flex justify-content-between mb-3">
-                        <h4>Últimas Consultas</h4>
-                        <button class="btn btn-success btn-sm">+ Nueva Consulta</button>
-                    </div>
-                    <?php foreach($consultations as $c): ?>
-                    <div class="list-group mb-2">
-                        <div class="list-group-item list-group-item-action">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h5 class="mb-1 text-primary">Diagnóstico: <?= substr($c['diagnosis'], 0, 50) ?>...</h5>
-                                <small class="text-muted"><?= $c['consultation_date'] ?></small>
-                            </div>
-                            <p class="mb-1"><?= $c['treatment'] ?></p>
-                            <small>Atendido por: Dr. <?= $c['user_name'] ?></small>
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-file-medical me-2"></i>Ficha Médica
+                    </h5>
+                </div>
+
+                <div class="card-body">
+                    <div class="row">
+
+                        <div class="col-md-4 text-center">
+                            <?php if ($pet->getPicture()): ?>
+                                <img src="<?= BASE_URL ?>storage/uploads/<?= $pet->getPicture() ?>"
+                                    class="img-fluid rounded mb-3" style="max-height: 200px;">
+                            <?php else: ?>
+                                <div class="bg-light rounded p-5 mb-3">
+                                    <i class="bi bi-camera" style="font-size: 3rem;"></i>
+                                    <p class="text-muted">Sin foto</p>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="col-md-8">
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th>Nombre</th>
+                                    <td><?= htmlspecialchars($pet->getName()) ?></td>
+                                </tr>
+
+                                <tr>
+                                    <th>Dueño</th>
+                                    <td><?= htmlspecialchars($pet->getClientName()) ?></td>
+                                </tr>
+
+                                <tr>
+                                    <th>Especie</th>
+                                    <td><?= htmlspecialchars($pet->getSpecies()) ?></td>
+                                </tr>
+
+                                <tr>
+                                    <th>Raza</th>
+                                    <td><?= htmlspecialchars($pet->getBreed() ?: 'No especificada') ?></td>
+                                </tr>
+
+                                <tr>
+                                    <th>Sexo</th>
+                                    <td><?= $pet->getSex() == 'M' ? 'Macho' : ($pet->getSex() == 'F' ? 'Hembra' : 'Desconocido') ?>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th>Fecha de nacimiento</th>
+                                    <td><?= $pet->getDateOfBirth() ?: 'No registrada' ?></td>
+                                </tr>
+                                <tr>
+                                    <th>Edad</th>
+                                    <td><?= $pet->getAge() ?></td>
+                                </tr>
+
+                                <tr>
+                                    <th>Peso</th>
+                                    <td><?= $pet->getCurrentWeight() ? $pet->getCurrentWeight() . ' kg' : 'No registrado' ?>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <th>Color</th>
+                                    <td><?= htmlspecialchars($pet->getColor() ?: 'No registrado') ?></td>
+                                </tr>
+                                <tr>
+                                    <th>Microchip</th>
+                                    <td><?= htmlspecialchars($pet->getMicrochip() ?: 'No registrado') ?></td>
+                                </tr>
+                                <tr>
+                                    <th>Alergias</th>
+                                    <td><?= nl2br(htmlspecialchars($pet->getAllergies() ?: 'Ninguna')) ?></td>
+                                </tr>
+                                <tr>
+                                    <th>Observaciones</th>
+                                    <td><?= nl2br(htmlspecialchars($pet->getObservations() ?: 'Ninguna')) ?></td>
+                                </tr>
+                            </table>
                         </div>
                     </div>
-                    <?php endforeach; ?>
+                </div>
+                <div class="card-footer">
+                    <a href="<?= BASE_URL ?>pets.php" class="btn btn-secondary">Volver</a>
+                    <a href="<?= BASE_URL ?>pets.php?action=edit&id=<?= $pet->getIdPet() ?>"
+                        class="btn btn-primary">Editar</a>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 </div>
+
+<?php require_once __DIR__ . '/../layouts/footer.php'; ?>

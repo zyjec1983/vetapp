@@ -1,0 +1,7 @@
+[24-Mar-2026 17:46:06 America/Guayaquil] Actualizando mascota ID: 8
+[24-Mar-2026 17:46:44 America/Guayaquil] Actualizando mascota ID: 8
+[24-Mar-2026 17:47:02 America/Guayaquil] Actualizando mascota ID: 8
+[24-Mar-2026 18:25:45 America/Guayaquil] Actualizando mascota ID: 8
+[24-Mar-2026 18:26:08 America/Guayaquil] Actualizando mascota ID: 8
+[24-Mar-2026 18:27:13 America/Guayaquil] Actualizando mascota ID: 3
+[24-Mar-2026 18:30:37 America/Guayaquil] Actualizando mascota ID: 3

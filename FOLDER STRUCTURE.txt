@@ -2,11 +2,20 @@ Listado de rutas de carpetas para el volumen WIN 10
 El n£mero de serie del volumen es 5264-97C1
 C:.
 |   .htaccess
+|   error_log.txt
 |   FOLDER STRUCTURE.txt
 |   generar_arbol.bat
 |   README.md
 |   SPRINTS.docx
 |   
++---.idea
+|       .gitignore
+|       modules.xml
+|       php.xml
+|       vcs.xml
+|       vetapp.iml
+|       workspace.xml
+|       
 +---app
 |   |   bootstrap.php
 |   |   
@@ -49,21 +58,46 @@ C:.
 |   |       RoleMiddleware.php
 |   |       
 |   +---models
-|   |       User.php
+|   |       ClientModel.php
+|   |       ConsultationModel.php
+|   |       PetModel.php
+|   |       UserModel.php
 |   |       
+|   +---public
+|   |   \---storage
+|   |       \---uploads
+|   |               69c2efa75158b.jpeg
+|   |               69c2f02102a35.jpg
+|   |               69c2f20e40451.jpg
+|   |               69c2f30d9091c.jpg
+|   |               69c314668f326.png
+|   |               
 |   +---repositories
+|   |       ClientRepository.php
+|   |       ConsultationRepository.php
 |   |       DashboardRepository.php
+|   |       PetRepository.php
 |   |       RoleRepository.php
 |   |       UserRepository.php
 |   |       
+|   +---storage
+|   |   \---uploads
 |   \---views
 |       +---auth
 |       |       login.php
 |       |       
 |       +---clients
+|       |       create.php
+|       |       edit.php
+|       |       index.php
+|       |       
 |       +---consultations
+|       |       create.php
+|       |       edit.php
+|       |       index.php
+|       |       show.php
+|       |       
 |       +---dashboard
-|       |       index - antiguo.php
 |       |       index.php
 |       |       
 |       +---layouts
@@ -73,6 +107,10 @@ C:.
 |       |       navbar.php
 |       |       
 |       +---pets
+|       |       1 show.php
+|       |       create.php
+|       |       edit.php
+|       |       index.php
 |       |       show.php
 |       |       
 |       +---sales
@@ -86,9 +124,12 @@ C:.
 |       
 +---public
 |   |   .htaccess
+|   |   clients.php
+|   |   consultations.php
 |   |   dashboard.php
 |   |   index.php
 |   |   logout.php
+|   |   pets.php
 |   |   users.php
 |   |   
 |   +---css
@@ -100,9 +141,14 @@ C:.
 |   |       login-bg-my-pets.png
 |   |       login-bg.jpg
 |   |       
-|   \---js
-|           bootstrap.bundle.min.js
-|           
+|   +---js
+|   |       bootstrap.bundle.min.js
+|   |       
+|   \---storage
+|       \---uploads
+|               69c31d90c715c.jpg
+|               69c31e9d41269.jpeg
+|               
 \---storage
     +---logs
     \---uploads

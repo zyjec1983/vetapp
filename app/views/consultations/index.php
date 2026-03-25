@@ -23,19 +23,27 @@ require_once __DIR__ . '/../layouts/navbar.php';
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-4">
 
             <!-- ******************* HEADER ****************** -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                 <h2>Gestión de Consultas</h2>
-                <a href="<?= BASE_URL ?>consultations.php?action=create" class="btn btn-primary">
-                    <i class="bi bi-plus-circle me-1"></i> Nueva Consulta
-                </a>
+                <div class="d-flex gap-2">
+                    <a href="<?= BASE_URL ?>clients.php?action=create_client" class="btn btn-outline-primary">
+                        <i class="bi bi-person-plus me-1"></i> Registrar Cliente
+                    </a>
+                    <a href="<?= BASE_URL ?>pets.php?action=create_pet" class="btn btn-outline-primary">
+                        <i class="bi bi-plus-circle me-1"></i> Registrar Mascota
+                    </a>
+                    <a href="<?= BASE_URL ?>consultations.php?action=create" class="btn btn-primary">
+                        <i class="bi bi-clipboard2-pulse me-1"></i> Nueva Consulta
+                    </a>
+                </div>
             </div>
 
             <!-- ******************* TABLA ****************** -->
             <div class="card shadow-sm">
                 <div class="card-body">
                     <div class="table-responsive">
-
-                        <table class="table table-hover table-striped align-middle">
+                        
+                    <table class="table table-hover table-striped align-middle">
                             <thead class="table-dark">
                                 <tr>
                                     <th>ID</th>
