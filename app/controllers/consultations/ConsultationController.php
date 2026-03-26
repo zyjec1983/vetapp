@@ -1,24 +1,43 @@
 <?php
-// app/controllers/consultations/ConsultationController.php
+/**
+ * Location: vetapp/app/controllers/consultations/ConsultationController.php
+ * Controlador de consultas médicas (CRUD completo + recordatorios)
+ */
+
+// Mostrar errores (solo en desarrollo)
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+// Requerir dependencias
 require_once __DIR__ . '/../BaseController.php';
 require_once __DIR__ . '/../../repositories/ConsultationRepository.php';
+require_once __DIR__ . '/../../repositories/PetRepository.php';
+require_once __DIR__ . '/../../repositories/ReminderRepository.php';
 require_once __DIR__ . '/../../models/ConsultationModel.php';
+require_once __DIR__ . '/../../models/ReminderModel.php';
 require_once __DIR__ . '/../../helpers/auth.php';
 
 class ConsultationController extends BaseController
 {
-    private $consultationRepo;
+    private $consultationRepo;   // Repositorio de consultas
+    private $petRepo;            // Repositorio de mascotas (para recordatorios)
+    private $reminderRepo;       // Repositorio de recordatorios
 
+    /**
+     * Constructor: inicializa repositorios y verifica autenticación/permisos
+     */
     public function __construct()
     {
         parent::__construct();
         $this->consultationRepo = new ConsultationRepository($this->db);
+        $this->petRepo = new PetRepository();
+        $this->reminderRepo = new ReminderRepository();
         $this->requireAuth();
     }
 
+    /**
+     * Verifica que el usuario esté autenticado y tenga rol de admin o veterinario
+     */
     private function requireAuth()
     {
         if (!isset($_SESSION['user'])) {
@@ -33,19 +52,28 @@ class ConsultationController extends BaseController
         }
     }
 
+    /**
+     * Lista todas las consultas (index)
+     */
     public function index()
     {
-        $consultations = $this->consultationRepo->getAll(); // devuelve array asociativo con joins
+        $consultations = $this->consultationRepo->getAll(); // array asociativo con joins
         require_once __DIR__ . '/../../views/consultations/index.php';
     }
 
+    /**
+     * Muestra el formulario para crear una nueva consulta
+     */
     public function create()
     {
         // Obtener lista de mascotas con sus dueños para el selector
-        $pets = $this->consultationRepo->getPetsWithClients(); // implementado arriba
+        $pets = $this->consultationRepo->getPetsWithClients();
         require_once __DIR__ . '/../../views/consultations/create.php';
     }
 
+    /**
+     * Procesa el formulario de creación de consulta y guarda en BD
+     */
     public function store()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -53,7 +81,7 @@ class ConsultationController extends BaseController
             exit;
         }
 
-        // Validaciones
+        // ********** Validaciones **********
         $errors = [];
         if (empty($_POST['id_pet']))
             $errors[] = 'Debe seleccionar una mascota.';
@@ -73,6 +101,7 @@ class ConsultationController extends BaseController
             }
         }
 
+        // Si hay errores, redirigir al formulario
         if (!empty($errors)) {
             $_SESSION['errors'] = $errors;
             $_SESSION['old'] = $_POST;
@@ -80,7 +109,7 @@ class ConsultationController extends BaseController
             exit;
         }
 
-        // 🔥 Obtener usuario actual desde el helper currentUser()
+        // Obtener ID del usuario autenticado
         $user = currentUser();
         $id_user = $user['id'] ?? null;
 
@@ -90,7 +119,7 @@ class ConsultationController extends BaseController
             exit;
         }
 
-        // Crear modelo con los datos
+        // Crear modelo de consulta
         $consultation = new ConsultationModel([
             'id_pet' => $_POST['id_pet'],
             'id_user' => $id_user,
@@ -104,10 +133,27 @@ class ConsultationController extends BaseController
             'observations' => trim($_POST['observations'] ?? '')
         ]);
 
+        // Guardar consulta
         if ($this->consultationRepo->create($consultation)) {
-            // Recordatorio (opcional)
+            // ********** Crear recordatorio si se solicitó **********
             if (isset($_POST['enable_reminder']) && $_POST['enable_reminder'] == '1') {
-                // Aquí llamarías al método para crear recordatorio
+                // Obtener datos de la mascota para saber el cliente dueño
+                $pet = $this->petRepo->findById($consultation->getIdPet());
+                if ($pet) {
+                    // Preparar modelo de recordatorio
+                    $reminder = new ReminderModel();
+                    $reminder->setReminderType($_POST['reminder_type'] ?? 'consultation');
+                    $reminder->setIdPet($consultation->getIdPet());
+                    $reminder->setIdClient($pet->getIdClient());
+                    // Fecha del recordatorio: la especificada o la próxima visita
+                    $reminderDate = !empty($_POST['reminder_date']) ? $_POST['reminder_date'] : $consultation->getNextVisit();
+                    $reminder->setReminderDate($reminderDate);
+                    $reminder->setMessage($_POST['reminder_message'] ?? '');
+                    $reminder->setSent(false);
+
+                    // Guardar recordatorio
+                    $this->reminderRepo->create($reminder);
+                }
             }
             $_SESSION['success'] = 'Consulta registrada correctamente.';
         } else {
@@ -118,6 +164,9 @@ class ConsultationController extends BaseController
         exit;
     }
 
+    /**
+     * Muestra el detalle de una consulta
+     */
     public function show($id)
     {
         $consultation = $this->consultationRepo->findById($id);
@@ -129,6 +178,9 @@ class ConsultationController extends BaseController
         require_once __DIR__ . '/../../views/consultations/show.php';
     }
 
+    /**
+     * Muestra el formulario de edición de una consulta
+     */
     public function edit($id)
     {
         $consultation = $this->consultationRepo->findById($id);
@@ -137,10 +189,13 @@ class ConsultationController extends BaseController
             header('Location: ' . BASE_URL . 'consultations.php');
             exit;
         }
-        $pets = $this->consultationRepo->getPetsWithClients(); // para selector
+        $pets = $this->consultationRepo->getPetsWithClients(); // para el selector
         require_once __DIR__ . '/../../views/consultations/edit.php';
     }
 
+    /**
+     * Procesa la actualización de una consulta
+     */
     public function update()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -162,7 +217,7 @@ class ConsultationController extends BaseController
             exit;
         }
 
-        // Validaciones
+        // Validaciones (igual que en store)
         $errors = [];
         if (empty($_POST['id_pet']))
             $errors[] = 'Debe seleccionar una mascota.';
@@ -189,6 +244,7 @@ class ConsultationController extends BaseController
             exit;
         }
 
+        // Actualizar modelo
         $consultation->setIdPet($_POST['id_pet']);
         $consultation->setWeight(!empty($_POST['weight']) ? (float) $_POST['weight'] : null);
         $consultation->setTemperature(!empty($_POST['temperature']) ? (float) $_POST['temperature'] : null);
@@ -209,6 +265,9 @@ class ConsultationController extends BaseController
         exit;
     }
 
+    /**
+     * Desactiva una consulta (soft delete)
+     */
     public function deactivate($id)
     {
         $consultation = $this->consultationRepo->findById($id);
@@ -226,20 +285,5 @@ class ConsultationController extends BaseController
 
         header('Location: ' . BASE_URL . 'consultations.php');
         exit;
-    }
-
-    private function createReminder($post, $consultationId)
-    {
-        // Aquí implementar la lógica para insertar en reminders
-        // Requiere tener el repositorio de reminders o una función auxiliar
-        // Por ahora, solo dejamos la estructura.
-        // Ejemplo:
-        $reminderData = [
-            'reminder_type' => $post['reminder_type'] ?? 'consultation',
-            'id_pet' => $post['id_pet'],
-            'reminder_date' => $post['reminder_date'],
-            'message' => $post['message'] ?? ''
-        ];
-        // Llamar a ReminderRepository para insertar
     }
 }

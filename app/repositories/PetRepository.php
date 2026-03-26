@@ -63,19 +63,19 @@ class PetRepository
                 )";
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
-            ':id_client'      => $pet->getIdClient(),
-            ':name'           => $pet->getName(),
-            ':species'        => $pet->getSpecies(),
-            ':breed'          => $pet->getBreed(),
-            ':sex'            => $pet->getSex(),
-            ':date_of_birth'  => $pet->getDateOfBirth(),
+            ':id_client' => $pet->getIdClient(),
+            ':name' => $pet->getName(),
+            ':species' => $pet->getSpecies(),
+            ':breed' => $pet->getBreed(),
+            ':sex' => $pet->getSex(),
+            ':date_of_birth' => $pet->getDateOfBirth(),
             ':current_weight' => $pet->getCurrentWeight(),
-            ':color'          => $pet->getColor(),
-            ':microchip'      => $pet->getMicrochip(),
-            ':allergies'      => $pet->getAllergies(),
-            ':observations'   => $pet->getObservations(),
-            ':picture'        => $pet->getPicture(),
-            ':active'         => 1
+            ':color' => $pet->getColor(),
+            ':microchip' => $pet->getMicrochip(),
+            ':allergies' => $pet->getAllergies(),
+            ':observations' => $pet->getObservations(),
+            ':picture' => $pet->getPicture(),
+            ':active' => 1
         ]);
     }
 
@@ -97,19 +97,19 @@ class PetRepository
                 WHERE id_pet = :id";
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
-            ':id'             => $pet->getIdPet(),
-            ':id_client'      => $pet->getIdClient(),
-            ':name'           => $pet->getName(),
-            ':species'        => $pet->getSpecies(),
-            ':breed'          => $pet->getBreed(),
-            ':sex'            => $pet->getSex(),
-            ':date_of_birth'  => $pet->getDateOfBirth(),
+            ':id' => $pet->getIdPet(),
+            ':id_client' => $pet->getIdClient(),
+            ':name' => $pet->getName(),
+            ':species' => $pet->getSpecies(),
+            ':breed' => $pet->getBreed(),
+            ':sex' => $pet->getSex(),
+            ':date_of_birth' => $pet->getDateOfBirth(),
             ':current_weight' => $pet->getCurrentWeight(),
-            ':color'          => $pet->getColor(),
-            ':microchip'      => $pet->getMicrochip(),
-            ':allergies'      => $pet->getAllergies(),
-            ':observations'   => $pet->getObservations(),
-            ':picture'        => $pet->getPicture()
+            ':color' => $pet->getColor(),
+            ':microchip' => $pet->getMicrochip(),
+            ':allergies' => $pet->getAllergies(),
+            ':observations' => $pet->getObservations(),
+            ':picture' => $pet->getPicture()
         ]);
     }
 
