@@ -1,5 +1,5 @@
 <?php
-// app/views/consultations/create.php
+// app/views/clients/create.php
 
 if (!function_exists('old')) {
     function old($key, $default = '') {
@@ -7,7 +7,7 @@ if (!function_exists('old')) {
     }
 }
 
-$title = 'Nueva Consulta | VetApp';
+$title = 'Nuevo Cliente | VetApp';
 
 // Recuperar datos antiguos si hay error
 $old = $_SESSION['old'] ?? [];
@@ -24,14 +24,16 @@ require_once __DIR__ . '/../layouts/navbar.php';
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-4">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="<?= BASE_URL ?>consultations.php">Consultas</a></li>
-                    <li class="breadcrumb-item active">Nueva Consulta</li>
+                    <li class="breadcrumb-item"><a href="<?= BASE_URL ?>clients.php">Clientes</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Nuevo Cliente</li>
                 </ol>
             </nav>
 
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-primary text-white py-3">
-                    <h5 class="mb-0"><i class="bi bi-clipboard2-pulse me-2"></i>Registrar Consulta Médica</h5>
+                    <h5 class="mb-0">
+                        <i class="bi bi-person-plus-fill me-2"></i>Registrar Nuevo Cliente
+                    </h5>
                 </div>
                 <div class="card-body p-4">
 
@@ -46,101 +48,72 @@ require_once __DIR__ . '/../layouts/navbar.php';
                         <?php unset($_SESSION['errors']); ?>
                     <?php endif; ?>
 
-                    <form method="POST" action="<?= BASE_URL ?>consultations.php?action=store" autocomplete="off">
-                        <!-- Selección de mascota -->
+                    <form action="<?= BASE_URL ?>clients.php?action=store" method="POST" autocomplete="off">
+                        <h6 class="text-primary text-uppercase small fw-bold mb-3">Información Personal</h6>
                         <div class="row g-3 mb-4">
-                            <div class="col-12">
-                                <label class="form-label fw-bold">Mascota *</label>
-                                <select name="id_pet" class="form-select" required>
-                                    <option value="">Seleccione una mascota</option>
-                                    <?php foreach ($pets as $pet): ?>
-                                        <option value="<?= $pet['id_pet'] ?>" <?= old('id_pet') == $pet['id_pet'] ? 'selected' : '' ?>>
-                                            <?= htmlspecialchars($pet['pet_name'] . ' (' . $pet['client_name'] . ')') ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
+                            <div class="col-12 col-md-4">
+                                <label class="form-label fw-bold small">Cédula o Pasaporte</label>
+                                <input type="text" name="identification" class="form-control" maxlength="20"
+                                       value="<?= htmlspecialchars(old('identification')) ?>">
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label class="form-label fw-bold small">Primer Nombre *</label>
+                                <input type="text" name="name" class="form-control" required
+                                       value="<?= htmlspecialchars(old('name')) ?>">
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label class="form-label fw-bold small">Segundo Nombre</label>
+                                <input type="text" name="middlename" class="form-control"
+                                       value="<?= htmlspecialchars(old('middlename')) ?>">
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-bold small">Apellido Paterno *</label>
+                                <input type="text" name="lastname1" class="form-control" required
+                                       value="<?= htmlspecialchars(old('lastname1')) ?>">
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-bold small">Apellido Materno</label>
+                                <input type="text" name="lastname2" class="form-control"
+                                       value="<?= htmlspecialchars(old('lastname2')) ?>">
                             </div>
                         </div>
 
-                        <!-- Datos clínicos -->
+                        <h6 class="text-primary text-uppercase small fw-bold mb-3">Contacto</h6>
                         <div class="row g-3 mb-4">
-                            <div class="col-md-4">
-                                <label class="form-label">Peso (kg)</label>
-                                <input type="number" step="0.01" name="weight" class="form-control" value="<?= old('weight') ?>">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Temperatura (°C)</label>
-                                <input type="number" step="0.1" name="temperature" class="form-control" value="<?= old('temperature') ?>">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Próxima Visita</label>
-                                <input type="date" name="next_visit" class="form-control" value="<?= old('next_visit') ?>">
-                            </div>
-                        </div>
-
-                        <div class="row g-3 mb-4">
-                            <div class="col-12">
-                                <label class="form-label fw-bold">Diagnóstico *</label>
-                                <textarea name="diagnosis" class="form-control" rows="3" required><?= old('diagnosis') ?></textarea>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label fw-bold">Tratamiento</label>
-                                <textarea name="treatment" class="form-control" rows="3"><?= old('treatment') ?></textarea>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Observaciones</label>
-                                <textarea name="observations" class="form-control" rows="2"><?= old('observations') ?></textarea>
-                            </div>
-                        </div>
-
-                        <!-- Honorarios y estado (al final) -->
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label">Honorarios ($)</label>
-                                <input type="number" step="0.01" name="consultation_fee" class="form-control" value="<?= old('consultation_fee') ?>">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Estado</label>
-                                <select name="status" class="form-select">
-                                    <option value="completed" <?= old('status') == 'completed' ? 'selected' : '' ?>>Completado</option>
-                                    <option value="pending" <?= old('status') == 'pending' ? 'selected' : '' ?>>Pendiente</option>
-                                    <option value="cancelled" <?= old('status') == 'cancelled' ? 'selected' : '' ?>>Cancelado</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Recordatorio (opcional) -->
-                        <div class="card border-warning mt-3">
-                            <div class="card-body">
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" id="enableReminder" name="enable_reminder" value="1">
-                                    <label class="form-check-label" for="enableReminder">Generar Recordatorio</label>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-bold small">Teléfono *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                    <input type="text" name="phone" class="form-control" required
+                                           value="<?= htmlspecialchars(old('phone')) ?>">
                                 </div>
-                                <div id="reminderFields" style="display:none;" class="row g-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label">Tipo de Recordatorio</label>
-                                        <select name="reminder_type" class="form-select">
-                                            <option value="consultation">Consulta</option>
-                                            <option value="vaccine">Vacuna</option>
-                                            <option value="payment">Pago</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">Fecha del Aviso</label>
-                                        <input type="date" name="reminder_date" class="form-control">
-                                    </div>
-                                    <div class="col-12">
-                                        <label class="form-label">Mensaje</label>
-                                        <textarea name="reminder_message" class="form-control"></textarea>
-                                    </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-bold small">Correo Electrónico</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                    <input type="email" name="email" class="form-control"
+                                           value="<?= htmlspecialchars(old('email')) ?>">
                                 </div>
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-end gap-2 border-top pt-4 mt-4">
-                            <a href="<?= BASE_URL ?>consultations.php" class="btn btn-outline-secondary px-4">Cancelar</a>
-                            <button type="submit" class="btn btn-success px-5 shadow-sm">
-                                <i class="bi bi-save me-2"></i>Guardar Consulta
+                        <h6 class="text-primary text-uppercase small fw-bold mb-3">Dirección y Observaciones</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <label class="form-label fw-bold small">Dirección</label>
+                                <textarea name="address" class="form-control" rows="2"><?= htmlspecialchars(old('address')) ?></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold small">Observaciones</label>
+                                <textarea name="observations" class="form-control" rows="2"><?= htmlspecialchars(old('observations')) ?></textarea>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 border-top pt-4">
+                            <a href="<?= BASE_URL ?>clients.php" class="btn btn-outline-secondary px-4">Cancelar</a>
+                            <button type="submit" class="btn btn-primary px-5 shadow-sm">
+                                <i class="bi bi-save me-2"></i>Guardar Cliente
                             </button>
                         </div>
                     </form>
@@ -149,11 +122,5 @@ require_once __DIR__ . '/../layouts/navbar.php';
         </main>
     </div>
 </div>
-
-<script>
-    document.getElementById('enableReminder').addEventListener('change', function () {
-        document.getElementById('reminderFields').style.display = this.checked ? 'block' : 'none';
-    });
-</script>
 
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>

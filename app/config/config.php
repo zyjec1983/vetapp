@@ -26,3 +26,13 @@ define('BASE_URL', 'http://localhost/vetapp/public/');
 
 // ***************** ENTORNO *****************
 define('ENV', 'development'); // production
+
+// ==================================================
+// CONFIGURACIÓN DE BASE DE DATOS
+// ==================================================
+define('DB_HOST', 'localhost');
+define('DB_PORT', '3306');        // Puerto de MySQL (por defecto 3306)
+define('DB_NAME', 'vetapp1');
+define('DB_USER', 'root');
+define('DB_PASS', '');
+define('DB_CHARSET', 'utf8mb4');

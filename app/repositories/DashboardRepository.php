@@ -126,23 +126,28 @@ class DashboardRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // ======================================
-    // MEDICAMENTOS CON POCO STOCK
-    // ======================================
-    public function lowStockMedications(): array
-    {
-        $stmt = $this->db->query("
-            SELECT 
-                name,
-                stock
-            FROM medications
-            WHERE stock <= 5
-            ORDER BY stock ASC
-        ");
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
+// ======================================
+// MEDICAMENTOS CON POCO STOCK
+// ======================================
+public function lowStockMedications(): array
+{
+    $sql = "
+        SELECT 
+            m.id_medication,
+            m.name,
+            m.minimum_stock,
+            COALESCE(SUM(b.quantity_remaining), 0) AS stock
+        FROM medications m
+        LEFT JOIN medication_batches b ON m.id_medication = b.id_medication
+        WHERE m.active = 1
+        GROUP BY m.id_medication
+        HAVING stock <= m.minimum_stock
+        ORDER BY stock ASC
+    ";
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
     // ======================================
     // VENTAS POR MES (GRAFICA)
     // ======================================
