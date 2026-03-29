@@ -1,6 +1,7 @@
 Listado de rutas de carpetas para el volumen WIN 10
 El n£mero de serie del volumen es 5264-97C1
 C:.
+|   .gitignore
 |   .htaccess
 |   error_log.txt
 |   FOLDER STRUCTURE.txt
@@ -45,6 +46,9 @@ C:.
 |   |   +---sales
 |   |   |       SaleController.php
 |   |   |       
+|   |   +---services
+|   |   |       ServiceController.php
+|   |   |       
 |   |   \---users
 |   |           UserController.php
 |   |           
@@ -58,26 +62,30 @@ C:.
 |   |       RoleMiddleware.php
 |   |       
 |   +---models
+|   |       BatchModel.php
 |   |       ClientModel.php
 |   |       ConsultationModel.php
+|   |       MedicationModel.php
 |   |       PetModel.php
+|   |       ReminderModel.php
+|   |       SaleDetailModel.php
+|   |       SaleModel.php
+|   |       ServiceModel.php
 |   |       UserModel.php
 |   |       
-|   +---public
-|   |   \---storage
-|   |       \---uploads
-|   |               69c2efa75158b.jpeg
-|   |               69c2f02102a35.jpg
-|   |               69c2f20e40451.jpg
-|   |               69c2f30d9091c.jpg
-|   |               69c314668f326.png
-|   |               
 |   +---repositories
+|   |       ActiveIngredientRepository.php
+|   |       BatchRepository.php
 |   |       ClientRepository.php
+|   |       CompanySettingsRepository.php
 |   |       ConsultationRepository.php
 |   |       DashboardRepository.php
+|   |       MedicationRepository.php
 |   |       PetRepository.php
+|   |       ReminderRepository.php
 |   |       RoleRepository.php
+|   |       SaleRepository.php
+|   |       ServiceRepository.php
 |   |       UserRepository.php
 |   |       
 |   +---storage
@@ -106,14 +114,28 @@ C:.
 |       |       header.php
 |       |       navbar.php
 |       |       
+|       +---medications
+|       |       create.php
+|       |       edit.php
+|       |       index.php
+|       |       show.php
+|       |       
 |       +---pets
-|       |       1 show.php
 |       |       create.php
 |       |       edit.php
 |       |       index.php
 |       |       show.php
 |       |       
 |       +---sales
+|       |       create.php
+|       |       index.php
+|       |       show.php
+|       |       
+|       +---services
+|       |       create.php
+|       |       edit.php
+|       |       index.php
+|       |       
 |       \---users
 |               create.php
 |               edit.php
@@ -129,7 +151,10 @@ C:.
 |   |   dashboard.php
 |   |   index.php
 |   |   logout.php
+|   |   medications.php
 |   |   pets.php
+|   |   sales.php
+|   |   services.php
 |   |   users.php
 |   |   
 |   +---css
@@ -148,6 +173,8 @@ C:.
 |       \---uploads
 |               69c31d90c715c.jpg
 |               69c31e9d41269.jpeg
+|               69c5eb69c931d.jpeg
+|               69c5ebb8355c1.jpeg
 |               
 \---storage
     +---logs

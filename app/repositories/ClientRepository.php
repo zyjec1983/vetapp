@@ -95,7 +95,7 @@ class ClientRepository
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([':id' => $id]);
     }
-    
+
     public function delete($id)
     {
         $sql = "DELETE FROM clients WHERE id_client = :id";
@@ -122,120 +122,34 @@ class ClientRepository
         }
         return $clients;
     }
-}
-?>
 
-<?php
-/**
- * Location: vetapp/app/repositories/ClientRepository.php
- */
-/*
-require_once __DIR__ . '/../models/ClientModel.php';
-
-class ClientRepository
+    public function searchClientsWithPets($q)
 {
-    private $db;
+    $sql = "
+        SELECT 
+            c.id_client,
+            CONCAT(c.name, ' ', c.lastname1) AS client_name,
+            p.name AS pet_name
+        FROM clients c
+        LEFT JOIN pets p ON p.id_client = c.id_client
+        WHERE 
+            c.name LIKE :q1
+            OR c.lastname1 LIKE :q2
+            OR p.name LIKE :q3
+        LIMIT 10
+    ";
 
-    public function __construct($db)
-    {
-        $this->db = $db;
-    }
+    $stmt = $this->db->prepare($sql);
 
-    public function getAll()
-    {
-        $sql = "SELECT * FROM clients ORDER BY created_at DESC";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute();
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $like = "%$q%";
 
-        $clients = [];
-        foreach ($rows as $row) {
-            $clients[] = new ClientModel($row);
-        }
-        return $clients;
-    }
+    $stmt->execute([
+        'q1' => $like,
+        'q2' => $like,
+        'q3' => $like
+    ]);
 
-    public function findById($id)
-    {
-        $sql = "SELECT * FROM clients WHERE id_client = :id";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([':id' => $id]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $row ? new ClientModel($row) : null;
-    }
-
-    public function create(ClientModel $client)
-    {
-        $sql = "INSERT INTO clients (name, middlename, lastname1, lastname2, phone, email, address, identification, observations)
-                VALUES (:name, :middlename, :lastname1, :lastname2, :phone, :email, :address, :identification, :observations)";
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute([
-            ':name'          => $client->getName(),
-            ':middlename'    => $client->getMiddlename(),
-            ':lastname1'     => $client->getLastname1(),
-            ':lastname2'     => $client->getLastname2(),
-            ':phone'         => $client->getPhone(),
-            ':email'         => $client->getEmail(),
-            ':address'       => $client->getAddress(),
-            ':identification'=> $client->getIdentification(),
-            ':observations'  => $client->getObservations()
-        ]);
-    }
-
-    public function update(ClientModel $client)
-    {
-        $sql = "UPDATE clients SET 
-                    name = :name,
-                    middlename = :middlename,
-                    lastname1 = :lastname1,
-                    lastname2 = :lastname2,
-                    phone = :phone,
-                    email = :email,
-                    address = :address,
-                    identification = :identification,
-                    observations = :observations
-                WHERE id_client = :id";
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute([
-            ':id'            => $client->getIdClient(),
-            ':name'          => $client->getName(),
-            ':middlename'    => $client->getMiddlename(),
-            ':lastname1'     => $client->getLastname1(),
-            ':lastname2'     => $client->getLastname2(),
-            ':phone'         => $client->getPhone(),
-            ':email'         => $client->getEmail(),
-            ':address'       => $client->getAddress(),
-            ':identification'=> $client->getIdentification(),
-            ':observations'  => $client->getObservations()
-        ]);
-    }
-
-    public function delete($id)
-    {
-        $sql = "DELETE FROM clients WHERE id_client = :id";
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute([':id' => $id]);
-    }
-
-    public function search($term)
-    {
-        $sql = "SELECT * FROM clients 
-                WHERE name LIKE :term 
-                   OR lastname1 LIKE :term 
-                   OR identification LIKE :term
-                ORDER BY name ASC
-                LIMIT 20";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([':term' => '%' . $term . '%']);
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        $clients = [];
-        foreach ($rows as $row) {
-            $clients[] = new ClientModel($row);
-        }
-        return $clients;
-    }
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-
-*/
+}
 ?>

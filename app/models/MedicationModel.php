@@ -21,6 +21,7 @@ class MedicationModel
     // Datos adicionales (no en BD)
     private $active_name;       // nombre del principio activo
     private $stock_total;       // stock calculado
+    private $taxable; 
 
     public function __construct($data = [])
     {
@@ -77,4 +78,7 @@ class MedicationModel
 
     public function getStockTotal() { return $this->stock_total; }
     public function setStockTotal($stock) { $this->stock_total = (int) $stock; }
+
+    public function getTaxable() { return $this->taxable; }
+    public function setTaxable($taxable) { $this->taxable = (bool) $taxable; }
 }

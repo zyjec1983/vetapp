@@ -49,15 +49,15 @@ class MedicationRepository
      */
     public function findById($id)
     {
-        $sql = "SELECT 
-                    m.*,
-                    a.name AS active_name,
-                    COALESCE(SUM(b.quantity_remaining), 0) AS stock_total
-                FROM medications m
-                LEFT JOIN active_ingredients a ON m.id_active = a.id_active
-                LEFT JOIN medication_batches b ON m.id_medication = b.id_medication
-                WHERE m.id_medication = :id
-                GROUP BY m.id_medication";
+        $sql = "SELECT m.id_medication, m.code, m.name, m.id_active, m.category, m.description,
+                   m.minimum_stock, m.sale_price, m.location, m.active, m.created_at, m.taxable,
+                   a.name AS active_name,
+                   COALESCE(SUM(b.quantity_remaining), 0) AS stock_total
+            FROM medications m
+            LEFT JOIN active_ingredients a ON m.id_active = a.id_active
+            LEFT JOIN medication_batches b ON m.id_medication = b.id_medication
+            WHERE m.id_medication = :id
+            GROUP BY m.id_medication, a.name";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([':id' => $id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -84,15 +84,15 @@ class MedicationRepository
                 )";
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
-            ':code'          => $med->getCode(),
-            ':name'          => $med->getName(),
-            ':id_active'     => $med->getIdActive(),
-            ':category'      => $med->getCategory(),
-            ':description'   => $med->getDescription(),
+            ':code' => $med->getCode(),
+            ':name' => $med->getName(),
+            ':id_active' => $med->getIdActive(),
+            ':category' => $med->getCategory(),
+            ':description' => $med->getDescription(),
             ':minimum_stock' => $med->getMinimumStock(),
-            ':sale_price'    => $med->getSalePrice(),
-            ':location'      => $med->getLocation(),
-            ':active'        => $med->getActive() ? 1 : 0
+            ':sale_price' => $med->getSalePrice(),
+            ':location' => $med->getLocation(),
+            ':active' => $med->getActive() ? 1 : 0
         ]);
     }
 
@@ -114,16 +114,16 @@ class MedicationRepository
                 WHERE id_medication = :id";
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
-            ':id'            => $med->getIdMedication(),
-            ':code'          => $med->getCode(),
-            ':name'          => $med->getName(),
-            ':id_active'     => $med->getIdActive(),
-            ':category'      => $med->getCategory(),
-            ':description'   => $med->getDescription(),
+            ':id' => $med->getIdMedication(),
+            ':code' => $med->getCode(),
+            ':name' => $med->getName(),
+            ':id_active' => $med->getIdActive(),
+            ':category' => $med->getCategory(),
+            ':description' => $med->getDescription(),
             ':minimum_stock' => $med->getMinimumStock(),
-            ':sale_price'    => $med->getSalePrice(),
-            ':location'      => $med->getLocation(),
-            ':active'        => $med->getActive() ? 1 : 0
+            ':sale_price' => $med->getSalePrice(),
+            ':location' => $med->getLocation(),
+            ':active' => $med->getActive() ? 1 : 0
         ]);
     }
 
@@ -158,4 +158,23 @@ class MedicationRepository
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    // app/repositories/MedicationRepository.php  
+
+   public function search($term)
+{
+    $searchTerm = '%' . $term . '%';
+    $sql = "SELECT m.id_medication, m.code, m.name, m.sale_price, m.taxable,
+                   COALESCE(SUM(b.quantity_remaining), 0) AS stock
+            FROM medications m
+            LEFT JOIN medication_batches b ON m.id_medication = b.id_medication
+            WHERE m.active = 1
+              AND (m.code LIKE ? OR m.name LIKE ?)
+            GROUP BY m.id_medication
+            ORDER BY m.name ASC
+            LIMIT 20";
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute([$searchTerm, $searchTerm]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 }
