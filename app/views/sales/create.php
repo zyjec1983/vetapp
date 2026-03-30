@@ -126,17 +126,17 @@ require_once __DIR__ . '/../layouts/navbar.php';
                                     </div>
 
                                     <div class="mt-3 d-flex justify-content-center gap-3">
-    <a href="<?= BASE_URL ?>sales.php"
-        class="btn btn-outline-danger px-4 py-2 d-flex align-items-center justify-content-center">
-        <i class="bi bi-x-circle me-1"></i> Cancelar
-    </a>
+                                        <a href="<?= BASE_URL ?>sales.php"
+                                            class="btn btn-outline-danger px-4 py-2 d-flex align-items-center justify-content-center">
+                                            <i class="bi bi-x-circle me-1"></i> Cancelar
+                                        </a>
 
-    <button type="submit"
-        class="btn btn-primary px-4 py-2 d-flex align-items-center justify-content-center"
-        id="submitSale">
-        <i class="bi bi-check-lg me-1"></i> Registrar Venta
-    </button>
-</div>
+                                        <button type="submit"
+                                            class="btn btn-primary px-4 py-2 d-flex align-items-center justify-content-center"
+                                            id="submitSale">
+                                            <i class="bi bi-check-lg me-1"></i> Registrar Venta
+                                        </button>
+                                    </div>
 
                                 </div>
                             </div>

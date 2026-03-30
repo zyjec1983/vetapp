@@ -286,4 +286,17 @@ class ConsultationController extends BaseController
         header('Location: ' . BASE_URL . 'consultations.php');
         exit;
     }
+
+    public function searchPets()
+    {
+        header('Content-Type: application/json');
+
+        $q = $_GET['q'] ?? '';
+
+        $repo = new PetRepository();
+        $results = $repo->searchPetsWithClients($q);
+
+        echo json_encode($results);
+        exit;
+    }
 }

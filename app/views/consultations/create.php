@@ -50,15 +50,27 @@ require_once __DIR__ . '/../layouts/navbar.php';
                         <!-- Datos de la mascota -->
                         <div class="row g-3 mb-4">
                             <div class="col-12">
-                                <label class="form-label fw-bold">Mascota *</label>
-                                <select name="id_pet" class="form-select" required>
-                                    <option value="">Seleccione una mascota</option>
-                                    <?php foreach ($pets as $pet): ?>
-                                        <option value="<?= $pet['id_pet'] ?>">
-                                            <?= htmlspecialchars($pet['pet_name'] . ' (' . $pet['client_name'] . ')') ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
+                                <div class="col-12">
+                                    <label class="form-label fw-bold">Buscar Cliente / Mascota *</label>
+
+                                    <div class="input-group">
+                                        <input type="text" id="petSearch" class="form-control"
+                                            placeholder="Buscar por cliente o mascota...">
+                                        <button class="btn btn-primary" type="button" id="petSearchBtn">
+                                            <i class="bi bi-search"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- Resultados -->
+                                    <div id="petResults" class="list-group mt-2"
+                                        style="max-height: 250px; overflow-y: auto;"></div>
+
+                                    <!-- Seleccionado -->
+                                    <div id="selectedPet" class="mt-2"></div>
+
+                                    <!-- ID real -->
+                                    <input type="hidden" name="id_pet" id="petId" required>
+                                </div>
                             </div>
                         </div>
 
@@ -168,7 +180,81 @@ require_once __DIR__ . '/../layouts/navbar.php';
     });
 </script>
 
-<?php
-    require_once __DIR__ . '/../layouts/footer.php';
-?>
+<script>
+    let petTimeout;
 
+    const petInput = document.getElementById('petSearch');
+    const petBtn = document.getElementById('petSearchBtn');
+    const petResults = document.getElementById('petResults');
+    const selectedPetDiv = document.getElementById('selectedPet');
+    const petIdInput = document.getElementById('petId');
+
+    function debouncePetSearch() {
+        clearTimeout(petTimeout);
+        petTimeout = setTimeout(searchPets, 300);
+    }
+
+    function searchPets() {
+        const q = petInput.value.trim();
+
+        if (q.length < 2) {
+            petResults.innerHTML = '';
+            return;
+        }
+
+        fetch(`<?= BASE_URL ?>consultations.php?action=searchPets&q=${encodeURIComponent(q)}`)
+            .then(res => res.json())
+            .then(data => {
+                petResults.innerHTML = '';
+
+                if (data.length === 0) {
+                    petResults.innerHTML = '<div class="list-group-item text-muted">Sin resultados</div>';
+                    return;
+                }
+
+                data.forEach(item => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'list-group-item list-group-item-action';
+
+                    btn.innerHTML = `
+                    <strong>${item.pet_name}</strong><br>
+                    <small>Dueño: ${item.client_name}</small>
+                `;
+
+                    btn.addEventListener('click', () => selectPet(item));
+
+                    petResults.appendChild(btn);
+                });
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Error al buscar mascotas');
+            });
+    }
+
+    function selectPet(item) {
+        petIdInput.value = item.id_pet;
+
+        selectedPetDiv.innerHTML = `
+        <div class="alert alert-success p-2">
+            <strong>${item.pet_name}</strong><br>
+            <small>Dueño: ${item.client_name}</small>
+        </div>
+    `;
+
+        petResults.innerHTML = '';
+        petInput.value = '';
+    }
+
+    // eventos
+    petBtn.addEventListener('click', searchPets);
+    petInput.addEventListener('input', debouncePetSearch);
+    petInput.addEventListener('keypress', e => {
+        if (e.key === 'Enter') searchPets();
+    });
+</script>
+
+<?php
+require_once __DIR__ . '/../layouts/footer.php';
+?>

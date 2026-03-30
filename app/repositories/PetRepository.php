@@ -163,4 +163,33 @@ class PetRepository
         }
         return $pets;
     }
+
+    public function searchPetsWithClients($q)
+    {
+        $sql = "
+        SELECT 
+            p.id_pet,
+            p.name AS pet_name,
+            CONCAT(c.name, ' ', c.lastname1) AS client_name
+        FROM pets p
+        INNER JOIN clients c ON c.id_client = p.id_client
+        WHERE 
+            p.name LIKE :q1
+            OR c.name LIKE :q2
+            OR c.lastname1 LIKE :q3
+        LIMIT 10
+    ";
+
+        $stmt = $this->db->prepare($sql);
+
+        $like = "%$q%";
+
+        $stmt->execute([
+            'q1' => $like,
+            'q2' => $like,
+            'q3' => $like
+        ]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

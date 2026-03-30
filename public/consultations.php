@@ -17,21 +17,30 @@ switch ($action) {
         break;
     case 'show':
         $id = $_GET['id'] ?? null;
-        if ($id) $controller->show($id);
-        else header('Location: ' . BASE_URL . 'consultations.php');
+        if ($id)
+            $controller->show($id);
+        else
+            header('Location: ' . BASE_URL . 'consultations.php');
         break;
     case 'edit':
         $id = $_GET['id'] ?? null;
-        if ($id) $controller->edit($id);
-        else header('Location: ' . BASE_URL . 'consultations.php');
+        if ($id)
+            $controller->edit($id);
+        else
+            header('Location: ' . BASE_URL . 'consultations.php');
         break;
     case 'update':
         $controller->update();
         break;
     case 'deactivate':
         $id = $_GET['id'] ?? null;
-        if ($id) $controller->deactivate($id);
-        else header('Location: ' . BASE_URL . 'consultations.php');
+        if ($id)
+            $controller->deactivate($id);
+        else
+            header('Location: ' . BASE_URL . 'consultations.php');
+        break;
+    case 'searchPets':
+        $controller->searchPets();
         break;
     default:
         $controller->index();
