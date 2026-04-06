@@ -76,12 +76,12 @@ class MedicationRepository
     public function create(MedicationModel $med)
     {
         $sql = "INSERT INTO medications (
-                    code, name, id_active, category, description,
-                    minimum_stock, sale_price, location, active
-                ) VALUES (
-                    :code, :name, :id_active, :category, :description,
-                    :minimum_stock, :sale_price, :location, :active
-                )";
+                code, name, id_active, category, description,
+                minimum_stock, sale_price, location, active, taxable
+            ) VALUES (
+                :code, :name, :id_active, :category, :description,
+                :minimum_stock, :sale_price, :location, :active, :taxable
+            )";
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
             ':code' => $med->getCode(),
@@ -92,7 +92,8 @@ class MedicationRepository
             ':minimum_stock' => $med->getMinimumStock(),
             ':sale_price' => $med->getSalePrice(),
             ':location' => $med->getLocation(),
-            ':active' => $med->getActive() ? 1 : 0
+            ':active' => $med->getActive() ? 1 : 0,
+            ':taxable' => $med->getTaxable() ? 1 : 0
         ]);
     }
 
@@ -100,32 +101,34 @@ class MedicationRepository
      * Actualizar medicamento
      */
     public function update(MedicationModel $med)
-    {
-        $sql = "UPDATE medications SET
-                    code = :code,
-                    name = :name,
-                    id_active = :id_active,
-                    category = :category,
-                    description = :description,
-                    minimum_stock = :minimum_stock,
-                    sale_price = :sale_price,
-                    location = :location,
-                    active = :active
-                WHERE id_medication = :id";
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute([
-            ':id' => $med->getIdMedication(),
-            ':code' => $med->getCode(),
-            ':name' => $med->getName(),
-            ':id_active' => $med->getIdActive(),
-            ':category' => $med->getCategory(),
-            ':description' => $med->getDescription(),
-            ':minimum_stock' => $med->getMinimumStock(),
-            ':sale_price' => $med->getSalePrice(),
-            ':location' => $med->getLocation(),
-            ':active' => $med->getActive() ? 1 : 0
-        ]);
-    }
+{
+    $sql = "UPDATE medications SET
+                code = :code,
+                name = :name,
+                id_active = :id_active,
+                category = :category,
+                description = :description,
+                minimum_stock = :minimum_stock,
+                sale_price = :sale_price,
+                location = :location,
+                active = :active,
+                taxable = :taxable
+            WHERE id_medication = :id";
+    $stmt = $this->db->prepare($sql);
+    return $stmt->execute([
+        ':id'            => $med->getIdMedication(),
+        ':code'          => $med->getCode(),
+        ':name'          => $med->getName(),
+        ':id_active'     => $med->getIdActive(),
+        ':category'      => $med->getCategory(),
+        ':description'   => $med->getDescription(),
+        ':minimum_stock' => $med->getMinimumStock(),
+        ':sale_price'    => $med->getSalePrice(),
+        ':location'      => $med->getLocation(),
+        ':active'        => $med->getActive() ? 1 : 0,
+        ':taxable'       => $med->getTaxable() ? 1 : 0
+    ]);
+}
 
     /**
      * Desactivar medicamento (soft delete)
@@ -136,6 +139,41 @@ class MedicationRepository
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([':id' => $id]);
     }
+
+    public function reactivate($id)
+{
+    $sql = "UPDATE medications SET active = 1 WHERE id_medication = :id";
+    $stmt = $this->db->prepare($sql);
+    return $stmt->execute([':id' => $id]);
+}
+
+/**
+ * Reactiva productos
+ * @return MedicationModel[]
+ */
+public function getAllInactive()
+{
+    $sql = "SELECT m.*, a.name AS active_name,
+                   COALESCE(SUM(b.quantity_remaining), 0) AS stock_total
+            FROM medications m
+            LEFT JOIN active_ingredients a ON m.id_active = a.id_active
+            LEFT JOIN medication_batches b ON m.id_medication = b.id_medication
+            WHERE m.active = 0
+            GROUP BY m.id_medication
+            ORDER BY m.name ASC";
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute();
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $medications = [];
+    foreach ($rows as $row) {
+        $med = new MedicationModel($row);
+        $med->setActiveName($row['active_name']);
+        $med->setStockTotal($row['stock_total']);
+        $medications[] = $med;
+    }
+    return $medications;
+}
 
     /**
      * Obtener medicamentos con stock bajo (stock_total <= minimum_stock)
@@ -161,10 +199,10 @@ class MedicationRepository
 
     // app/repositories/MedicationRepository.php  
 
-   public function search($term)
-{
-    $searchTerm = '%' . $term . '%';
-    $sql = "SELECT m.id_medication, m.code, m.name, m.sale_price, m.taxable,
+    public function search($term)
+    {
+        $searchTerm = '%' . $term . '%';
+        $sql = "SELECT m.id_medication, m.code, m.name, m.sale_price, m.taxable,
                    COALESCE(SUM(b.quantity_remaining), 0) AS stock
             FROM medications m
             LEFT JOIN medication_batches b ON m.id_medication = b.id_medication
@@ -173,8 +211,16 @@ class MedicationRepository
             GROUP BY m.id_medication
             ORDER BY m.name ASC
             LIMIT 20";
-    $stmt = $this->db->prepare($sql);
-    $stmt->execute([$searchTerm, $searchTerm]);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$searchTerm, $searchTerm]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function findByCode($code)
+    {
+        $sql = "SELECT * FROM medications WHERE code = :code";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':code' => $code]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }

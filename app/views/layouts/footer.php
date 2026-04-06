@@ -43,23 +43,30 @@ endif;
 ?>
 
 <!-- ******************* mostrar mensaje de error ******************* -->
+<!-- ******************* mostrar mensaje de error ******************* -->
 <?php
-if (isset($_SESSION['error'])):
-    ?>
-
+if (isset($_SESSION['error'])): ?>
     <script>
-
         Swal.fire({
             icon: 'error',
             title: 'Error',
             text: '<?= $_SESSION['error'] ?>',
             confirmButtonColor: '#d33'
         });
-
     </script>
+    <?php unset($_SESSION['error']);
+endif;
 
-    <?php
-    unset($_SESSION['error']);
+if (isset($_SESSION['errors']) && is_array($_SESSION['errors'])): ?>
+    <script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Errores encontrados',
+            html: '<?= implode('<br>', array_map('htmlspecialchars', $_SESSION['errors'])) ?>',
+            confirmButtonColor: '#d33'
+        });
+    </script>
+    <?php unset($_SESSION['errors']);
 endif;
 ?>
 

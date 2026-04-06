@@ -49,6 +49,19 @@ switch ($action) {
     case 'addActiveIngredient':
         $controller->addActiveIngredient();
         break;
+    case 'storeAccessory':
+        $controller->storeAccessory();
+        break;
+    case 'inactive':
+        $controller->inactive();
+        break;
+    case 'reactivate':
+        $id = $_GET['id'] ?? null;
+        if ($id)
+            $controller->reactivate($id);
+        else
+            header('Location: ' . BASE_URL . 'medications.php');
+        break;
     default:
         $controller->index();
 }

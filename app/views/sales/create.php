@@ -108,6 +108,13 @@ require_once __DIR__ . '/../layouts/navbar.php';
                                                 <span>IVA (15%):</span>
                                                 <span id="iva">$0.00</span>
                                             </div>
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+    <span>Exento de IVA:</span>
+    <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="ivaExemptSwitch">
+        <label class="form-check-label" for="ivaExemptSwitch"></label>
+    </div>
+</div>
                                             <hr>
                                             <div class="d-flex justify-content-between">
                                                 <h4 class="fw-bold text-primary">Total a Pagar:</h4>
@@ -296,37 +303,49 @@ require_once __DIR__ . '/../layouts/navbar.php';
     // TOTALS
     // =========================
     function calculateTotals(subtotal) {
-        const discountPercent = parseFloat(document.getElementById('discountPercent').value) || 0;
-        const discountAmount = subtotal * (discountPercent / 100);
-        const base = subtotal - discountAmount;
-
+    const discountPercent = parseFloat(document.getElementById('discountPercent').value) || 0;
+    const discountAmount = subtotal * (discountPercent / 100);
+    const base = subtotal - discountAmount;
+    
+    // Verificar si el switch de exención de IVA está activado
+    const isExempt = document.getElementById('ivaExemptSwitch').checked;
+    let iva = 0;
+    
+    if (!isExempt) {
         let taxableBase = 0;
         cart.forEach(item => {
             if (item.taxable) {
                 taxableBase += item.unit_price * item.quantity;
             }
         });
-
         const taxableDiscounted = taxableBase * (1 - discountPercent / 100);
-        const iva = taxableDiscounted * 0.15;
-        const total = base + iva;
-
-        document.getElementById('subtotal').innerText = `$${subtotal.toFixed(2)}`;
-        document.getElementById('iva').innerText = `$${iva.toFixed(2)}`;
-        document.getElementById('total').innerText = `$${total.toFixed(2)}`;
-
-        document.getElementById('subtotalInput').value = subtotal.toFixed(2);
-        document.getElementById('taxTotalInput').value = iva.toFixed(2);
-        document.getElementById('totalInput').value = total.toFixed(2);
-        document.getElementById('discountInput').value = discountAmount.toFixed(2);
+        iva = taxableDiscounted * 0.15;
     }
-
+    
+    const total = base + iva;
+    
+    document.getElementById('subtotal').innerText = `$${subtotal.toFixed(2)}`;
+    document.getElementById('iva').innerText = `$${iva.toFixed(2)}`;
+    document.getElementById('total').innerText = `$${total.toFixed(2)}`;
+    
+    document.getElementById('subtotalInput').value = subtotal.toFixed(2);
+    document.getElementById('taxTotalInput').value = iva.toFixed(2);
+    document.getElementById('totalInput').value = total.toFixed(2);
+    document.getElementById('discountInput').value = discountAmount.toFixed(2);
+}
     document.getElementById('discountPercent').addEventListener('input', () => {
         if (cart.length) {
             let subtotal = cart.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
             calculateTotals(subtotal);
         }
     });
+
+    document.getElementById('ivaExemptSwitch').addEventListener('change', () => {
+    if (cart.length) {
+        let subtotal = cart.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
+        calculateTotals(subtotal);
+    }
+});
 
     // =========================
     // CLIENT SEARCH
