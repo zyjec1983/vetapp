@@ -101,8 +101,8 @@ class MedicationRepository
      * Actualizar medicamento
      */
     public function update(MedicationModel $med)
-{
-    $sql = "UPDATE medications SET
+    {
+        $sql = "UPDATE medications SET
                 code = :code,
                 name = :name,
                 id_active = :id_active,
@@ -114,21 +114,21 @@ class MedicationRepository
                 active = :active,
                 taxable = :taxable
             WHERE id_medication = :id";
-    $stmt = $this->db->prepare($sql);
-    return $stmt->execute([
-        ':id'            => $med->getIdMedication(),
-        ':code'          => $med->getCode(),
-        ':name'          => $med->getName(),
-        ':id_active'     => $med->getIdActive(),
-        ':category'      => $med->getCategory(),
-        ':description'   => $med->getDescription(),
-        ':minimum_stock' => $med->getMinimumStock(),
-        ':sale_price'    => $med->getSalePrice(),
-        ':location'      => $med->getLocation(),
-        ':active'        => $med->getActive() ? 1 : 0,
-        ':taxable'       => $med->getTaxable() ? 1 : 0
-    ]);
-}
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([
+            ':id' => $med->getIdMedication(),
+            ':code' => $med->getCode(),
+            ':name' => $med->getName(),
+            ':id_active' => $med->getIdActive(),
+            ':category' => $med->getCategory(),
+            ':description' => $med->getDescription(),
+            ':minimum_stock' => $med->getMinimumStock(),
+            ':sale_price' => $med->getSalePrice(),
+            ':location' => $med->getLocation(),
+            ':active' => $med->getActive() ? 1 : 0,
+            ':taxable' => $med->getTaxable() ? 1 : 0
+        ]);
+    }
 
     /**
      * Desactivar medicamento (soft delete)
@@ -141,19 +141,19 @@ class MedicationRepository
     }
 
     public function reactivate($id)
-{
-    $sql = "UPDATE medications SET active = 1 WHERE id_medication = :id";
-    $stmt = $this->db->prepare($sql);
-    return $stmt->execute([':id' => $id]);
-}
+    {
+        $sql = "UPDATE medications SET active = 1 WHERE id_medication = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([':id' => $id]);
+    }
 
-/**
- * Reactiva productos
- * @return MedicationModel[]
- */
-public function getAllInactive()
-{
-    $sql = "SELECT m.*, a.name AS active_name,
+    /**
+     * Reactiva productos
+     * @return MedicationModel[]
+     */
+    public function getAllInactive()
+    {
+        $sql = "SELECT m.*, a.name AS active_name,
                    COALESCE(SUM(b.quantity_remaining), 0) AS stock_total
             FROM medications m
             LEFT JOIN active_ingredients a ON m.id_active = a.id_active
@@ -161,19 +161,19 @@ public function getAllInactive()
             WHERE m.active = 0
             GROUP BY m.id_medication
             ORDER BY m.name ASC";
-    $stmt = $this->db->prepare($sql);
-    $stmt->execute();
-    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $medications = [];
-    foreach ($rows as $row) {
-        $med = new MedicationModel($row);
-        $med->setActiveName($row['active_name']);
-        $med->setStockTotal($row['stock_total']);
-        $medications[] = $med;
+        $medications = [];
+        foreach ($rows as $row) {
+            $med = new MedicationModel($row);
+            $med->setActiveName($row['active_name']);
+            $med->setStockTotal($row['stock_total']);
+            $medications[] = $med;
+        }
+        return $medications;
     }
-    return $medications;
-}
 
     /**
      * Obtener medicamentos con stock bajo (stock_total <= minimum_stock)
@@ -223,4 +223,70 @@ public function getAllInactive()
         $stmt->execute([':code' => $code]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    /**
+     * Obtener medicamentos paginados y filtrados por categoría
+     * @param string|null $category 'medicamentos' (cualquiera excepto Accesorios), 'accesorios', 'todos'
+     * @param int $limit
+     * @param int $offset
+     * @return MedicationModel[]
+     */
+    public function getPaginatedFiltered($category, $limit, $offset)
+    {
+        // Construir condición WHERE según la categoría seleccionada
+        $where = "m.active = 1";
+        if ($category === 'medicamentos') {
+            $where .= " AND m.category NOT IN ('Accesorios y otros', 'Accesorio')";
+        } elseif ($category === 'accesorios') {
+            $where .= " AND m.category IN ('Accesorios y otros', 'Accesorio')";
+        }
+        // Si category = 'todos', no se añade filtro extra
+
+        $sql = "SELECT 
+                m.*,
+                a.name AS active_name,
+                COALESCE(SUM(b.quantity_remaining), 0) AS stock_total
+            FROM medications m
+            LEFT JOIN active_ingredients a ON m.id_active = a.id_active
+            LEFT JOIN medication_batches b ON m.id_medication = b.id_medication
+            WHERE $where
+            GROUP BY m.id_medication
+            ORDER BY m.name ASC
+            LIMIT :limit OFFSET :offset";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $medications = [];
+        foreach ($rows as $row) {
+            $med = new MedicationModel($row);
+            $med->setActiveName($row['active_name']);
+            $med->setStockTotal($row['stock_total']);
+            $medications[] = $med;
+        }
+        return $medications;
+    }
+
+    /**
+     * Contar total de medicamentos según el filtro (para paginación)
+     * @param string|null $category 'medicamentos', 'accesorios', 'todos'
+     * @return int
+     */
+    public function countFiltered($category)
+    {
+        $where = "active = 1";
+        if ($category === 'medicamentos') {
+            $where .= " AND category NOT IN ('Accesorios y otros', 'Accesorio')";
+        } elseif ($category === 'accesorios') {
+            $where .= " AND category IN ('Accesorios y otros', 'Accesorio')";
+        }
+        $sql = "SELECT COUNT(*) FROM medications WHERE $where";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return (int) $stmt->fetchColumn();
+    }
+
+
 }

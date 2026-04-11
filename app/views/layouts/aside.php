@@ -80,23 +80,33 @@ $currentUser = currentUser() ?? [];
 
     .sidebar .nav-link {
         padding: 10px 20px;
+        transition: all 0.2s ease-in-out;
     }
 
+    /* Hover para los enlaces principales */
     .sidebar .nav-link:hover {
-        background: #343a40;
+        background-color: #6c757d;   /* gris claro  */
+        color: #ffffff !important;
+        border-radius: 8px;
+        padding-left: 28px;
     }
 
-    /* Estilos para el dropdown oscuro */
+    /* Estilos para el dropdown de Medicamentos */
     .dropdown-menu.bg-dark {
         background-color: #343a40 !important;
-        border: 1px solid #454d55;
+        border: 1px solid #6c757d;
     }
+
     .dropdown-menu.bg-dark .dropdown-item {
-        color: #fff;
-        background-color: transparent;
+        color: #ffffff;
+        background-color: #343a40;
+        transition: all 0.2s ease-in-out;
     }
+
+    /* Hover para los items del dropdown */
     .dropdown-menu.bg-dark .dropdown-item:hover {
-        background-color: #454d55;
-        color: #fff;
+        background-color: #6c757d !important;
+        color: #ffffff !important;
+        padding-left: 28px;
     }
 </style>

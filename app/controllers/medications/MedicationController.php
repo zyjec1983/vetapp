@@ -43,11 +43,6 @@ class MedicationController extends BaseController
         }
     }
 
-    public function index()
-    {
-        $medications = $this->medRepo->getAll();
-        require_once __DIR__ . '/../../views/medications/index.php';
-    }
 
     public function create()
     {
@@ -439,4 +434,37 @@ class MedicationController extends BaseController
         header('Location: ' . BASE_URL . 'medications.php');
         exit;
     }
+
+
+    /**
+     * Listar medicamentos con filtro y paginación
+     */
+    public function index()
+    {
+        // Obtener tipo de filtro (medicamentos, accesorios, todos)
+        $type = $_GET['type'] ?? '';
+        $page = (int) ($_GET['page'] ?? 1);
+        $limit = 10;
+        $offset = ($page - 1) * $limit;
+
+        // Validar tipo permitido
+        $allowedTypes = ['medicamentos', 'accesorios', 'todos'];
+        if (!in_array($type, $allowedTypes)) {
+            $type = ''; // No seleccionado
+        }
+
+        $medications = [];
+        $total = 0;
+        $totalPages = 0;
+
+        if ($type !== '') {
+            $medications = $this->medRepo->getPaginatedFiltered($type, $limit, $offset);
+            $total = $this->medRepo->countFiltered($type);
+            $totalPages = ceil($total / $limit);
+        }
+
+        require_once __DIR__ . '/../../views/medications/index.php';
+    }
+
+
 }
