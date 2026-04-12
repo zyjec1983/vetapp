@@ -39,6 +39,14 @@ $currentUser = currentUser() ?? [];
             <?php endif; ?>
             <hr class="text-white">
 
+            <?php if (hasRole('admin')): ?>
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="<?= BASE_URL ?>services.php">
+                        <i class="bi bi-briefcase me-2"></i> Servicios
+                    </a>
+                </li>
+            <?php endif; ?>
+
             <?php if (hasRole('veterinarian') || hasRole('admin')): ?>
                 <li class="nav-item">
                     <a class="nav-link text-white active" href="<?= BASE_URL ?>consultations.php">
@@ -50,13 +58,18 @@ $currentUser = currentUser() ?? [];
             <?php if (hasRole('veterinarian') || hasRole('admin') || hasRole('pharmacy')): ?>
                 <!-- Dropdown Medicamentos -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle text-white" href="#" id="medicamentosDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle text-white" href="#" id="medicamentosDropdown" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-capsule me-2"></i> Medicamentos
                     </a>
                     <ul class="dropdown-menu bg-dark" aria-labelledby="medicamentosDropdown">
-                        <li><a class="dropdown-item text-white bg-dark" href="<?= BASE_URL ?>medications.php">Gestión de Medicamentos</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-white bg-dark" href="<?= BASE_URL ?>medications.php?action=inactive">Reactivar Producto</a></li>
+                        <li><a class="dropdown-item text-white bg-dark" href="<?= BASE_URL ?>medications.php">Gestión de
+                                Medicamentos</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item text-white bg-dark"
+                                href="<?= BASE_URL ?>medications.php?action=inactive">Reactivar Producto</a></li>
                     </ul>
                 </li>
 
@@ -85,7 +98,8 @@ $currentUser = currentUser() ?? [];
 
     /* Hover para los enlaces principales */
     .sidebar .nav-link:hover {
-        background-color: #6c757d;   /* gris claro  */
+        background-color: #6c757d;
+        /* gris claro  */
         color: #ffffff !important;
         border-radius: 8px;
         padding-left: 28px;

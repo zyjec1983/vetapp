@@ -17,6 +17,9 @@ require_once __DIR__ . '/../../models/ConsultationModel.php';
 require_once __DIR__ . '/../../models/ReminderModel.php';
 require_once __DIR__ . '/../../helpers/auth.php';
 
+require_once __DIR__ . '/../../repositories/ServiceRepository.php';
+require_once __DIR__ . '/../../models/ServiceModel.php';
+
 class ConsultationController extends BaseController
 {
     private $consultationRepo;   // Repositorio de consultas
@@ -64,12 +67,15 @@ class ConsultationController extends BaseController
     /**
      * Muestra el formulario para crear una nueva consulta
      */
-    public function create()
-    {
-        // Obtener lista de mascotas con sus dueños para el selector
-        $pets = $this->consultationRepo->getPetsWithClients();
-        require_once __DIR__ . '/../../views/consultations/create.php';
-    }
+   public function create()
+{
+    // Obtener lista de mascotas con sus dueños para el selector
+    $pets = $this->consultationRepo->getPetsWithClients();
+    // Obtener servicios activos
+    $serviceRepo = new ServiceRepository();
+    $services = $serviceRepo->getAll(true); // solo activos
+    require_once __DIR__ . '/../../views/consultations/create.php';
+}
 
     /**
      * Procesa el formulario de creación de consulta y guarda en BD
@@ -123,6 +129,7 @@ class ConsultationController extends BaseController
         $consultation = new ConsultationModel([
             'id_pet' => $_POST['id_pet'],
             'id_user' => $id_user,
+            'id_service'       => $_POST['id_service'] ?? null,
             'weight' => !empty($_POST['weight']) ? (float) $_POST['weight'] : null,
             'temperature' => !empty($_POST['temperature']) ? (float) $_POST['temperature'] : null,
             'diagnosis' => trim($_POST['diagnosis']),

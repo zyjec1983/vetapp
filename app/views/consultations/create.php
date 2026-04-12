@@ -113,12 +113,27 @@ require_once __DIR__ . '/../layouts/navbar.php';
 
                         <!-- Honorarios y estado (al final) -->
                         <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label">Honorarios ($)</label>
-                                <input type="number" step="0.01" name="consultation_fee" class="form-control"
-                                    value="<?= old('consultation_fee') ?>">
+                            <div class="col-md-7">
+                                <label class="form-label">Servicio *</label>
+                                <select name="id_service" id="serviceSelect" class="form-select" required>
+                                    <option value="">-- Seleccione un servicio --</option>
+                                    <?php foreach ($services as $service): ?>
+                                        <option value="<?= $service->getIdService() ?>"
+                                            data-price="<?= $service->getPrice() ?>">
+                                            <?= htmlspecialchars($service->getName()) ?> -
+                                            $<?= number_format($service->getPrice(), 2) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
                             </div>
-                            <div class="col-md-6">
+
+                            <div class="col-md-2">
+                                <label class="form-label">Honorarios ($)</label>
+                                <input type="number" step="0.01" name="consultation_fee" id="consultationFee"
+                                    class="form-control" readonly>
+                            </div>
+
+                            <div class="col-md-3">
                                 <label class="form-label">Estado</label>
                                 <select name="status" class="form-select">
                                     <option value="completed" <?= old('status') == 'completed' ? 'selected' : '' ?>>
@@ -253,6 +268,21 @@ require_once __DIR__ . '/../layouts/navbar.php';
     petInput.addEventListener('keypress', e => {
         if (e.key === 'Enter') searchPets();
     });
+
+    document.getElementById('serviceSelect').addEventListener('change', function () {
+        const selected = this.options[this.selectedIndex];
+        const price = selected.dataset.price || 0;
+        document.getElementById('consultationFee').value = price;
+    });
+
+    // Al final del archivo, antes del footer
+
+    document.getElementById('serviceSelect').addEventListener('change', function() {
+        const selected = this.options[this.selectedIndex];
+        const price = selected.dataset.price || 0;
+        document.getElementById('consultationFee').value = price;
+    });
+
 </script>
 
 <?php

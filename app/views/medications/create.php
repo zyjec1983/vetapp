@@ -155,40 +155,47 @@ require_once __DIR__ . '/../layouts/navbar.php';
                             <form action="<?= BASE_URL ?>medications.php?action=storeAccessory" method="POST"
                                 autocomplete="off">
                                 <div class="row g-3 mb-4">
-    <div class="col-md-4">
-        <label class="form-label fw-bold small">Código *</label>
-        <input type="text" name="code" class="form-control" required value="<?= old('code') ?>">
-        <small class="text-muted">Código del fabricante o propio</small>
-    </div>
-    <div class="col-md-4">
-        <label class="form-label fw-bold small">Nombre *</label>
-        <input type="text" name="name" class="form-control" required value="<?= old('name') ?>">
-    </div>
-    <div class="col-md-4">
-        <label class="form-label fw-bold small">Stock Mínimo</label>
-        <input type="number" name="minimum_stock" class="form-control" value="<?= old('minimum_stock', 0) ?>">
-        <small class="text-muted">Para alerta de bajo stock (opcional)</small>
-    </div>
-</div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold small">Código *</label>
+                                        <input type="text" name="code" class="form-control" required
+                                            value="<?= old('code') ?>">
+                                        <small class="text-muted">Código del fabricante o propio</small>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold small">Nombre *</label>
+                                        <input type="text" name="name" class="form-control" required
+                                            value="<?= old('name') ?>">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold small">Stock Mínimo</label>
+                                        <input type="number" name="minimum_stock" class="form-control"
+                                            value="<?= old('minimum_stock', 0) ?>">
+                                        <small class="text-muted">Para alerta de bajo stock (opcional)</small>
+                                    </div>
+                                </div>
 
                                 <div class="row g-3 mb-4">
-    <div class="col-md-4">
-        <label class="form-label fw-bold small">Precio Venta ($) *</label>
-        <input type="number" step="0.01" name="sale_price" class="form-control" required value="<?= old('sale_price') ?>">
-    </div>
-    <div class="col-md-4">
-        <label class="form-label fw-bold small">Stock Inicial *</label>
-        <input type="number" name="initial_stock" class="form-control" required value="<?= old('initial_stock') ?>">
-        <small class="text-muted">Cantidad que ingresa al inventario</small>
-    </div>
-    <div class="col-md-4">
-        <div class="form-check form-switch mt-4">
-            <input class="form-check-input" type="checkbox" name="taxable" id="taxable_acc" value="1" <?= old('taxable') ? 'checked' : 'checked' ?>>
-            <label class="form-check-label" for="taxable_acc">¿Grava IVA?</label>
-        </div>
-        <small class="text-muted">Accesorios generalmente gravan IVA (activado por defecto).</small>
-    </div>
-</div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold small">Precio Venta ($) *</label>
+                                        <input type="number" step="0.01" name="sale_price" class="form-control" required
+                                            value="<?= old('sale_price') ?>">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold small">Stock Inicial *</label>
+                                        <input type="number" name="initial_stock" class="form-control" required
+                                            value="<?= old('initial_stock') ?>">
+                                        <small class="text-muted">Cantidad que ingresa al inventario</small>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check form-switch mt-4">
+                                            <input class="form-check-input" type="checkbox" name="taxable"
+                                                id="taxable_acc" value="1" <?= old('taxable') ? 'checked' : 'checked' ?>>
+                                            <label class="form-check-label" for="taxable_acc">¿Grava IVA?</label>
+                                        </div>
+                                        <small class="text-muted">Accesorios generalmente gravan IVA (activado por
+                                            defecto).</small>
+                                    </div>
+                                </div>
 
                                 <div class="row g-3 mb-4">
                                     <div class="col-12">

@@ -100,19 +100,37 @@ require_once __DIR__ . '/../layouts/navbar.php';
                             </div>
                         </div>
 
-                        <!-- Honorarios y estado -->
+                        <!-- Honorarios y estado (al final) -->
                         <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label">Honorarios ($)</label>
-                                <input type="number" step="0.01" name="consultation_fee" class="form-control"
-                                    value="<?= htmlspecialchars($old['consultation_fee'] ?? $consultation->getConsultationFee()) ?>">
+                            <div class="col-md-7">
+                                <label class="form-label">Servicio *</label>
+                                <select name="id_service" id="serviceSelect" class="form-select" required>
+                                    <option value="">-- Seleccione un servicio --</option>
+                                    <?php foreach ($services as $service): ?>
+                                        <option value="<?= $service->getIdService() ?>"
+                                            data-price="<?= $service->getPrice() ?>">
+                                            <?= htmlspecialchars($service->getName()) ?> -
+                                            $<?= number_format($service->getPrice(), 2) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
                             </div>
-                            <div class="col-md-6">
+
+                            <div class="col-md-2">
+                                <label class="form-label">Honorarios ($)</label>
+                                <input type="number" step="0.01" name="consultation_fee" id="consultationFee"
+                                    class="form-control" readonly>
+                            </div>
+
+                            <div class="col-md-3">
                                 <label class="form-label">Estado</label>
                                 <select name="status" class="form-select">
-                                    <option value="completed" <?= (($old['status'] ?? $consultation->getStatus()) == 'completed') ? 'selected' : '' ?>>Completado</option>
-                                    <option value="pending" <?= (($old['status'] ?? $consultation->getStatus()) == 'pending') ? 'selected' : '' ?>>Pendiente</option>
-                                    <option value="cancelled" <?= (($old['status'] ?? $consultation->getStatus()) == 'cancelled') ? 'selected' : '' ?>>Cancelado</option>
+                                    <option value="completed" <?= old('status') == 'completed' ? 'selected' : '' ?>>
+                                        Completado</option>
+                                    <option value="pending" <?= old('status') == 'pending' ? 'selected' : '' ?>>Pendiente
+                                    </option>
+                                    <option value="cancelled" <?= old('status') == 'cancelled' ? 'selected' : '' ?>>
+                                        Cancelado</option>
                                 </select>
                             </div>
                         </div>
@@ -162,6 +180,12 @@ require_once __DIR__ . '/../layouts/navbar.php';
     document.getElementById('enableReminder').addEventListener('change', function () {
         document.getElementById('reminderFields').style.display = this.checked ? 'block' : 'none';
     });
+
+    document.getElementById('serviceSelect').addEventListener('change', function() {
+    const selected = this.options[this.selectedIndex];
+    const price = selected.dataset.price || 0;
+    document.getElementById('consultationFee').value = price;
+});
 </script>
 
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>
