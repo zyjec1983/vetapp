@@ -200,26 +200,51 @@ require_once __DIR__ . '/../layouts/navbar.php';
 </div>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
     const salesData = <?= json_encode($data['monthlySales']) ?>;
+    console.log('Datos de ventas:', salesData); // Verificar en consola
+
     let totals = new Array(12).fill(0);
-    salesData.forEach(sale => { totals[sale.month - 1] = sale.total; });
+    if (salesData && salesData.length > 0) {
+        salesData.forEach(sale => {
+            const month = parseInt(sale.month);
+            if (month >= 1 && month <= 12) {
+                totals[month - 1] = parseFloat(sale.total);
+            }
+        });
+    }
 
     const ctx = document.getElementById('salesChart');
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
-            datasets: [{
-                label: 'Ventas ($)',
-                data: totals,
-                borderColor: '#0d6efd',
-                backgroundColor: 'rgba(13, 110, 253, 0.1)',
-                fill: true,
-                tension: 0.3
-            }]
-        },
-        options: { plugins: { legend: { display: false } } }
-    });
+    if (ctx) {
+        try {
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
+                    datasets: [{
+                        label: 'Ventas ($)',
+                        data: totals,
+                        borderColor: '#0d6efd',
+                        backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: { 
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { display: false } }
+                }
+            });
+            console.log('Gráfico creado correctamente');
+        } catch (error) {
+            console.error('Error al crear el gráfico:', error);
+            document.getElementById('salesChart').parentNode.innerHTML = '<div class="alert alert-danger">Error al cargar el gráfico. Verifique la consola.</div>';
+        }
+    } else {
+        console.error('Canvas salesChart no encontrado');
+    }
+});
 </script>
 
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>
