@@ -39,6 +39,13 @@ switch ($action) {
     case 'searchClients':
         $controller->searchClients();
         break;
+    case 'pdf':
+        $id = $_GET['id'] ?? null;
+        if ($id)
+            $controller->generatePDF($id);
+        else
+            header('Location: ' . BASE_URL . 'sales.php');
+        break;
     default:
         $controller->index();
 }

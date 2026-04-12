@@ -203,10 +203,10 @@ class SaleRepository
     public function findById($id)
     {
         // Obtener cabecera
-        $sql = "SELECT s.*, c.name AS client_name
-            FROM sales s
-            LEFT JOIN clients c ON s.id_client = c.id_client
-            WHERE s.id_sale = :id";
+        $sql = "SELECT s.*, c.name AS client_name, c.phone AS client_phone
+        FROM sales s
+        LEFT JOIN clients c ON s.id_client = c.id_client
+        WHERE s.id_sale = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([':id' => $id]);
         $sale = $stmt->fetch(PDO::FETCH_ASSOC);

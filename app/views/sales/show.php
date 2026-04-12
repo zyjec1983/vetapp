@@ -27,12 +27,14 @@ require_once __DIR__ . '/../layouts/navbar.php';
                 <div class="card-body">
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <p><strong>Fecha:</strong> <?= date('d/m/Y H:i', strtotime($saleData['sale']['sale_date'])) ?></p>
-                            <p><strong>Cliente:</strong> <?= htmlspecialchars($saleData['sale']['client_name'] ?? 'Consumidor final') ?></p>
+                            <p><strong>Fecha:</strong>
+                                <?= date('d/m/Y H:i', strtotime($saleData['sale']['sale_date'])) ?></p>
+                            <p><strong>Cliente:</strong>
+                                <?= htmlspecialchars($saleData['sale']['client_name'] ?? 'Consumidor final') ?></p>
                             <p><strong>Atendido por:</strong> Usuario ID <?= $saleData['sale']['id_user'] ?></p>
                         </div>
                         <div class="col-md-6">
-                            <p><strong>Estado:</strong> 
+                            <p><strong>Estado:</strong>
                                 <?php if ($saleData['sale']['status'] == 'paid'): ?>
                                     <span class="badge bg-success">Pagada</span>
                                 <?php elseif ($saleData['sale']['status'] == 'cancelled'): ?>
@@ -42,7 +44,8 @@ require_once __DIR__ . '/../layouts/navbar.php';
                                 <?php endif; ?>
                             </p>
                             <p><strong>Método de pago:</strong> <?= ucfirst($saleData['sale']['payment_method']) ?></p>
-                            <p><strong>Observaciones:</strong> <?= nl2br(htmlspecialchars($saleData['sale']['observations'] ?? '')) ?></p>
+                            <p><strong>Observaciones:</strong>
+                                <?= nl2br(htmlspecialchars($saleData['sale']['observations'] ?? '')) ?></p>
                         </div>
                     </div>
 
@@ -50,24 +53,24 @@ require_once __DIR__ . '/../layouts/navbar.php';
                     <div class="table-responsive">
                         <table class="table table-bordered">
                             <thead class="table-dark">
-                                    <th>Producto</th>
-                                    <th>Cantidad</th>
-                                    <th>Precio Unitario</th>
-                                    <th>Subtotal</th>
-                                    <th>IVA</th>
-                                    <th>Total</th>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                                <th>Precio Unitario</th>
+                                <th>Subtotal</th>
+                                <th>IVA</th>
+                                <th>Total</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach ($saleData['details'] as $det): ?>
-                                <tr>
-                                    <td><?= htmlspecialchars($det['medication_name']) ?></td>
-                                    <td><?= $det['quantity'] ?></td>
-                                    <td>$<?= number_format($det['unit_price'], 2) ?></td>
-                                    <td>$<?= number_format($det['subtotal'], 2) ?></td>
-                                    <td>$<?= number_format($det['tax_amount'], 2) ?></td>
-                                    <td class="fw-bold">$<?= number_format($det['total'], 2) ?></td>
-                                </tr>
+                                    <tr>
+                                        <td><?= htmlspecialchars($det['medication_name']) ?></td>
+                                        <td><?= $det['quantity'] ?></td>
+                                        <td>$<?= number_format($det['unit_price'], 2) ?></td>
+                                        <td>$<?= number_format($det['subtotal'], 2) ?></td>
+                                        <td>$<?= number_format($det['tax_amount'], 2) ?></td>
+                                        <td class="fw-bold">$<?= number_format($det['total'], 2) ?></td>
+                                    </tr>
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
@@ -77,25 +80,94 @@ require_once __DIR__ . '/../layouts/navbar.php';
                         <div class="col-md-4">
                             <div class="card bg-light">
                                 <div class="card-body">
-                                    <p class="d-flex justify-content-between"><span>Subtotal:</span> <span>$<?= number_format($saleData['sale']['subtotal'], 2) ?></span></p>
-                                    <p class="d-flex justify-content-between"><span>Descuento:</span> <span>$<?= number_format($saleData['sale']['discount'], 2) ?></span></p>
-                                    <p class="d-flex justify-content-between"><span>IVA:</span> <span>$<?= number_format($saleData['sale']['tax_total'], 2) ?></span></p>
+                                    <p class="d-flex justify-content-between"><span>Subtotal:</span>
+                                        <span>$<?= number_format($saleData['sale']['subtotal'], 2) ?></span>
+                                    </p>
+                                    <p class="d-flex justify-content-between"><span>Descuento:</span>
+                                        <span>$<?= number_format($saleData['sale']['discount'], 2) ?></span>
+                                    </p>
+                                    <p class="d-flex justify-content-between"><span>IVA:</span>
+                                        <span>$<?= number_format($saleData['sale']['tax_total'], 2) ?></span>
+                                    </p>
                                     <hr>
-                                    <h5 class="d-flex justify-content-between"><span>Total:</span> <span class="text-primary">$<?= number_format($saleData['sale']['total'], 2) ?></span></h5>
+                                    <h5 class="d-flex justify-content-between"><span>Total:</span> <span
+                                            class="text-primary">$<?= number_format($saleData['sale']['total'], 2) ?></span>
+                                    </h5>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
                 <div class="card-footer">
+                    <!-- ********* Boton volver ********* -->
                     <a href="<?= BASE_URL ?>sales.php" class="btn btn-secondary">Volver</a>
+
+                    <!-- ********* Boton VER PDF ********* -->
                     <?php if ($saleData['sale']['status'] != 'cancelled'): ?>
-                        <a href="<?= BASE_URL ?>sales.php?action=cancel&id=<?= $saleData['sale']['id_sale'] ?>" class="btn btn-danger" onclick="return confirm('¿Cancelar esta venta?')">Cancelar Venta</a>
-                    <?php endif; ?>
-                </div>
+                        <a href="<?= BASE_URL ?>sales.php?action=pdf&id=<?= $saleData['sale']['id_sale'] ?>"
+                            class="btn btn-info px-4 py-2 shadow-sm text-white" target="_blank">
+                            <i class="bi bi-file-pdf me-1"></i> Ver PDF
+                        </a>
+
+                        <!-- ********* Boton ENVIAR POR WHATSAPP ********* -->
+                        <?php
+                        $clientPhone = $saleData['sale']['client_phone'] ?? '';
+                        if ($clientPhone):
+                            $phone = preg_replace('/[^0-9]/', '', $clientPhone);
+                            if (str_starts_with($phone, '0')) {
+                                $phone = '593' . substr($phone, 1);
+                            }
+                            // Generar URL del PDF
+                            $pdfUrl = BASE_URL . "sales.php?action=pdf&id=" . $saleData['sale']['id_sale'];
+                            $message = "Estimado cliente, su factura {$saleData['sale']['sale_code']} está disponible.\n";
+                            $message .= "Total: $" . number_format($saleData['sale']['total'], 2) . "\n";
+                            if (ENV == 'production') {
+                                $message .= "Descargue su factura aquí: " . $pdfUrl;
+                            } else {
+                                $message .= "(Enlace disponible solo en el sistema de la veterinaria)";
+                            }
+                            $waUrl = "https://wa.me/{$phone}?text=" . urlencode($message);
+                            ?>
+                            <a href="<?= $waUrl ?>" class="btn btn-success" target="_blank">
+                                <i class="bi bi-whatsapp"></i> Enviar por WhatsApp
+                            </a>
+                        <?php endif; ?>
+
+                        <button type="button" class="btn btn-danger px-4 py-2 shadow-sm" id="btnCancelSale"
+                            data-id="<?= $saleData['sale']['id_sale'] ?>"
+                            data-code="<?= htmlspecialchars($saleData['sale']['sale_code']) ?>">
+                            <i class="bi bi-x-circle me-1"></i> Cancelar Venta
+                        </button>
+
+                    </div>
+                <?php endif; ?>
             </div>
-        </main>
     </div>
+    </main>
 </div>
+</div>
+
+
+<script>
+document.getElementById('btnCancelSale')?.addEventListener('click', function(e) {
+    const id = this.dataset.id;
+    const code = this.dataset.code;
+    Swal.fire({
+        title: '¿Cancelar venta?',
+        text: `La venta ${code} se marcará como cancelada. Esta acción no se puede deshacer.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Sí, cancelar',
+        cancelButtonText: 'No'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = '<?= BASE_URL ?>sales.php?action=cancel&id=' + id;
+        }
+    });
+});
+</script>
 
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>

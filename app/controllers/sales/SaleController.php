@@ -10,6 +10,7 @@ require_once __DIR__ . '/../../repositories/ClientRepository.php';
 require_once __DIR__ . '/../../models/SaleModel.php';
 require_once __DIR__ . '/../../models/SaleDetailModel.php';
 require_once __DIR__ . '/../../helpers/auth.php';
+require_once ROOT_PATH . '/vendor/dompdf/autoload.inc.php';
 
 class SaleController extends BaseController
 {
@@ -124,8 +125,28 @@ class SaleController extends BaseController
 
         $saleId = $this->saleRepo->createSale($sale, $details);
         if ($saleId) {
+            // Si el método de pago es crédito, crear recordatorio
+            if ($_POST['payment_method'] == 'credit') {
+                // Asegurar que ReminderRepository y ReminderModel estén disponibles
+                require_once __DIR__ . '/../../repositories/ReminderRepository.php';
+                require_once __DIR__ . '/../../models/ReminderModel.php';
+
+                $reminderRepo = new ReminderRepository();
+
+                // Obtener el código de la venta (debes tenerlo en $sale)
+                $saleCode = $sale->getSaleCode();
+
+                // Crear el recordatorio
+                $reminderData = [
+                    'reminder_type' => 'payment',
+                    'id_client' => $_POST['id_client'],
+                    'reminder_date' => date('Y-m-d', strtotime('+7 days')), // 7 días después
+                    'message' => "Pago pendiente de factura {$saleCode}"
+                ];
+                $reminder = new ReminderModel($reminderData);
+                $reminderRepo->create($reminder);
+            }
             $_SESSION['success'] = 'Venta registrada correctamente.';
-            // Redirigir a la vista de detalle (factura)
             header('Location: ' . BASE_URL . 'sales.php?action=show&id=' . $saleId);
         } else {
             $_SESSION['error'] = 'Error al registrar la venta. Verifique stock.';
@@ -200,5 +221,93 @@ class SaleController extends BaseController
 
         echo json_encode($results);
         exit;
+    }
+
+    /**
+     * Generar PDF de la factura
+     */
+    public function generatePDF($id)
+    {
+        $saleData = $this->saleRepo->findById($id);
+        if (!$saleData) {
+            $_SESSION['error'] = 'Venta no encontrada.';
+            header('Location: ' . BASE_URL . 'sales.php');
+            exit;
+        }
+
+        // Cargar dompdf
+        require_once ROOT_PATH . '/vendor/dompdf/autoload.inc.php';
+        $dompdf = new Dompdf\Dompdf();
+
+        $html = $this->renderPDFHTML($saleData);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $dompdf->stream("factura_{$saleData['sale']['sale_code']}.pdf", array("Attachment" => false));
+        exit;
+    }
+
+    /**
+     * Renderizar HTML para el PDF
+     */
+    private function renderPDFHTML($saleData)
+    {
+        $sale = $saleData['sale'];
+        $details = $saleData['details'];
+
+        $html = '<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Factura</title>
+        <style>
+            body { font-family: DejaVu Sans, sans-serif; font-size: 12px; }
+            .header { text-align: center; margin-bottom: 20px; }
+            .empresa { font-size: 20px; font-weight: bold; }
+            .factura { font-size: 16px; margin-top: 10px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; }
+            .totales { margin-top: 20px; text-align: right; }
+            .total { font-size: 14px; font-weight: bold; }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <div class="empresa">VetApp</div>
+            <div class="factura">FACTURA: ' . htmlspecialchars($sale['sale_code']) . '</div>
+            <div>Fecha: ' . date('d/m/Y H:i', strtotime($sale['sale_date'])) . '</div>
+            <div>Cliente: ' . htmlspecialchars($sale['client_name'] ?? 'Consumidor final') . '</div>
+            <div>Teléfono: ' . htmlspecialchars($sale['client_phone'] ?? 'No registrado') . '</div>
+        </div>
+
+        <table>
+            <thead>
+                <tr><th>Producto</th><th>Cant.</th><th>P.Unitario</th><th>Subtotal</th><th>IVA</th><th>Total</th></tr>
+            </thead>
+            <tbody>';
+        foreach ($details as $det) {
+            $html .= '<tr>
+            <td>' . htmlspecialchars($det['medication_name']) . '</td>
+            <td>' . $det['quantity'] . '</td>
+            <td>$' . number_format($det['unit_price'], 2) . '</td>
+            <td>$' . number_format($det['subtotal'], 2) . '</td>
+            <td>$' . number_format($det['tax_amount'], 2) . '</td>
+            <td>$' . number_format($det['total'], 2) . '</td>
+        </tr>';
+        }
+        $html .= '</tbody>
+        </table>
+
+        <div class="totales">
+            <p>Subtotal: $' . number_format($sale['subtotal'], 2) . '</p>
+            <p>Descuento: $' . number_format($sale['discount'], 2) . '</p>
+            <p>IVA: $' . number_format($sale['tax_total'], 2) . '</p>
+            <p class="total">Total: $' . number_format($sale['total'], 2) . '</p>
+        </div>
+    </body>
+    </html>';
+        return $html;
     }
 }
