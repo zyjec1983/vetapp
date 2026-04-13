@@ -33,6 +33,10 @@ require_once __DIR__ . '/../layouts/navbar.php';
 
                     <form id="userForm" action="<?= BASE_URL ?>users.php?action=store" method="POST" autocomplete="off">
 
+                        <!-- ********** GENERA TOKEN ********** -->
+                        <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
+
+
                         <h6 class="text-primary text-uppercase small fw-bold mb-3">Información Personal</h6>
                         <div class="row g-3 mb-4">
 
@@ -73,7 +77,7 @@ require_once __DIR__ . '/../layouts/navbar.php';
                         </div>
 
                         <h6 class="text-primary text-uppercase small fw-bold mb-3">Contacto y Credenciales</h6>
-                        
+
                         <div class="row g-3 mb-3">
                             <div class="col-12 col-md-6">
                                 <label class="form-label fw-bold small">Correo Electrónico *</label>
@@ -98,8 +102,7 @@ require_once __DIR__ . '/../layouts/navbar.php';
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-key"></i></span>
                                     <input type="password" name="password" id="password" class="form-control"
-                                        placeholder="Min 5 - Max 8 caracteres" required 
-                                        minlength="5" maxlength="8">
+                                        placeholder="Min 5 - Max 8 caracteres" required minlength="5" maxlength="8">
                                 </div>
                                 <div class="form-text small text-muted">Debe tener entre 5 y 8 caracteres.</div>
                             </div>
@@ -108,7 +111,7 @@ require_once __DIR__ . '/../layouts/navbar.php';
                                 <label class="form-label fw-bold small">Repetir Contraseña *</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-shield-check"></i></span>
-                                    <input type="password" name="confirm_password" id="confirm_password" 
+                                    <input type="password" name="confirm_password" id="confirm_password"
                                         class="form-control" placeholder="Repita la contraseña" required>
                                 </div>
                                 <div id="passwordError" class="text-danger small mt-1" style="display: none;">
@@ -123,24 +126,30 @@ require_once __DIR__ . '/../layouts/navbar.php';
                             <div class="row">
                                 <div class="col-12 col-sm-4 mb-2">
                                     <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" name="roles[]" value="1" id="role_admin">
-                                        <label class="form-check-label fw-bold text-dark" for="role_admin">Administrador</label>
+                                        <input class="form-check-input" type="checkbox" name="roles[]" value="1"
+                                            id="role_admin">
+                                        <label class="form-check-label fw-bold text-dark"
+                                            for="role_admin">Administrador</label>
                                     </div>
                                     <small class="text-muted d-block ms-4">Control total del sistema</small>
                                 </div>
 
                                 <div class="col-12 col-sm-4 mb-2">
                                     <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" name="roles[]" value="2" id="role_vet">
-                                        <label class="form-check-label fw-bold text-dark" for="role_vet">Veterinario</label>
+                                        <input class="form-check-input" type="checkbox" name="roles[]" value="2"
+                                            id="role_vet">
+                                        <label class="form-check-label fw-bold text-dark"
+                                            for="role_vet">Veterinario</label>
                                     </div>
                                     <small class="text-muted d-block ms-4">Consultas y registros médicos</small>
                                 </div>
 
                                 <div class="col-12 col-sm-4 mb-2">
                                     <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" name="roles[]" value="3" id="role_pharm">
-                                        <label class="form-check-label fw-bold text-dark" for="role_pharm">Farmacia</label>
+                                        <input class="form-check-input" type="checkbox" name="roles[]" value="3"
+                                            id="role_pharm">
+                                        <label class="form-check-label fw-bold text-dark"
+                                            for="role_pharm">Farmacia</label>
                                     </div>
                                     <small class="text-muted d-block ms-4">Gestión de stock y ventas</small>
                                 </div>
@@ -162,36 +171,36 @@ require_once __DIR__ . '/../layouts/navbar.php';
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const password = document.getElementById('password');
-    const confirmPassword = document.getElementById('confirm_password');
-    const errorDiv = document.getElementById('passwordError');
-    const submitBtn = document.getElementById('submitBtn');
+    document.addEventListener('DOMContentLoaded', function () {
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('confirm_password');
+        const errorDiv = document.getElementById('passwordError');
+        const submitBtn = document.getElementById('submitBtn');
 
-    function validatePassword() {
-        // Solo validamos si el usuario ya empezó a escribir en el segundo campo
-        if (confirmPassword.value.length > 0) {
-            if (password.value !== confirmPassword.value) {
-                confirmPassword.classList.add('is-invalid');
-                confirmPassword.classList.remove('is-valid');
-                errorDiv.style.display = 'block';
-                submitBtn.disabled = true;
+        function validatePassword() {
+            // Solo validamos si el usuario ya empezó a escribir en el segundo campo
+            if (confirmPassword.value.length > 0) {
+                if (password.value !== confirmPassword.value) {
+                    confirmPassword.classList.add('is-invalid');
+                    confirmPassword.classList.remove('is-valid');
+                    errorDiv.style.display = 'block';
+                    submitBtn.disabled = true;
+                } else {
+                    confirmPassword.classList.remove('is-invalid');
+                    confirmPassword.classList.add('is-valid');
+                    errorDiv.style.display = 'none';
+                    submitBtn.disabled = false;
+                }
             } else {
-                confirmPassword.classList.remove('is-invalid');
-                confirmPassword.classList.add('is-valid');
+                confirmPassword.classList.remove('is-invalid', 'is-valid');
                 errorDiv.style.display = 'none';
                 submitBtn.disabled = false;
             }
-        } else {
-            confirmPassword.classList.remove('is-invalid', 'is-valid');
-            errorDiv.style.display = 'none';
-            submitBtn.disabled = false;
         }
-    }
 
-    password.addEventListener('input', validatePassword);
-    confirmPassword.addEventListener('input', validatePassword);
-});
+        password.addEventListener('input', validatePassword);
+        confirmPassword.addEventListener('input', validatePassword);
+    });
 </script>
 
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>

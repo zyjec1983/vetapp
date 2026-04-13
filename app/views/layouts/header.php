@@ -13,6 +13,12 @@ require_once __DIR__ . '/../../config/config.php';
 
 // 🔥 Cargar helpers de autenticación
 require_once __DIR__ . '/../../helpers/auth.php';
+
+// 🔥 Cargar helpers de CSRF (para tokens en formularios)
+require_once __DIR__ . '/../../helpers/csrf.php';
+
+// 🔥 Cargar helpers de sanitización (para old inputs)
+require_once __DIR__ . '/../../helpers/sanitize.php';
 ?>
 
 

@@ -2,7 +2,8 @@
 // app/views/services/edit.php
 
 if (!function_exists('old')) {
-    function old($key, $default = '') {
+    function old($key, $default = '')
+    {
         return $_SESSION['old'][$key] ?? $default;
     }
 }
@@ -35,13 +36,18 @@ require_once __DIR__ . '/../layouts/navbar.php';
                     <?php if (isset($_SESSION['errors'])): ?>
                         <div class="alert alert-danger">
                             <ul><?php foreach ($_SESSION['errors'] as $error): ?>
-                                <li><?= htmlspecialchars($error) ?></li>
-                            <?php endforeach; ?></ul>
+                                    <li><?= htmlspecialchars($error) ?></li>
+                                <?php endforeach; ?>
+                            </ul>
                         </div>
                         <?php unset($_SESSION['errors']); ?>
                     <?php endif; ?>
 
                     <form action="<?= BASE_URL ?>services.php?action=update" method="POST" autocomplete="off">
+
+                        <!-- ********** GENERA TOKEN ********** -->
+                        <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
+
                         <input type="hidden" name="id_service" value="<?= $service->getIdService() ?>">
 
                         <div class="row g-3 mb-4">
@@ -57,8 +63,8 @@ require_once __DIR__ . '/../layouts/navbar.php';
                             </div>
                             <div class="col-md-3">
                                 <div class="form-check form-switch mt-4">
-                                    <input class="form-check-input" type="checkbox" name="taxable" id="taxable" value="1"
-                                        <?= old('taxable', $service->getTaxable()) ? 'checked' : '' ?>>
+                                    <input class="form-check-input" type="checkbox" name="taxable" id="taxable"
+                                        value="1" <?= old('taxable', $service->getTaxable()) ? 'checked' : '' ?>>
                                     <label class="form-check-label" for="taxable">¿Grava IVA?</label>
                                 </div>
                                 <small class="text-muted">Servicios veterinarios no gravan IVA (según decreto).</small>
@@ -68,7 +74,8 @@ require_once __DIR__ . '/../layouts/navbar.php';
                         <div class="row g-3 mb-4">
                             <div class="col-12">
                                 <label class="form-label fw-bold small">Descripción (opcional)</label>
-                                <textarea name="description" class="form-control" rows="3"><?= htmlspecialchars(old('description', $service->getDescription())) ?></textarea>
+                                <textarea name="description" class="form-control"
+                                    rows="3"><?= htmlspecialchars(old('description', $service->getDescription())) ?></textarea>
                             </div>
                         </div>
 

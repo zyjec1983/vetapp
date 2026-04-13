@@ -51,6 +51,10 @@ require_once __DIR__ . '/../layouts/navbar.php';
                             <?php endif; ?>
 
                             <form action="<?= BASE_URL ?>medications.php?action=store" method="POST" autocomplete="off">
+
+                                <!-- ********** GENERA TOKEN ********** -->
+                                <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
+
                                 <div class="row g-3 mb-4">
                                     <div class="col-md-4">
                                         <label class="form-label fw-bold small">Código *</label>
@@ -154,6 +158,7 @@ require_once __DIR__ . '/../layouts/navbar.php';
                         <div class="card-body p-4">
                             <form action="<?= BASE_URL ?>medications.php?action=storeAccessory" method="POST"
                                 autocomplete="off">
+                                <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
                                 <div class="row g-3 mb-4">
                                     <div class="col-md-4">
                                         <label class="form-label fw-bold small">Código *</label>

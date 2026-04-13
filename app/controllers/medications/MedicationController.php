@@ -44,6 +44,7 @@ class MedicationController extends BaseController
     }
 
 
+    // ********** Mostrar formulario para crear medicamento **********
     public function create()
     {
         $activeIngredients = $this->activeRepo->getAll();
@@ -55,60 +56,70 @@ class MedicationController extends BaseController
      */
     public function store()
     {
+        // ********** Verificar CSRF **********
+        $this->validateCSRF();
+
+        // ********** Validar método POST ********** 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: ' . BASE_URL . 'medications.php');
             exit;
         }
 
+        // ********** Sanitizar todos los datos POST ********** 
+        $data = $this->sanitizeInputData($_POST);
+
+        // ********** Validaciones ********** 
         $errors = [];
-        if (empty($_POST['code']))
+        if (empty($data['code']))
             $errors[] = 'El código es obligatorio.';
-        if (empty($_POST['name']))
+        if (empty($data['name']))
             $errors[] = 'El nombre es obligatorio.';
-        if (empty($_POST['sale_price']) || !is_numeric($_POST['sale_price'])) {
+        if (empty($data['sale_price']) || !is_numeric($data['sale_price'])) {
             $errors[] = 'El precio de venta es obligatorio y debe ser un número.';
         }
-        if (empty($_POST['minimum_stock']) || !is_numeric($_POST['minimum_stock'])) {
+        if (empty($data['minimum_stock']) || !is_numeric($data['minimum_stock'])) {
             $errors[] = 'El stock mínimo es obligatorio y debe ser un número.';
         }
 
-        // ***********  Verificar si el código ya existe *********** 
-        $existing = $this->medRepo->findByCode($_POST['code']);
+        // ********** Verificar si el código ya existe ********** 
+        $existing = $this->medRepo->findByCode($data['code']);
         if ($existing) {
             $errors[] = 'El código ya existe. Por favor, use otro.';
         }
 
         if (!empty($errors)) {
             $_SESSION['errors'] = $errors;
-            $_SESSION['old'] = $_POST;
+            $_SESSION['old'] = $data;
             header('Location: ' . BASE_URL . 'medications.php?action=create');
             exit;
         }
 
+        // ********** Crear modelo con datos sanitizados ********** 
         $med = new MedicationModel([
-            'code' => trim($_POST['code']),
-            'name' => trim($_POST['name']),
-            'id_active' => !empty($_POST['id_active']) ? $_POST['id_active'] : null,
-            'category' => trim($_POST['category'] ?? ''),
-            'description' => trim($_POST['description'] ?? ''),
-            'minimum_stock' => (int) $_POST['minimum_stock'],
-            'sale_price' => (float) $_POST['sale_price'],
-            'location' => trim($_POST['location'] ?? ''),
+            'code' => $data['code'],
+            'name' => $data['name'],
+            'id_active' => !empty($data['id_active']) ? $data['id_active'] : null,
+            'category' => $data['category'] ?? '',
+            'description' => $data['description'] ?? '',
+            'minimum_stock' => (int) $data['minimum_stock'],
+            'sale_price' => (float) $data['sale_price'],
+            'location' => $data['location'] ?? '',
             'active' => 1,
-            'taxable' => isset($_POST['taxable']) ? 1 : 0
+            'taxable' => isset($data['taxable']) ? 1 : 0
         ]);
 
         if ($this->medRepo->create($med)) {
             $medicationId = $this->db->lastInsertId();
 
-            if (!empty($_POST['initial_stock']) && $_POST['initial_stock'] > 0) {
+            // ********** Crear lote inicial si se proporcionó stock ********** 
+            if (!empty($data['initial_stock']) && $data['initial_stock'] > 0) {
                 $batch = new BatchModel([
                     'id_medication' => $medicationId,
                     'batch_number' => 'INICIAL',
                     'expiration_date' => date('Y-m-d', strtotime('+5 years')),
                     'purchase_price' => 0,
-                    'quantity_received' => (int) $_POST['initial_stock'],
-                    'quantity_remaining' => (int) $_POST['initial_stock']
+                    'quantity_received' => (int) $data['initial_stock'],
+                    'quantity_remaining' => (int) $data['initial_stock']
                 ]);
                 $this->batchRepo->create($batch);
             }
@@ -121,6 +132,7 @@ class MedicationController extends BaseController
         exit;
     }
 
+    // ********** Mostrar detalle de medicamento con sus lotes **********
     public function show($id)
     {
         $medication = $this->medRepo->findById($id);
@@ -133,6 +145,7 @@ class MedicationController extends BaseController
         require_once __DIR__ . '/../../views/medications/show.php';
     }
 
+    // ********** Mostrar formulario para editar medicamento **********
     public function edit($id)
     {
         $medication = $this->medRepo->findById($id);
@@ -147,12 +160,18 @@ class MedicationController extends BaseController
 
     public function update()
     {
+        // ********** Verificar CSRF ********** 
+        $this->validateCSRF();
+
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: ' . BASE_URL . 'medications.php');
             exit;
         }
 
-        $id = $_POST['id_medication'] ?? null;
+        // ********** Sanitizar todos los datos POST ********** 
+        $data = $this->sanitizeInputData($_POST);
+
+        $id = $data['id_medication'] ?? null;
         if (!$id) {
             $_SESSION['error'] = 'ID de medicamento no proporcionado.';
             header('Location: ' . BASE_URL . 'medications.php');
@@ -166,49 +185,49 @@ class MedicationController extends BaseController
             exit;
         }
 
-        // Validaciones
+        // ********** Validaciones ********** 
         $errors = [];
-        if (empty($_POST['code']))
+        if (empty($data['code']))
             $errors[] = 'El código es obligatorio.';
-        if (empty($_POST['name']))
+        if (empty($data['name']))
             $errors[] = 'El nombre es obligatorio.';
-        if (empty($_POST['sale_price']) || !is_numeric($_POST['sale_price'])) {
+        if (empty($data['sale_price']) || !is_numeric($data['sale_price'])) {
             $errors[] = 'El precio de venta es obligatorio y debe ser un número.';
         }
-        if (empty($_POST['minimum_stock']) || !is_numeric($_POST['minimum_stock'])) {
+        if (empty($data['minimum_stock']) || !is_numeric($data['minimum_stock'])) {
             $errors[] = 'El stock mínimo es obligatorio y debe ser un número.';
         }
 
         if (!empty($errors)) {
             $_SESSION['errors'] = $errors;
-            $_SESSION['old'] = $_POST;
+            $_SESSION['old'] = $data;
             header('Location: ' . BASE_URL . 'medications.php?action=edit&id=' . $id);
             exit;
         }
 
-        // Actualizar propiedades del objeto
-        $medication->setCode(trim($_POST['code']));
-        $medication->setName(trim($_POST['name']));
-        $medication->setIdActive(!empty($_POST['id_active']) ? $_POST['id_active'] : null);
-        $medication->setCategory(trim($_POST['category'] ?? ''));
-        $medication->setDescription(trim($_POST['description'] ?? ''));
-        $medication->setMinimumStock((int) $_POST['minimum_stock']);
-        $medication->setSalePrice((float) $_POST['sale_price']);
-        $medication->setLocation(trim($_POST['location'] ?? ''));
+        // ********** Actualizar propiedades del objeto con datos sanitizados ********** 
+        $medication->setCode($data['code']);
+        $medication->setName($data['name']);
+        $medication->setIdActive(!empty($data['id_active']) ? $data['id_active'] : null);
+        $medication->setCategory($data['category'] ?? '');
+        $medication->setDescription($data['description'] ?? '');
+        $medication->setMinimumStock((int) $data['minimum_stock']);
+        $medication->setSalePrice((float) $data['sale_price']);
+        $medication->setLocation($data['location'] ?? '');
         // No modificar 'active' a menos que tengas un campo en el formulario
-        $medication->setTaxable(isset($_POST['taxable']) ? 1 : 0);
+        $medication->setTaxable(isset($data['taxable']) ? 1 : 0);
 
-        // Guardar cambios
+        // ********** Guardar cambios ********** 
         if ($this->medRepo->update($medication)) {
             // Crear un nuevo lote si se proporcionó stock inicial
-            if (!empty($_POST['initial_stock']) && $_POST['initial_stock'] > 0) {
+            if (!empty($data['initial_stock']) && $data['initial_stock'] > 0) {
                 $batch = new BatchModel([
                     'id_medication' => $id,
                     'batch_number' => 'EDIT-' . time(),
                     'expiration_date' => date('Y-m-d', strtotime('+5 years')),
                     'purchase_price' => 0,
-                    'quantity_received' => (int) $_POST['initial_stock'],
-                    'quantity_remaining' => (int) $_POST['initial_stock']
+                    'quantity_received' => (int) $data['initial_stock'],
+                    'quantity_remaining' => (int) $data['initial_stock']
                 ]);
                 $this->batchRepo->create($batch);
             }
@@ -221,6 +240,7 @@ class MedicationController extends BaseController
         exit;
     }
 
+    // ********** Desactivar medicamento (soft delete) **********
     public function deactivate($id)
     {
         $medication = $this->medRepo->findById($id);
@@ -240,6 +260,7 @@ class MedicationController extends BaseController
         exit;
     }
 
+    // ********** Reactivar medicamento desactivado **********
     public function reactivate($id)
     {
         $medication = $this->medRepo->findById($id);
@@ -259,26 +280,36 @@ class MedicationController extends BaseController
         exit;
     }
 
+    // ********** Listar medicamentos desactivados **********
     public function inactive()
     {
-        $medications = $this->medRepo->getAllInactive(); // método nuevo
+        $medications = $this->medRepo->getAllInactive();
         require_once __DIR__ . '/../../views/medications/inactive.php';
     }
 
     public function addBatch()
     {
+        // ********** VERIFICAR CSRF **********
+        $this->validateCSRF();
+
+        // ********** VALIDAR MÉTODO POST **********
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: ' . BASE_URL . 'medications.php');
             exit;
         }
 
-        $medicationId = $_POST['id_medication'] ?? null;
+        // ********** SANITIZAR DATOS POST **********
+        $data = $this->sanitizeInputData($_POST);
+
+        // ********** OBTENER ID DEL MEDICAMENTO **********
+        $medicationId = $data['id_medication'] ?? null;
         if (!$medicationId) {
             $_SESSION['error'] = 'ID de medicamento no proporcionado.';
             header('Location: ' . BASE_URL . 'medications.php');
             exit;
         }
 
+        // ********** VERIFICAR QUE EL MEDICAMENTO EXISTA **********
         $medication = $this->medRepo->findById($medicationId);
         if (!$medication) {
             $_SESSION['error'] = 'Medicamento no encontrado.';
@@ -286,44 +317,50 @@ class MedicationController extends BaseController
             exit;
         }
 
+        // ********** VALIDACIONES DE CAMPOS **********
         $errors = [];
-        if (empty($_POST['batch_number']))
+        if (empty($data['batch_number']))
             $errors[] = 'El número de lote es obligatorio.';
-        if (empty($_POST['expiration_date']))
+        if (empty($data['expiration_date']))
             $errors[] = 'La fecha de expiración es obligatoria.';
-        if (empty($_POST['quantity_received']) || !is_numeric($_POST['quantity_received']) || $_POST['quantity_received'] <= 0) {
+        if (empty($data['quantity_received']) || !is_numeric($data['quantity_received']) || $data['quantity_received'] <= 0) {
             $errors[] = 'La cantidad recibida debe ser un número positivo.';
         }
-        if (!empty($_POST['purchase_price']) && !is_numeric($_POST['purchase_price'])) {
+        if (!empty($data['purchase_price']) && !is_numeric($data['purchase_price'])) {
             $errors[] = 'El precio de compra debe ser un número.';
         }
 
+        // ********** SI HAY ERRORES, REDIRIGIR **********
         if (!empty($errors)) {
             $_SESSION['errors'] = $errors;
-            $_SESSION['old'] = $_POST;
+            $_SESSION['old'] = $data;
             header('Location: ' . BASE_URL . 'medications.php?action=show&id=' . $medicationId);
             exit;
         }
 
+        // ********** CREAR MODELO DE LOTE CON DATOS SANITIZADOS **********
         $batch = new BatchModel([
             'id_medication' => $medicationId,
-            'batch_number' => trim($_POST['batch_number']),
-            'expiration_date' => $_POST['expiration_date'],
-            'purchase_price' => !empty($_POST['purchase_price']) ? (float) $_POST['purchase_price'] : null,
-            'quantity_received' => (int) $_POST['quantity_received'],
-            'quantity_remaining' => (int) $_POST['quantity_received']
+            'batch_number' => $data['batch_number'],
+            'expiration_date' => $data['expiration_date'],
+            'purchase_price' => !empty($data['purchase_price']) ? (float) $data['purchase_price'] : null,
+            'quantity_received' => (int) $data['quantity_received'],
+            'quantity_remaining' => (int) $data['quantity_received']
         ]);
 
+        // ********** GUARDAR LOTE **********
         if ($this->batchRepo->create($batch)) {
             $_SESSION['success'] = 'Lote agregado correctamente.';
         } else {
             $_SESSION['error'] = 'Error al agregar el lote.';
         }
 
+        // ********** REDIRIGIR AL DETALLE DEL MEDICAMENTO **********
         header('Location: ' . BASE_URL . 'medications.php?action=show&id=' . $medicationId);
         exit;
     }
 
+    // ********** Agregar principio activo vía AJAX **********
     public function addActiveIngredient()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -332,8 +369,10 @@ class MedicationController extends BaseController
             exit;
         }
 
-        $name = trim($_POST['name'] ?? '');
-        $description = trim($_POST['description'] ?? '');
+        // ********** Sanitizar datos de entrada **********
+        $data = $this->sanitizeInputData($_POST);
+        $name = $data['name'] ?? '';
+        $description = $data['description'] ?? '';
 
         if (empty($name)) {
             http_response_code(400);
@@ -370,59 +409,70 @@ class MedicationController extends BaseController
      */
     public function storeAccessory()
     {
+        // ********** VERIFICAR CSRF **********
+        $this->validateCSRF();
+
+        // ********** VALIDAR MÉTODO POST **********
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: ' . BASE_URL . 'medications.php');
             exit;
         }
 
+        // ********** SANITIZAR DATOS POST **********
+        $data = $this->sanitizeInputData($_POST);
+
+        // ********** VALIDACIONES DE CAMPOS **********
         $errors = [];
-        if (empty($_POST['code']))
+        if (empty($data['code']))
             $errors[] = 'El código es obligatorio.';
-        if (empty($_POST['name']))
+        if (empty($data['name']))
             $errors[] = 'El nombre es obligatorio.';
-        if (empty($_POST['sale_price']) || !is_numeric($_POST['sale_price'])) {
+        if (empty($data['sale_price']) || !is_numeric($data['sale_price'])) {
             $errors[] = 'El precio de venta es obligatorio y debe ser un número.';
         }
-        if (empty($_POST['initial_stock']) || !is_numeric($_POST['initial_stock']) || $_POST['initial_stock'] < 0) {
+        if (empty($data['initial_stock']) || !is_numeric($data['initial_stock']) || $data['initial_stock'] < 0) {
             $errors[] = 'El stock inicial debe ser un número válido.';
         }
 
-        // Verificar si el código ya existe (evitar duplicados)
-        $existing = $this->medRepo->findByCode($_POST['code']);
-
+        // ********** VERIFICAR SI EL CÓDIGO YA EXISTE **********
+        $existing = $this->medRepo->findByCode($data['code']);
         if ($existing) {
             $errors[] = 'El código ya existe. Por favor, use otro.';
         }
 
+        // ********** SI HAY ERRORES, REDIRIGIR **********
         if (!empty($errors)) {
             $_SESSION['errors'] = $errors;
-            $_SESSION['old'] = $_POST;
+            $_SESSION['old'] = $data;
             header('Location: ' . BASE_URL . 'medications.php?action=create');
             exit;
         }
 
+        // ********** CREAR MODELO DE ACCESORIO CON DATOS SANITIZADOS **********
         $med = new MedicationModel([
-            'code' => trim($_POST['code']),
-            'name' => trim($_POST['name']),
+            'code' => $data['code'],
+            'name' => $data['name'],
             'category' => 'Accesorios y otros',
-            'description' => trim($_POST['description'] ?? ''),
-            'minimum_stock' => (int) ($_POST['minimum_stock'] ?? 0),
-            'sale_price' => (float) $_POST['sale_price'],
-            'location' => trim($_POST['location'] ?? ''),
+            'description' => $data['description'] ?? '',
+            'minimum_stock' => (int) ($data['minimum_stock'] ?? 0),
+            'sale_price' => (float) $data['sale_price'],
+            'location' => $data['location'] ?? '',
             'active' => 1,
-            'taxable' => isset($_POST['taxable']) ? 1 : 0
+            'taxable' => isset($data['taxable']) ? 1 : 0
         ]);
 
+        // ********** GUARDAR ACCESORIO **********
         if ($this->medRepo->create($med)) {
             $medicationId = $this->db->lastInsertId();
 
+            // ********** CREAR LOTE INICIAL CON EL STOCK PROPORCIONADO **********
             $batch = new BatchModel([
                 'id_medication' => $medicationId,
                 'batch_number' => 'INICIAL',
                 'expiration_date' => date('Y-m-d', strtotime('+5 years')),
                 'purchase_price' => 0,
-                'quantity_received' => (int) $_POST['initial_stock'],
-                'quantity_remaining' => (int) $_POST['initial_stock']
+                'quantity_received' => (int) $data['initial_stock'],
+                'quantity_remaining' => (int) $data['initial_stock']
             ]);
             $this->batchRepo->create($batch);
 
@@ -431,6 +481,7 @@ class MedicationController extends BaseController
             $_SESSION['error'] = 'Error al registrar el accesorio.';
         }
 
+        // ********** REDIRIGIR AL LISTADO DE MEDICAMENTOS **********
         header('Location: ' . BASE_URL . 'medications.php');
         exit;
     }
@@ -441,7 +492,7 @@ class MedicationController extends BaseController
      */
     public function index()
     {
-        // Obtener tipo de filtro (medicamentos, accesorios, todos)
+        //  ********** Obtener tipo de filtro (medicamentos, accesorios, todos) ********** 
         $type = $_GET['type'] ?? '';
         $page = (int) ($_GET['page'] ?? 1);
         $limit = 10;

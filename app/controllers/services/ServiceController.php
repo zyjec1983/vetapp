@@ -1,5 +1,7 @@
 <?php
-// app/controllers/services/ServiceController.php
+/**
+ * Location: vetapp/app/controllers/services/ServiceController.php
+ */
 
 require_once __DIR__ . '/../BaseController.php';
 require_once __DIR__ . '/../../repositories/ServiceRepository.php';
@@ -9,6 +11,7 @@ class ServiceController extends BaseController
 {
     private $serviceRepo;
 
+    // ********** Constructor: inicializa repositorio y verifica autenticación/admin **********
     public function __construct()
     {
         parent::__construct();
@@ -17,6 +20,7 @@ class ServiceController extends BaseController
         $this->requireAdmin();
     }
 
+    // ********** Verifica que el usuario esté autenticado **********
     private function requireAuth()
     {
         if (!isset($_SESSION['user'])) {
@@ -25,6 +29,7 @@ class ServiceController extends BaseController
         }
     }
 
+    // ********** Verifica que el usuario tenga rol de admin **********
     private function requireAdmin()
     {
         $roles = $_SESSION['user']['roles'] ?? [];
@@ -35,43 +40,55 @@ class ServiceController extends BaseController
         }
     }
 
+    // ********** Listar todos los servicios activos **********
     public function index()
     {
         $services = $this->serviceRepo->getAll();
         require_once __DIR__ . '/../../views/services/index.php';
     }
 
+    // ********** Mostrar formulario para crear servicio **********
     public function create()
     {
         require_once __DIR__ . '/../../views/services/create.php';
     }
 
+    // ********** Guardar nuevo servicio **********
     public function store()
     {
+        // ********** Verificar CSRF **********
+        $this->validateCSRF();
+
+        // ********** Validar método POST **********
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: ' . BASE_URL . 'services.php');
             exit;
         }
 
+        // ********** Sanitizar todos los datos POST **********
+        $data = $this->sanitizeInputData($_POST);
+
+        // ********** Validaciones **********
         $errors = [];
-        if (empty($_POST['name'])) $errors[] = 'El nombre es obligatorio.';
-        if (empty($_POST['price']) || !is_numeric($_POST['price'])) {
+        if (empty($data['name'])) $errors[] = 'El nombre es obligatorio.';
+        if (empty($data['price']) || !is_numeric($data['price'])) {
             $errors[] = 'El precio es obligatorio y debe ser un número.';
         }
 
         if (!empty($errors)) {
             $_SESSION['errors'] = $errors;
-            $_SESSION['old'] = $_POST;
+            $_SESSION['old'] = $data;
             header('Location: ' . BASE_URL . 'services.php?action=create');
             exit;
         }
 
+        // Crear modelo con datos sanitizados
         $service = new ServiceModel([
-            'name'        => trim($_POST['name']),
-            'description' => trim($_POST['description'] ?? ''),
-            'price'       => (float) $_POST['price'],
-            'taxable'     => isset($_POST['taxable']) ? 1 : 0,
-            'active'      => 1
+            'name' => $data['name'],
+            'description' => $data['description'] ?? '',
+            'price' => (float) $data['price'],
+            'taxable' => isset($data['taxable']) ? 1 : 0,
+            'active' => 1
         ]);
 
         if ($this->serviceRepo->create($service)) {
@@ -84,6 +101,7 @@ class ServiceController extends BaseController
         exit;
     }
 
+    // ********** Mostrar formulario para editar servicio **********
     public function edit($id)
     {
         $service = $this->serviceRepo->findById($id);
@@ -95,14 +113,22 @@ class ServiceController extends BaseController
         require_once __DIR__ . '/../../views/services/edit.php';
     }
 
+    // ********** Actualizar servicio **********
     public function update()
     {
+        // ********** Verificar CSRF **********
+        $this->validateCSRF();
+
+        // ********** Validar método POST **********
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: ' . BASE_URL . 'services.php');
             exit;
         }
 
-        $id = $_POST['id_service'] ?? null;
+        // ********** Sanitizar todos los datos POST **********
+        $data = $this->sanitizeInputData($_POST);
+
+        $id = $data['id_service'] ?? null;
         if (!$id) {
             $_SESSION['error'] = 'ID de servicio no proporcionado.';
             header('Location: ' . BASE_URL . 'services.php');
@@ -116,24 +142,26 @@ class ServiceController extends BaseController
             exit;
         }
 
+        // ********** Validaciones **********
         $errors = [];
-        if (empty($_POST['name'])) $errors[] = 'El nombre es obligatorio.';
-        if (empty($_POST['price']) || !is_numeric($_POST['price'])) {
+        if (empty($data['name'])) $errors[] = 'El nombre es obligatorio.';
+        if (empty($data['price']) || !is_numeric($data['price'])) {
             $errors[] = 'El precio es obligatorio y debe ser un número.';
         }
 
         if (!empty($errors)) {
             $_SESSION['errors'] = $errors;
-            $_SESSION['old'] = $_POST;
+            $_SESSION['old'] = $data;
             header('Location: ' . BASE_URL . 'services.php?action=edit&id=' . $id);
             exit;
         }
 
-        $service->setName(trim($_POST['name']));
-        $service->setDescription(trim($_POST['description'] ?? ''));
-        $service->setPrice((float) $_POST['price']);
-        $service->setTaxable(isset($_POST['taxable']) ? 1 : 0);
-        $service->setActive(isset($_POST['active']) ? 1 : 0);
+        // Actualizar propiedades con datos sanitizados
+        $service->setName($data['name']);
+        $service->setDescription($data['description'] ?? '');
+        $service->setPrice((float) $data['price']);
+        $service->setTaxable(isset($data['taxable']) ? 1 : 0);
+        $service->setActive(isset($data['active']) ? 1 : 0);
 
         if ($this->serviceRepo->update($service)) {
             $_SESSION['success'] = 'Servicio actualizado correctamente.';
@@ -145,6 +173,7 @@ class ServiceController extends BaseController
         exit;
     }
 
+    // ********** Desactivar servicio (soft delete) **********
     public function deactivate($id)
     {
         $service = $this->serviceRepo->findById($id);
@@ -164,6 +193,7 @@ class ServiceController extends BaseController
         exit;
     }
 
+    // ********** Reactivar servicio desactivado **********
     public function reactivate($id)
     {
         $service = $this->serviceRepo->findById($id);
@@ -183,9 +213,10 @@ class ServiceController extends BaseController
         exit;
     }
 
+    // ********** Listar servicios desactivados **********
     public function inactive()
     {
-        $services = $this->serviceRepo->getAll(false); // todos, luego filtramos en vista
+        $services = $this->serviceRepo->getAll(false);
         require_once __DIR__ . '/../../views/services/inactive.php';
     }
 }

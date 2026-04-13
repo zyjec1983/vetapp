@@ -2,7 +2,8 @@
 // app/views/services/create.php
 
 if (!function_exists('old')) {
-    function old($key, $default = '') {
+    function old($key, $default = '')
+    {
         return $_SESSION['old'][$key] ?? $default;
     }
 }
@@ -35,25 +36,33 @@ require_once __DIR__ . '/../layouts/navbar.php';
                     <?php if (isset($_SESSION['errors'])): ?>
                         <div class="alert alert-danger">
                             <ul><?php foreach ($_SESSION['errors'] as $error): ?>
-                                <li><?= htmlspecialchars($error) ?></li>
-                            <?php endforeach; ?></ul>
+                                    <li><?= htmlspecialchars($error) ?></li>
+                                    <?php endforeach; ?>
+                            </ul>
                         </div>
                         <?php unset($_SESSION['errors']); ?>
                     <?php endif; ?>
 
                     <form action="<?= BASE_URL ?>services.php?action=store" method="POST" autocomplete="off">
+
+                        <!-- ********** GENERA TOKEN ********** -->
+                        <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
+
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small">Nombre del Servicio *</label>
-                                <input type="text" name="name" class="form-control" required value="<?= htmlspecialchars(old('name')) ?>">
+                                <input type="text" name="name" class="form-control" required
+                                    value="<?= htmlspecialchars(old('name')) ?>">
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label fw-bold small">Precio ($) *</label>
-                                <input type="number" step="0.01" name="price" class="form-control" required value="<?= old('price') ?>">
+                                <input type="number" step="0.01" name="price" class="form-control" required
+                                    value="<?= old('price') ?>">
                             </div>
                             <div class="col-md-3">
                                 <div class="form-check form-switch mt-4">
-                                    <input class="form-check-input" type="checkbox" name="taxable" id="taxable" value="1" <?= old('taxable') ? 'checked' : '' ?>>
+                                    <input class="form-check-input" type="checkbox" name="taxable" id="taxable"
+                                        value="1" <?= old('taxable') ? 'checked' : '' ?>>
                                     <label class="form-check-label" for="taxable">¿Grava IVA?</label>
                                 </div>
                                 <small class="text-muted">Servicios veterinarios no gravan IVA (según decreto).</small>
@@ -63,7 +72,8 @@ require_once __DIR__ . '/../layouts/navbar.php';
                         <div class="row g-3 mb-4">
                             <div class="col-12">
                                 <label class="form-label fw-bold small">Descripción (opcional)</label>
-                                <textarea name="description" class="form-control" rows="3"><?= htmlspecialchars(old('description')) ?></textarea>
+                                <textarea name="description" class="form-control"
+                                    rows="3"><?= htmlspecialchars(old('description')) ?></textarea>
                             </div>
                         </div>
 

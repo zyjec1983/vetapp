@@ -40,10 +40,14 @@ require_once __DIR__ . '/../layouts/navbar.php';
                         <?php unset($_SESSION['errors']); ?>
                     <?php endif; ?>
 
-                   <form action="<?= BASE_URL ?>pets.php?action=update" method="POST" enctype="multipart/form-data" autocomplete="off">
+                    <form action="<?= BASE_URL ?>pets.php?action=update" method="POST" enctype="multipart/form-data"
+                        autocomplete="off">
+
+                        <!-- ********** GENERA TOKEN ********** -->
+                        <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
 
                         <input type="hidden" name="id_pet" value="<?= $pet->getIdPet() ?>">
-                        
+
                         <div class="row g-3 mb-4">
                             <div class="col-12">
                                 <label class="form-label fw-bold small">Dueño *</label>

@@ -28,6 +28,10 @@ require_once __DIR__ . '/../layouts/navbar.php';
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
                     <form method="GET" action="<?= BASE_URL ?>medications.php" class="row g-3 align-items-end">
+                            
+                    <!-- ********** GENERA TOKEN ********** -->    
+                    <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
+
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Filtrar por tipo</label>
                             <select name="type" class="form-select" onchange="this.form.submit()">

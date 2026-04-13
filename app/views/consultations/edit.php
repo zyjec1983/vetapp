@@ -48,6 +48,10 @@ require_once __DIR__ . '/../layouts/navbar.php';
                     <?php endif; ?>
 
                     <form method="POST" action="<?= BASE_URL ?>consultations.php?action=update" autocomplete="off">
+                            
+                    <!-- ********** GENERA TOKEN ********** -->    
+                    <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
+
                         <input type="hidden" name="id_consultation" value="<?= $consultation->getIdConsultation() ?>">
 
                         <!-- Datos de la mascota -->

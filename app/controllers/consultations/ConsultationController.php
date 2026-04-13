@@ -4,11 +4,9 @@
  * Controlador de consultas médicas (CRUD completo + recordatorios)
  */
 
-// Mostrar errores (solo en desarrollo)
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Requerir dependencias
 require_once __DIR__ . '/../BaseController.php';
 require_once __DIR__ . '/../../repositories/ConsultationRepository.php';
 require_once __DIR__ . '/../../repositories/PetRepository.php';
@@ -16,19 +14,16 @@ require_once __DIR__ . '/../../repositories/ReminderRepository.php';
 require_once __DIR__ . '/../../models/ConsultationModel.php';
 require_once __DIR__ . '/../../models/ReminderModel.php';
 require_once __DIR__ . '/../../helpers/auth.php';
-
 require_once __DIR__ . '/../../repositories/ServiceRepository.php';
 require_once __DIR__ . '/../../models/ServiceModel.php';
 
 class ConsultationController extends BaseController
 {
-    private $consultationRepo;   // Repositorio de consultas
-    private $petRepo;            // Repositorio de mascotas (para recordatorios)
-    private $reminderRepo;       // Repositorio de recordatorios
+    private $consultationRepo;
+    private $petRepo;
+    private $reminderRepo;
 
-    /**
-     * Constructor: inicializa repositorios y verifica autenticación/permisos
-     */
+    // ********** Constructor: inicializa repositorios y verifica autenticación/permisos **********
     public function __construct()
     {
         parent::__construct();
@@ -38,9 +33,7 @@ class ConsultationController extends BaseController
         $this->requireAuth();
     }
 
-    /**
-     * Verifica que el usuario esté autenticado y tenga rol de admin o veterinario
-     */
+    // ********** Verifica que el usuario esté autenticado y tenga rol de admin o veterinario **********
     private function requireAuth()
     {
         if (!isset($_SESSION['user'])) {
@@ -55,54 +48,53 @@ class ConsultationController extends BaseController
         }
     }
 
-    /**
-     * Lista todas las consultas (index)
-     */
+    // ********** Lista todas las consultas médicas **********
     public function index()
     {
-        $consultations = $this->consultationRepo->getAll(); // array asociativo con joins
+        $consultations = $this->consultationRepo->getAll();
         require_once __DIR__ . '/../../views/consultations/index.php';
     }
 
-    /**
-     * Muestra el formulario para crear una nueva consulta
-     */
-   public function create()
-{
-    // Obtener lista de mascotas con sus dueños para el selector
-    $pets = $this->consultationRepo->getPetsWithClients();
-    // Obtener servicios activos
-    $serviceRepo = new ServiceRepository();
-    $services = $serviceRepo->getAll(true); // solo activos
-    require_once __DIR__ . '/../../views/consultations/create.php';
-}
+    // ********** Mostrar formulario para crear consulta **********
+    public function create()
+    {
+        $pets = $this->consultationRepo->getPetsWithClients();
+        $serviceRepo = new ServiceRepository();
+        $services = $serviceRepo->getAll(true);
+        require_once __DIR__ . '/../../views/consultations/create.php';
+    }
 
-    /**
-     * Procesa el formulario de creación de consulta y guarda en BD
-     */
+    // ********** Guardar nueva consulta médica **********
     public function store()
     {
+        // ********** Verificar CSRF **********
+        $this->validateCSRF();
+
+        // ********** Validar método POST **********
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: ' . BASE_URL . 'consultations.php');
             exit;
         }
 
+        // ********** Sanitizar todos los datos POST **********
+        $data = $this->sanitizeInputData($_POST);
+
         // ********** Validaciones **********
         $errors = [];
-        if (empty($_POST['id_pet']))
+        if (empty($data['id_pet']))
             $errors[] = 'Debe seleccionar una mascota.';
-        if (empty($_POST['diagnosis']))
+        if (empty($data['diagnosis']))
             $errors[] = 'El diagnóstico es obligatorio.';
-        if (!empty($_POST['consultation_fee']) && !is_numeric($_POST['consultation_fee'])) {
+        if (!empty($data['consultation_fee']) && !is_numeric($data['consultation_fee'])) {
             $errors[] = 'El honorario debe ser un número.';
         }
-        if (!empty($_POST['weight']) && !is_numeric($_POST['weight']))
+        if (!empty($data['weight']) && !is_numeric($data['weight']))
             $errors[] = 'El peso debe ser un número.';
-        if (!empty($_POST['temperature']) && !is_numeric($_POST['temperature']))
+        if (!empty($data['temperature']) && !is_numeric($data['temperature']))
             $errors[] = 'La temperatura debe ser un número.';
-        if (!empty($_POST['next_visit'])) {
-            $date = DateTime::createFromFormat('Y-m-d', $_POST['next_visit']);
-            if (!$date || $date->format('Y-m-d') !== $_POST['next_visit']) {
+        if (!empty($data['next_visit'])) {
+            $date = DateTime::createFromFormat('Y-m-d', $data['next_visit']);
+            if (!$date || $date->format('Y-m-d') !== $data['next_visit']) {
                 $errors[] = 'La fecha de próxima visita no es válida.';
             }
         }
@@ -110,7 +102,7 @@ class ConsultationController extends BaseController
         // Si hay errores, redirigir al formulario
         if (!empty($errors)) {
             $_SESSION['errors'] = $errors;
-            $_SESSION['old'] = $_POST;
+            $_SESSION['old'] = $data;
             header('Location: ' . BASE_URL . 'consultations.php?action=create');
             exit;
         }
@@ -125,40 +117,35 @@ class ConsultationController extends BaseController
             exit;
         }
 
-        // Crear modelo de consulta
+        // Crear modelo de consulta con datos sanitizados
         $consultation = new ConsultationModel([
-            'id_pet' => $_POST['id_pet'],
+            'id_pet' => $data['id_pet'],
             'id_user' => $id_user,
-            'id_service'       => $_POST['id_service'] ?? null,
-            'weight' => !empty($_POST['weight']) ? (float) $_POST['weight'] : null,
-            'temperature' => !empty($_POST['temperature']) ? (float) $_POST['temperature'] : null,
-            'diagnosis' => trim($_POST['diagnosis']),
-            'treatment' => trim($_POST['treatment'] ?? ''),
-            'next_visit' => $_POST['next_visit'] ?? null,
-            'consultation_fee' => !empty($_POST['consultation_fee']) ? (float) $_POST['consultation_fee'] : null,
-            'status' => $_POST['status'] ?? 'completed',
-            'observations' => trim($_POST['observations'] ?? '')
+            'id_service' => $data['id_service'] ?? null,
+            'weight' => !empty($data['weight']) ? (float) $data['weight'] : null,
+            'temperature' => !empty($data['temperature']) ? (float) $data['temperature'] : null,
+            'diagnosis' => $data['diagnosis'],
+            'treatment' => $data['treatment'] ?? '',
+            'next_visit' => $data['next_visit'] ?? null,
+            'consultation_fee' => !empty($data['consultation_fee']) ? (float) $data['consultation_fee'] : null,
+            'status' => $data['status'] ?? 'completed',
+            'observations' => $data['observations'] ?? ''
         ]);
 
         // Guardar consulta
         if ($this->consultationRepo->create($consultation)) {
             // ********** Crear recordatorio si se solicitó **********
-            if (isset($_POST['enable_reminder']) && $_POST['enable_reminder'] == '1') {
-                // Obtener datos de la mascota para saber el cliente dueño
+            if (isset($data['enable_reminder']) && $data['enable_reminder'] == '1') {
                 $pet = $this->petRepo->findById($consultation->getIdPet());
                 if ($pet) {
-                    // Preparar modelo de recordatorio
                     $reminder = new ReminderModel();
-                    $reminder->setReminderType($_POST['reminder_type'] ?? 'consultation');
+                    $reminder->setReminderType($data['reminder_type'] ?? 'consultation');
                     $reminder->setIdPet($consultation->getIdPet());
                     $reminder->setIdClient($pet->getIdClient());
-                    // Fecha del recordatorio: la especificada o la próxima visita
-                    $reminderDate = !empty($_POST['reminder_date']) ? $_POST['reminder_date'] : $consultation->getNextVisit();
+                    $reminderDate = !empty($data['reminder_date']) ? $data['reminder_date'] : $consultation->getNextVisit();
                     $reminder->setReminderDate($reminderDate);
-                    $reminder->setMessage($_POST['reminder_message'] ?? '');
+                    $reminder->setMessage($data['reminder_message'] ?? '');
                     $reminder->setSent(false);
-
-                    // Guardar recordatorio
                     $this->reminderRepo->create($reminder);
                 }
             }
@@ -171,9 +158,7 @@ class ConsultationController extends BaseController
         exit;
     }
 
-    /**
-     * Muestra el detalle de una consulta
-     */
+    // ********** Mostrar detalle de una consulta **********
     public function show($id)
     {
         $consultation = $this->consultationRepo->findById($id);
@@ -185,9 +170,7 @@ class ConsultationController extends BaseController
         require_once __DIR__ . '/../../views/consultations/show.php';
     }
 
-    /**
-     * Muestra el formulario de edición de una consulta
-     */
+    // ********** Mostrar formulario para editar consulta **********
     public function edit($id)
     {
         $consultation = $this->consultationRepo->findById($id);
@@ -196,21 +179,26 @@ class ConsultationController extends BaseController
             header('Location: ' . BASE_URL . 'consultations.php');
             exit;
         }
-        $pets = $this->consultationRepo->getPetsWithClients(); // para el selector
+        $pets = $this->consultationRepo->getPetsWithClients();
         require_once __DIR__ . '/../../views/consultations/edit.php';
     }
 
-    /**
-     * Procesa la actualización de una consulta
-     */
+    // ********** Actualizar consulta médica **********
     public function update()
     {
+        // ********** Verificar CSRF **********
+        $this->validateCSRF();
+
+        // ********** Validar método POST **********
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: ' . BASE_URL . 'consultations.php');
             exit;
         }
 
-        $id = $_POST['id_consultation'] ?? null;
+        // ********** Sanitizar todos los datos POST **********
+        $data = $this->sanitizeInputData($_POST);
+
+        $id = $data['id_consultation'] ?? null;
         if (!$id) {
             $_SESSION['error'] = 'ID de consulta no proporcionado.';
             header('Location: ' . BASE_URL . 'consultations.php');
@@ -224,43 +212,43 @@ class ConsultationController extends BaseController
             exit;
         }
 
-        // Validaciones (igual que en store)
+        // ********** Validaciones **********
         $errors = [];
-        if (empty($_POST['id_pet']))
+        if (empty($data['id_pet']))
             $errors[] = 'Debe seleccionar una mascota.';
-        if (empty($_POST['diagnosis']))
+        if (empty($data['diagnosis']))
             $errors[] = 'El diagnóstico es obligatorio.';
-        if (!empty($_POST['consultation_fee']) && !is_numeric($_POST['consultation_fee'])) {
+        if (!empty($data['consultation_fee']) && !is_numeric($data['consultation_fee'])) {
             $errors[] = 'El honorario debe ser un número.';
         }
-        if (!empty($_POST['weight']) && !is_numeric($_POST['weight']))
+        if (!empty($data['weight']) && !is_numeric($data['weight']))
             $errors[] = 'El peso debe ser un número.';
-        if (!empty($_POST['temperature']) && !is_numeric($_POST['temperature']))
+        if (!empty($data['temperature']) && !is_numeric($data['temperature']))
             $errors[] = 'La temperatura debe ser un número.';
-        if (!empty($_POST['next_visit'])) {
-            $date = DateTime::createFromFormat('Y-m-d', $_POST['next_visit']);
-            if (!$date || $date->format('Y-m-d') !== $_POST['next_visit']) {
+        if (!empty($data['next_visit'])) {
+            $date = DateTime::createFromFormat('Y-m-d', $data['next_visit']);
+            if (!$date || $date->format('Y-m-d') !== $data['next_visit']) {
                 $errors[] = 'La fecha de próxima visita no es válida.';
             }
         }
 
         if (!empty($errors)) {
             $_SESSION['errors'] = $errors;
-            $_SESSION['old'] = $_POST;
+            $_SESSION['old'] = $data;
             header('Location: ' . BASE_URL . 'consultations.php?action=edit&id=' . $id);
             exit;
         }
 
-        // Actualizar modelo
-        $consultation->setIdPet($_POST['id_pet']);
-        $consultation->setWeight(!empty($_POST['weight']) ? (float) $_POST['weight'] : null);
-        $consultation->setTemperature(!empty($_POST['temperature']) ? (float) $_POST['temperature'] : null);
-        $consultation->setDiagnosis(trim($_POST['diagnosis']));
-        $consultation->setTreatment(trim($_POST['treatment'] ?? ''));
-        $consultation->setNextVisit($_POST['next_visit'] ?? null);
-        $consultation->setConsultationFee(!empty($_POST['consultation_fee']) ? (float) $_POST['consultation_fee'] : null);
-        $consultation->setStatus($_POST['status'] ?? 'completed');
-        $consultation->setObservations(trim($_POST['observations'] ?? ''));
+        // Actualizar modelo con datos sanitizados
+        $consultation->setIdPet($data['id_pet']);
+        $consultation->setWeight(!empty($data['weight']) ? (float) $data['weight'] : null);
+        $consultation->setTemperature(!empty($data['temperature']) ? (float) $data['temperature'] : null);
+        $consultation->setDiagnosis($data['diagnosis']);
+        $consultation->setTreatment($data['treatment'] ?? '');
+        $consultation->setNextVisit($data['next_visit'] ?? null);
+        $consultation->setConsultationFee(!empty($data['consultation_fee']) ? (float) $data['consultation_fee'] : null);
+        $consultation->setStatus($data['status'] ?? 'completed');
+        $consultation->setObservations($data['observations'] ?? '');
 
         if ($this->consultationRepo->update($consultation)) {
             $_SESSION['success'] = 'Consulta actualizada correctamente.';
@@ -272,9 +260,7 @@ class ConsultationController extends BaseController
         exit;
     }
 
-    /**
-     * Desactiva una consulta (soft delete)
-     */
+    // ********** Desactivar consulta médica (soft delete) **********
     public function deactivate($id)
     {
         $consultation = $this->consultationRepo->findById($id);
@@ -294,11 +280,12 @@ class ConsultationController extends BaseController
         exit;
     }
 
+    // ********** Buscar mascotas para autocomplete (evita XSS en búsqueda) **********
     public function searchPets()
     {
         header('Content-Type: application/json');
 
-        $q = $_GET['q'] ?? '';
+        $q = isset($_GET['q']) ? sanitizeInput($_GET['q']) : '';
 
         $repo = new PetRepository();
         $results = $repo->searchPetsWithClients($q);

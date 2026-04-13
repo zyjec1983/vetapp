@@ -2,7 +2,8 @@
 // app/views/clients/create.php
 
 if (!function_exists('old')) {
-    function old($key, $default = '') {
+    function old($key, $default = '')
+    {
         return $_SESSION['old'][$key] ?? $default;
     }
 }
@@ -49,32 +50,35 @@ require_once __DIR__ . '/../layouts/navbar.php';
                     <?php endif; ?>
 
                     <form action="<?= BASE_URL ?>clients.php?action=store" method="POST" autocomplete="off">
+                        <!-- ********** genera token ********** -->
+                        <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
+
                         <h6 class="text-primary text-uppercase small fw-bold mb-3">Información Personal</h6>
                         <div class="row g-3 mb-4">
                             <div class="col-12 col-md-4">
                                 <label class="form-label fw-bold small">Cédula o Pasaporte</label>
                                 <input type="text" name="identification" class="form-control" maxlength="20"
-                                       value="<?= htmlspecialchars(old('identification')) ?>">
+                                    value="<?= htmlspecialchars(old('identification')) ?>">
                             </div>
                             <div class="col-12 col-md-4">
                                 <label class="form-label fw-bold small">Primer Nombre *</label>
                                 <input type="text" name="name" class="form-control" required
-                                       value="<?= htmlspecialchars(old('name')) ?>">
+                                    value="<?= htmlspecialchars(old('name')) ?>">
                             </div>
                             <div class="col-12 col-md-4">
                                 <label class="form-label fw-bold small">Segundo Nombre</label>
                                 <input type="text" name="middlename" class="form-control"
-                                       value="<?= htmlspecialchars(old('middlename')) ?>">
+                                    value="<?= htmlspecialchars(old('middlename')) ?>">
                             </div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label fw-bold small">Apellido Paterno *</label>
                                 <input type="text" name="lastname1" class="form-control" required
-                                       value="<?= htmlspecialchars(old('lastname1')) ?>">
+                                    value="<?= htmlspecialchars(old('lastname1')) ?>">
                             </div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label fw-bold small">Apellido Materno</label>
                                 <input type="text" name="lastname2" class="form-control"
-                                       value="<?= htmlspecialchars(old('lastname2')) ?>">
+                                    value="<?= htmlspecialchars(old('lastname2')) ?>">
                             </div>
                         </div>
 
@@ -85,7 +89,7 @@ require_once __DIR__ . '/../layouts/navbar.php';
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-telephone"></i></span>
                                     <input type="text" name="phone" class="form-control" required
-                                           value="<?= htmlspecialchars(old('phone')) ?>">
+                                        value="<?= htmlspecialchars(old('phone')) ?>">
                                 </div>
                             </div>
                             <div class="col-12 col-md-6">
@@ -93,7 +97,7 @@ require_once __DIR__ . '/../layouts/navbar.php';
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-envelope"></i></span>
                                     <input type="email" name="email" class="form-control"
-                                           value="<?= htmlspecialchars(old('email')) ?>">
+                                        value="<?= htmlspecialchars(old('email')) ?>">
                                 </div>
                             </div>
                         </div>
@@ -102,11 +106,13 @@ require_once __DIR__ . '/../layouts/navbar.php';
                         <div class="row g-3 mb-4">
                             <div class="col-12">
                                 <label class="form-label fw-bold small">Dirección</label>
-                                <textarea name="address" class="form-control" rows="2"><?= htmlspecialchars(old('address')) ?></textarea>
+                                <textarea name="address" class="form-control"
+                                    rows="2"><?= htmlspecialchars(old('address')) ?></textarea>
                             </div>
                             <div class="col-12">
                                 <label class="form-label fw-bold small">Observaciones</label>
-                                <textarea name="observations" class="form-control" rows="2"><?= htmlspecialchars(old('observations')) ?></textarea>
+                                <textarea name="observations" class="form-control"
+                                    rows="2"><?= htmlspecialchars(old('observations')) ?></textarea>
                             </div>
                         </div>
 

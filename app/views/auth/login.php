@@ -5,6 +5,7 @@
     <h2>Login VetApp</h2>
 
     <form method="POST" action="/vetapp/public/login">
+        <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
         <div class="mb-3">
             <label>Email</label>
             <input type="email" name="email" class="form-control">

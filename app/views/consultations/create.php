@@ -47,6 +47,10 @@ require_once __DIR__ . '/../layouts/navbar.php';
                     <?php endif; ?>
 
                     <form method="POST" action="<?= BASE_URL ?>consultations.php?action=store" autocomplete="off">
+
+                        <!-- ********** GENERA TOKEN ********** -->
+                        <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
+
                         <!-- Datos de la mascota -->
                         <div class="row g-3 mb-4">
                             <div class="col-12">
@@ -277,7 +281,7 @@ require_once __DIR__ . '/../layouts/navbar.php';
 
     // Al final del archivo, antes del footer
 
-    document.getElementById('serviceSelect').addEventListener('change', function() {
+    document.getElementById('serviceSelect').addEventListener('change', function () {
         const selected = this.options[this.selectedIndex];
         const price = selected.dataset.price || 0;
         document.getElementById('consultationFee').value = price;

@@ -18,6 +18,7 @@ class SaleController extends BaseController
     private $medRepo;
     private $clientRepo;
 
+    // ********** Constructor: inicializa repositorios y verifica autenticación **********
     public function __construct()
     {
         parent::__construct();
@@ -27,6 +28,7 @@ class SaleController extends BaseController
         $this->requireAuth();
     }
 
+    // ********** Verifica que el usuario esté autenticado y tenga rol admin/veterinario/pharmacy **********
     private function requireAuth()
     {
         if (!isset($_SESSION['user'])) {
@@ -34,7 +36,6 @@ class SaleController extends BaseController
             exit;
         }
         $roles = $_SESSION['user']['roles'] ?? [];
-        // Administradores, veterinarios y farmacia pueden vender
         if (!in_array('admin', $roles) && !in_array('veterinarian', $roles) && !in_array('pharmacy', $roles)) {
             $_SESSION['error'] = 'No tienes permiso para acceder a esta sección.';
             header('Location: ' . BASE_URL . 'dashboard.php');
@@ -42,24 +43,34 @@ class SaleController extends BaseController
         }
     }
 
+    // ********** Listar todas las ventas **********
     public function index()
     {
         $sales = $this->saleRepo->getAll();
         require_once __DIR__ . '/../../views/sales/index.php';
     }
 
+    // ********** Mostrar formulario para crear venta **********
     public function create()
     {
-        $clients = $this->clientRepo->getAll(); // lista de clientes para selector
+        $clients = $this->clientRepo->getAll();
         require_once __DIR__ . '/../../views/sales/create.php';
     }
 
+    // ********** Guardar nueva venta con sus detalles **********
     public function store()
     {
+        // ********** Verificar CSRF **********
+        $this->validateCSRF();
+
+        // ********** Validar método POST **********
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: ' . BASE_URL . 'sales.php');
             exit;
         }
+
+        // ********** Sanitizar todos los datos POST **********
+        $data = $this->sanitizeInputData($_POST);
 
         $user = currentUser();
         $id_user = $user['id'] ?? null;
@@ -70,14 +81,14 @@ class SaleController extends BaseController
         }
 
         // Recibir datos del carrito (enviado como JSON)
-        $cart = json_decode($_POST['cart'] ?? '[]', true);
+        $cart = json_decode($data['cart'] ?? '[]', true);
         if (empty($cart)) {
             $_SESSION['error'] = 'No hay productos en la venta.';
             header('Location: ' . BASE_URL . 'sales.php?action=create');
             exit;
         }
 
-        // Validaciones básicas
+        // Validaciones básicas del carrito
         foreach ($cart as $item) {
             if (!isset($item['id_medication']) || !isset($item['quantity']) || $item['quantity'] <= 0) {
                 $_SESSION['error'] = 'Datos de producto inválidos.';
@@ -86,21 +97,21 @@ class SaleController extends BaseController
             }
         }
 
-        // Crear modelo de venta
+        // Crear modelo de venta con datos sanitizados
         $sale = new SaleModel([
             'sale_code' => $this->generateSaleCode(),
-            'id_client' => $_POST['id_client'] ?? null,
+            'id_client' => $data['id_client'] ?? null,
             'id_user' => $id_user,
-            'subtotal' => (float) $_POST['subtotal'],
-            'discount' => (float) $_POST['discount'],
-            'tax_total' => (float) $_POST['tax_total'],
-            'total' => (float) $_POST['total'],
-            'payment_method' => $_POST['payment_method'] ?? 'cash',
+            'subtotal' => (float) $data['subtotal'],
+            'discount' => (float) $data['discount'],
+            'tax_total' => (float) $data['tax_total'],
+            'total' => (float) $data['total'],
+            'payment_method' => $data['payment_method'] ?? 'cash',
             'status' => 'paid',
-            'observations' => trim($_POST['observations'] ?? '')
+            'observations' => $data['observations'] ?? ''
         ]);
 
-        // Construir detalles
+        // Construir detalles de la venta
         $details = [];
         foreach ($cart as $item) {
             $med = $this->medRepo->findById($item['id_medication']);
@@ -109,8 +120,6 @@ class SaleController extends BaseController
                 header('Location: ' . BASE_URL . 'sales.php?action=create');
                 exit;
             }
-            // Si $med es un objeto MedicationModel, usar getTaxable()
-            // Si es un array, usar $med['taxable']
             $taxable = is_object($med) ? $med->getTaxable() : ($med['taxable'] ?? true);
             $taxRate = $taxable ? 15 : 0;
 
@@ -125,22 +134,18 @@ class SaleController extends BaseController
 
         $saleId = $this->saleRepo->createSale($sale, $details);
         if ($saleId) {
-            // Si el método de pago es crédito, crear recordatorio
-            if ($_POST['payment_method'] == 'credit') {
-                // Asegurar que ReminderRepository y ReminderModel estén disponibles
+            // Si el método de pago es crédito, crear recordatorio de pago pendiente
+            if ($data['payment_method'] == 'credit') {
                 require_once __DIR__ . '/../../repositories/ReminderRepository.php';
                 require_once __DIR__ . '/../../models/ReminderModel.php';
 
                 $reminderRepo = new ReminderRepository();
-
-                // Obtener el código de la venta (debes tenerlo en $sale)
                 $saleCode = $sale->getSaleCode();
 
-                // Crear el recordatorio
                 $reminderData = [
                     'reminder_type' => 'payment',
-                    'id_client' => $_POST['id_client'],
-                    'reminder_date' => date('Y-m-d', strtotime('+7 days')), // 7 días después
+                    'id_client' => $data['id_client'],
+                    'reminder_date' => date('Y-m-d', strtotime('+7 days')),
                     'message' => "Pago pendiente de factura {$saleCode}"
                 ];
                 $reminder = new ReminderModel($reminderData);
@@ -155,6 +160,7 @@ class SaleController extends BaseController
         exit;
     }
 
+    // ********** Mostrar detalle de una venta **********
     public function show($id)
     {
         $saleData = $this->saleRepo->findById($id);
@@ -166,6 +172,7 @@ class SaleController extends BaseController
         require_once __DIR__ . '/../../views/sales/show.php';
     }
 
+    // ********** Cancelar una venta **********
     public function cancel($id)
     {
         $saleData = $this->saleRepo->findById($id);
@@ -183,14 +190,11 @@ class SaleController extends BaseController
         exit;
     }
 
-    /**
-     * Genera un código único para la venta (ej: VENTA-20260328-001)
-     */
+    // ********** Generar código único para venta (ej: VENTA-20260328-001) **********
     private function generateSaleCode()
     {
         $date = date('Ymd');
         $prefix = "VENTA-{$date}-";
-        // Contar ventas de hoy para secuencia
         $sql = "SELECT COUNT(*) FROM sales WHERE DATE(sale_date) = CURDATE()";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
@@ -198,9 +202,11 @@ class SaleController extends BaseController
         return $prefix . str_pad($count, 3, '0', STR_PAD_LEFT);
     }
 
+    // ********** Buscar medicamentos para autocomplete (evita XSS en búsqueda) **********
     public function searchMedications()
     {
-        $term = $_GET['q'] ?? '';
+        header('Content-Type: application/json');
+        $term = isset($_GET['q']) ? sanitizeInput($_GET['q']) : '';
         if (strlen($term) < 2) {
             echo json_encode([]);
             exit;
@@ -210,22 +216,18 @@ class SaleController extends BaseController
         exit;
     }
 
+    // ********** Buscar clientes para autocomplete (evita XSS en búsqueda) **********
     public function searchClients()
     {
         header('Content-Type: application/json');
-
-        $q = $_GET['q'] ?? '';
-
+        $q = isset($_GET['q']) ? sanitizeInput($_GET['q']) : '';
         $repo = new ClientRepository();
         $results = $repo->searchClientsWithPets($q);
-
         echo json_encode($results);
         exit;
     }
 
-    /**
-     * Generar PDF de la factura
-     */
+    // ********** Generar PDF de factura **********
     public function generatePDF($id)
     {
         $saleData = $this->saleRepo->findById($id);
@@ -235,7 +237,6 @@ class SaleController extends BaseController
             exit;
         }
 
-        // Cargar dompdf
         require_once ROOT_PATH . '/vendor/dompdf/autoload.inc.php';
         $dompdf = new Dompdf\Dompdf();
 
@@ -248,9 +249,7 @@ class SaleController extends BaseController
         exit;
     }
 
-    /**
-     * Renderizar HTML para el PDF
-     */
+    // ********** Renderizar HTML para PDF de factura **********
     private function renderPDFHTML($saleData)
     {
         $sale = $saleData['sale'];

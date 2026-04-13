@@ -9,168 +9,146 @@ require_once __DIR__ . '/../BaseController.php';
 require_once __DIR__ . '/../../repositories/UserRepository.php';
 require_once __DIR__ . '/../../repositories/RoleRepository.php';
 
-
 class UserController extends BaseController
 {
-
-
+    // ********** Constructor: inicializa sesión y repositorios **********
     public function __construct()
     {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-
         parent::__construct();
     }
 
+    // ********** Listar todos los usuarios (solo admin) **********
     public function index(): void
     {
-        // ***** Solo admin *****
         if (!hasRole('admin')) {
             header('Location: ' . BASE_URL . 'dashboard.php');
             exit;
         }
 
         $users = $this->userRepository->findAll();
-
         require_once __DIR__ . '/../../views/users/index.php';
     }
 
+    // ********** Mostrar formulario para crear usuario **********
     public function create()
     {
         require __DIR__ . '/../../views/users/create.php';
     }
 
-    // ******************* guardar nuevo usuario *******************
+    // ********** Guardar nuevo usuario con roles **********
     public function store(): void
     {
-        // ******************* validar método POST *******************
+        // ********** Verificar CSRF **********
+        $this->validateCSRF();
+
+        // ********** Validar método POST **********
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: ' . BASE_URL . 'users.php');
             exit;
         }
 
-        // ******************* obtener datos del formulario *******************
-        $identification = trim($_POST['identification'] ?? '');
-        $name = trim($_POST['name'] ?? '');
-        $middlename = trim($_POST['middlename'] ?? '');
-        $lastname1 = trim($_POST['lastname1'] ?? '');
-        $lastname2 = trim($_POST['lastname2'] ?? '');
-        $email = trim($_POST['email'] ?? '');
-        $phone = trim($_POST['phone'] ?? '');
-        $password = $_POST['password'] ?? '';
-        $confirmPassword = $_POST['confirm_password'] ?? '';
-        $roles = $_POST['roles'] ?? [];
+        // ********** Sanitizar todos los datos POST **********
+        $data = $this->sanitizeInputData($_POST);
 
+        // ********** Obtener datos del formulario con datos sanitizados **********
+        $identification = $data['identification'] ?? '';
+        $name = $data['name'] ?? '';
+        $middlename = $data['middlename'] ?? '';
+        $lastname1 = $data['lastname1'] ?? '';
+        $lastname2 = $data['lastname2'] ?? '';
+        $email = $data['email'] ?? '';
+        $phone = $data['phone'] ?? '';
+        $password = $data['password'] ?? '';
+        $confirmPassword = $data['confirm_password'] ?? '';
+        $roles = $data['roles'] ?? [];
 
-        // ******************* validar campos obligatorios *******************
+        // ********** Validar campos obligatorios **********
         if ($identification === '' || $name === '' || $lastname1 === '' || $email === '' || $password === '') {
-
             $_SESSION['error'] = 'Debe completar todos los campos obligatorios';
             header('Location: ' . BASE_URL . 'users.php?action=create');
             exit;
         }
 
-
-        // ******************* validar identificación (solo números) *******************
+        // ********** Validar identificación (solo números) **********
         if (!preg_match("/^[0-9]{6,20}$/", $identification)) {
-
             $_SESSION['error'] = 'Identificación inválida';
             header('Location: ' . BASE_URL . 'users.php?action=create');
             exit;
         }
 
-
-        // ******************* validar nombres *******************
+        // ********** Validar nombres **********
         if (!preg_match("/^[A-Za-zñÑáéíóúÁÉÍÓÚ\s]+$/", $name)) {
-
             $_SESSION['error'] = 'Nombre inválido';
             header('Location: ' . BASE_URL . 'users.php?action=create');
             exit;
         }
 
-
-        // ******************* validar segundo nombre si existe *******************
+        // ********** Validar segundo nombre si existe **********
         if ($middlename !== '' && !preg_match("/^[A-Za-zñÑáéíóúÁÉÍÓÚ\s]+$/", $middlename)) {
-
             $_SESSION['error'] = 'Segundo nombre inválido';
             header('Location: ' . BASE_URL . 'users.php?action=create');
             exit;
         }
 
-
-        // ******************* validar apellido paterno *******************
+        // ********** Validar apellido paterno **********
         if (!preg_match("/^[A-Za-zñÑáéíóúÁÉÍÓÚ\s]+$/", $lastname1)) {
-
             $_SESSION['error'] = 'Apellido paterno inválido';
             header('Location: ' . BASE_URL . 'users.php?action=create');
             exit;
         }
 
-
-        // ******************* validar apellido materno *******************
+        // ********** Validar apellido materno **********
         if ($lastname2 !== '' && !preg_match("/^[A-Za-zñÑáéíóúÁÉÍÓÚ\s]+$/", $lastname2)) {
-
             $_SESSION['error'] = 'Apellido materno inválido';
             header('Location: ' . BASE_URL . 'users.php?action=create');
             exit;
         }
 
-
-        // ******************* sanitizar email *******************
+        // ********** Sanitizar email (ya viene sanitizado pero se valida) **********
         $email = filter_var($email, FILTER_SANITIZE_EMAIL);
 
-
-        // ******************* validar email *******************
+        // ********** Validar email **********
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-
             $_SESSION['error'] = 'Correo electrónico inválido';
             header('Location: ' . BASE_URL . 'users.php?action=create');
             exit;
         }
 
-
-        // ******************* validar teléfono *******************
+        // ********** Validar teléfono **********
         if ($phone !== '' && !preg_match("/^[0-9+\s]{7,20}$/", $phone)) {
-
             $_SESSION['error'] = 'Teléfono inválido';
             header('Location: ' . BASE_URL . 'users.php?action=create');
             exit;
         }
 
-
-        // ******************* validar contraseña *******************
+        // ********** Validar contraseña **********
         if (strlen($password) < 5 || strlen($password) > 8) {
-
             $_SESSION['error'] = 'La contraseña debe tener entre 5 y 8 caracteres';
             header('Location: ' . BASE_URL . 'users.php?action=create');
             exit;
         }
 
-
-        // ******************* validar coincidencia de contraseñas *******************
+        // ********** Validar coincidencia de contraseñas **********
         if ($password !== $confirmPassword) {
-
             $_SESSION['error'] = 'Las contraseñas no coinciden';
             header('Location: ' . BASE_URL . 'users.php?action=create');
             exit;
         }
 
-
-        // ******************* validar roles *******************
+        // ********** Validar roles **********
         if (empty($roles)) {
-
             $_SESSION['error'] = 'Debe asignar al menos un rol';
             header('Location: ' . BASE_URL . 'users.php?action=create');
             exit;
         }
 
-
-        // ******************* encriptar contraseña *******************
+        // ********** Encriptar contraseña **********
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
-
-        // ******************* preparar datos *******************
+        // ********** Preparar datos del usuario **********
         $userData = [
             'email' => $email,
             'password' => $passwordHash,
@@ -182,129 +160,107 @@ class UserController extends BaseController
             'phone' => $phone
         ];
 
-
-        // ******************* guardar usuario *******************
+        // ********** Guardar usuario **********
         $userId = $this->userRepository->create($userData);
 
-
-        // ******************* guardar roles *******************
+        // ********** Guardar roles **********
         $this->userRepository->assignRoles($userId, $roles);
 
-
-        // ******************* mensaje éxito *******************
+        // ********** Mensaje de éxito **********
         $_SESSION['success'] = 'Usuario creado correctamente';
-
         header('Location: ' . BASE_URL . 'users.php');
         exit;
-
     }
 
-    // =====================================================
-    // EDITAR USUARIO
-    // =====================================================
+    // ********** Mostrar formulario para editar usuario **********
     public function edit($id)
     {
         $id = (int) $id;
-
         $user = $this->userRepository->findById($id);
 
-        // 🔥 CREAR roleRepository
         $roleRepository = new RoleRepository($this->db);
-
-        // 🔥 TRAER TODOS LOS ROLES
         $roles = $roleRepository->findAll();
-
-        // 🔥 TRAER ROLES DEL USUARIO
         $userRoles = $this->userRepository->getRolesByUserId($id);
-
-        // convertir a array simple
         $roleIds = array_column($userRoles, 'id_role');
 
-        // 🔥 FORM DATA
         $formData = $user;
         $formData['role_ids'] = $roleIds;
 
         require __DIR__ . '/../../views/users/edit.php';
     }
 
-    // =====================================================
-    // ACTUALIZAR USUARIO (COMPLETO)
-    // =====================================================
+    // ********** Actualizar usuario y sus roles **********
     public function update()
     {
+        // ********** Verificar CSRF **********
+        $this->validateCSRF();
 
-        // ******************* validar método *******************
+        // ********** Validar método POST **********
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: ' . BASE_URL . 'users.php');
             exit;
         }
 
-        // ******************* obtener id y sanitizar datos *******************
-        $id = (int) ($_POST['id_user'] ?? 0);
+        // ********** Sanitizar todos los datos POST **********
+        $data = $this->sanitizeInputData($_POST);
+
+        // ********** Obtener ID del usuario **********
+        $id = (int) ($data['id_user'] ?? 0);
 
         if ($id <= 0) {
             die("ID inválido");
         }
 
-        $identification = trim($_POST['identification'] ?? '');
-        $name = trim($_POST['name'] ?? '');
-        $middlename = trim($_POST['middlename'] ?? '');
-        $lastname1 = trim($_POST['lastname1'] ?? '');
-        $lastname2 = trim($_POST['lastname2'] ?? '');
-        $email = trim($_POST['email'] ?? '');
-        $phone = trim($_POST['phone'] ?? '');
-        $password = $_POST['password'] ?? '';
-        $roles = $_POST['roles'] ?? [];
-        $active = isset($_POST['active']) ? 1 : 0;
+        // ********** Obtener datos del formulario con datos sanitizados **********
+        $identification = $data['identification'] ?? '';
+        $name = $data['name'] ?? '';
+        $middlename = $data['middlename'] ?? '';
+        $lastname1 = $data['lastname1'] ?? '';
+        $lastname2 = $data['lastname2'] ?? '';
+        $email = $data['email'] ?? '';
+        $phone = $data['phone'] ?? '';
+        $password = $data['password'] ?? '';
+        $roles = $data['roles'] ?? [];
+        $active = isset($data['active']) ? 1 : 0;
 
-        // ******************* validaciones básicas *******************
+        // ********** Validaciones básicas **********
         if (!$id || $name === '' || $lastname1 === '' || $email === '') {
-
             $_SESSION['error'] = 'Datos obligatorios incompletos';
-            $_SESSION['form_data'] = $_POST;
-
+            $_SESSION['form_data'] = $data;
             header('Location: ' . BASE_URL . 'users.php?action=edit&id=' . $id);
             exit;
         }
 
-        // ******************* validar email *******************
+        // ********** Validar email **********
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-
             $_SESSION['error'] = 'Correo electrónico inválido';
-            $_SESSION['form_data'] = $_POST;
-
+            $_SESSION['form_data'] = $data;
             header('Location: ' . BASE_URL . 'users.php?action=edit&id=' . $id);
             exit;
         }
 
-        // ******************* validar roles *******************
+        // ********** Validar roles **********
         if (empty($roles)) {
-
             $_SESSION['error'] = 'Debe seleccionar al menos un rol';
-            $_SESSION['form_data'] = $_POST;
-
+            $_SESSION['form_data'] = $data;
             header('Location: ' . BASE_URL . 'users.php?action=edit&id=' . $id);
             exit;
         }
 
-        // ******************* preparar password si existe *******************
+        // ********** Preparar password si existe **********
         $hashedPassword = null;
 
         if (!empty($password)) {
-
             if (strlen($password) < 6) {
-
                 $_SESSION['error'] = 'La contraseña debe tener mínimo 6 caracteres';
-                $_SESSION['form_data'] = $_POST;
-
+                $_SESSION['form_data'] = $data;
                 header('Location: ' . BASE_URL . 'users.php?action=edit&id=' . $id);
                 exit;
             }
-
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         }
 
-        // ******************* actualizar usuario *******************
+        // ********** Actualizar usuario **********
         $updated = $this->userRepository->updateFull(
             $id,
             $name,
@@ -318,27 +274,23 @@ class UserController extends BaseController
         );
 
         if (!$updated) {
-
             $_SESSION['error'] = 'Error al actualizar usuario';
             header('Location: ' . BASE_URL . 'users.php');
             exit;
         }
 
-        // ******************* actualizar roles *******************
+        // ********** Actualizar roles **********
         $this->userRepository->updateRoles($id, $roles);
 
         $_SESSION['success'] = 'Usuario actualizado correctamente';
-
         header('Location: ' . BASE_URL . 'users.php');
         exit;
     }
 
-    // =====================================================
-// DESACTIVAR USUARIO
-// =====================================================
+    // ********** Desactivar usuario (soft delete) **********
     public function deactivate(int $id)
     {
-        // ******************* obtener id *******************
+        // ********** Obtener ID de la URL **********
         $id = (int) ($_GET['id'] ?? 0);
 
         if ($id <= 0) {
@@ -347,21 +299,17 @@ class UserController extends BaseController
             exit;
         }
 
-        // ******************* ejecutar soft delete *******************
+        // ********** Ejecutar soft delete **********
         $deleted = $this->userRepository->deactivate($id);
 
-        // ******************* mensaje SweetAlert *******************
+        // ********** Mensaje de resultado **********
         if ($deleted) {
             $_SESSION['success'] = 'Usuario desactivado correctamente';
         } else {
             $_SESSION['error'] = 'No se pudo desactivar el usuario';
         }
 
-        // ******************* redirección *******************
         header("Location: users.php");
         exit;
     }
-
 }
-
-?>

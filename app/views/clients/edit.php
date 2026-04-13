@@ -42,6 +42,10 @@ require_once __DIR__ . '/../layouts/navbar.php';
                     <?php endif; ?>
 
                     <form action="<?= BASE_URL ?>clients.php?action=update" method="POST" autocomplete="off">
+
+                    <!-- ********** genera token ********** -->    
+                    <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
+                    
                         <input type="hidden" name="id_client" value="<?= $client->getIdClient() ?>">
 
                         <h6 class="text-primary text-uppercase small fw-bold mb-3">Información Personal</h6>
