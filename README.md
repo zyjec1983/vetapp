@@ -15,159 +15,185 @@ Unlike traditional "spaghetti" PHP projects, VetApp follows modern standards use
 
     Singleton Pattern: Optimized database connection management.
 
+    CSRF Protection & Input Sanitization: Built-in security helpers to prevent XSS and CSRF attacks.
+
 🛠️ Tech Stack & Security
 
     Backend: PHP 8.1+ (Strict types enabled)
 
     Database: MySQL / MariaDB (PDO with Prepared Statements)
 
-    Frontend: HTML5, CSS3, Bootstrap 5
+    Frontend: HTML5, CSS3, Bootstrap 5, SweetAlert2, Chart.js
 
-    Security: * One-way password hashing using bcrypt.
+    Security:
+
+        One-way password hashing using bcrypt.
 
         XSS Protection via output escaping.
 
-        CSRF-ready architecture.
+        CSRF tokens on all forms.
+
+        Input sanitization and type casting.
+
+        Session regeneration to prevent fixation.
 
         Protected /app directory (Logic is not exposed to the web).
 
 📁 Project Structure
-Plaintext
+text
 
 vetapp/
-├── app/                # Core Application Logic
-│   ├── config/         # System & DB Configuration
-│   ├── controllers/    # Request Handling
-│   ├── middleware/     # Auth & Role Guards
-│   ├── models/         # Domain Entities (Business Rules)
-│   ├── repositories/   # Data Access Layer (SQL)
-│   ├── helpers/        # Global Utility Functions
-│   └── views/          # UI Templates (HTML/PHP)
-├── public/             # Entry Point (Front Controller & Assets)
-├── database/           # SQL Migrations/Scripts
-└── storage/            # Logs & File Uploads
+├── app/                     # Core Application Logic
+│   ├── config/              # System & DB Configuration
+│   ├── controllers/         # Request Handling (Auth, Clients, Pets, Consultations, Medications, Sales, Services, Users)
+│   ├── middleware/          # Auth & Role Guards
+│   ├── models/              # Domain Entities (Business Rules)
+│   ├── repositories/        # Data Access Layer (SQL)
+│   ├── helpers/             # Global Utility Functions (auth, csrf, sanitize, redirect, alert)
+│   └── views/               # UI Templates (HTML/PHP)
+├── public/                  # Entry Point (Front Controller & Assets)
+├── database/                # SQL Migrations/Scripts
+└── storage/                 # Logs & File Uploads
 
 🔧 Installation & Setup
 
-    Clone the repository: git clone https://github.com/zyjec1983/vetapp
+    Clone the repository
+    git clone https://github.com/zyjec1983/vetapp
 
-    Database: Import database/vetapp.sql into your MySQL server.
+    Database
+    Import database/vetapp.sql into your MySQL server.
 
-    Configuration:
+    Configuration
 
-        Update your credentials in app/config/Database.php.
+        Update credentials in app/config/Database.php (or define constants in app/config/config.php).
 
-        Set your BASE_URL in app/config/config.php.
+        Set BASE_URL in app/config/config.php (e.g., http://localhost/vetapp/public/).
 
-    Run: Point your web server to the public/ folder.
+    Run
+    Point your web server to the public/ folder.
 
+✅ Current Features (Sprints 1–9)
+Module	Features
+Authentication	Login, logout, session management, role-based access (admin, veterinarian, pharmacy).
+Users	CRUD, soft delete (activate/deactivate), role assignment, SweetAlert2 confirmations.
+Clients	CRUD, soft delete, search by name/identification, linked to pets.
+Pets	CRUD, image upload, client selection, soft delete, medical record view.
+Consultations	CRUD, service selection (predefined prices), weight, temperature, diagnosis, treatment, next visit, observations, reminders.
+Medications	CRUD with batch management (FIFO), stock calculation, IVA toggle (taxable), low-stock alerts, product deactivation/reactivation.
+Services	CRUD for predefined veterinary services (consultation, grooming, etc.), used in consultations.
+Sales	Shopping cart, client/pet search, discount, IVA exemption toggle, payment methods (cash, card, transfer, credit). PDF generation, WhatsApp sharing, cancellation with SweetAlert2.
+Dashboard	Summary cards (clients, pets, today consultations, today sales), today reminders (with WhatsApp), low stock alerts, annual sales chart.
+Security	CSRF tokens, input sanitization, session regeneration, password hashing, prepared statements.
 📈 Roadmap
 
-    [x] Core Architecture & Autoloading
+    Core Architecture & Autoloading
 
-    [x] Authentication System (Login/Logout)
+    Authentication System (Login/Logout)
 
-    [x] Role-Based Access Control (Admin/Vet/Pharmacy)
+    Role-Based Access Control (Admin/Vet/Pharmacy)
 
-    [ ] Patient & Medical Records Module
+    Clients & Pets Management
 
-    [ ] Appointment Scheduling System
+    Medical Consultations with Reminders
 
-    [ ] REST API Integration for Mobile App
+    Medications Inventory (Batches, FIFO, Stock)
+
+    Sales Module (PDF, WhatsApp, Exempt IVA)
+
+    Services Management
+
+    Security Enhancements (CSRF, Sanitization)
+
+    Electronic Invoicing (SRI Ecuador) – pending study
+
+    Reports (Sales, Consultations, Inventory)
+
+    REST API for mobile app (future)
 
 👨‍💻 Author
 
-Christian Rodríguez Software Developer focused on Clean Code and Backend Architecture.
----------------------------------------------------------
----------------------------------------------------------
---------------------------------------------------------- 
+Christian Rodríguez
+Software Developer focused on Clean Code and Backend Architecture.
+Project developed as a practical exercise in MVC, Repository Pattern, and security best practices using vanilla PHP.
+🇪🇸 Versión en Español
+VetApp 🐾 - Sistema de Gestión Veterinaria
 
-TRADUCCIÓN AL ESPAÑOL
-# VetApp 🐾
+VetApp es un sistema robusto enfocado en backend, construido con PHP 8.1+ puro, siguiendo una arquitectura MVC + Repository + Middleware para garantizar escalabilidad, seguridad y código limpio.
+🚀 Características Arquitectónicas Clave
 
-Sistema de gestión veterinaria desarrollado en PHP puro siguiendo una arquitectura **MVC + Repository + Middleware**, con énfasis en buenas prácticas, separación de responsabilidades y seguridad.
+    Patrón Repository: Separa la lógica de negocio del acceso a datos.
 
------------------------------------------------------------
+    Middleware personalizado: Autenticación y control de acceso por roles (RBAC).
 
-## Objetivo del proyecto
+    Entidades de dominio: Modelos con tipado estricto y validación.
 
-VetApp es un proyecto educativo–profesional cuyo objetivo es:
+    Autoloading y Bootstrap centralizados: Carga automática de clases PSR-4.
 
-- Aprender MVC de forma **correcta**
-- Evitar acoplamiento entre capas
-- Facilitar mantenimiento y escalabilidad
-- Preparar la base para frameworks como Laravel o Symfony
+    Singleton para la conexión a BD.
 
------------------------------------------------------------
+    Protección CSRF y sanitización de entradas.
 
-## Arquitectura
+🛠️ Tecnologías y Seguridad
 
-El proyecto utiliza las siguientes capas:
+    Backend: PHP 8.1+
 
-- **Controllers**: Orquestan la lógica de la aplicación
-- **Models**: Representan entidades del dominio
-- **Repositories**: Acceso a datos (PDO, SQL)
-- **Middleware**: Autenticación y control de roles
-- **Views**: Presentación (HTML + Bootstrap)
-- **Helpers**: Funciones reutilizables
-- **Public**: Punto de entrada del sistema
+    Base de datos: MySQL / MariaDB (PDO con prepared statements)
 
------------------------------------------------------------
+    Frontend: HTML5, CSS3, Bootstrap 5, SweetAlert2, Chart.js
 
-## Estructura del proyecto
-vetapp/
-├── app/
-│ ├── config/
-│ ├── controllers/
-│ ├── middleware/
-│ ├── models/
-│ ├── views/
-│ └── helpers/
-├── repositories/
-├── database/
-├── public/
-├── storage/
-└── README.md
+    Seguridad: Hash de contraseñas con bcrypt, escape de salidas (XSS), tokens CSRF, sanitización, regeneración de sesión.
 
+📁 Estructura del Proyecto
 
------------------------------------------------------------
+(Ver estructura en inglés arriba)
+🔧 Instalación
 
-## Seguridad
+    Clonar repositorio.
 
-- Contraseñas con `password_hash()` / `password_verify()`
-- Middleware de autenticación
-- Middleware de roles
-- Acceso a datos mediante PDO (prepared statements)
+    Importar database/vetapp.sql en MySQL.
 
------------------------------------------------------------
+    Configurar credenciales y BASE_URL en app/config/config.php.
 
-## Requisitos
+    Apuntar servidor web a la carpeta public/.
 
-- PHP >= 8.1
-- MySQL / MariaDB
-- Servidor Apache (XAMPP / Laragon recomendado)
+✅ Funcionalidades actuales (Sprints 1–9)
+Módulo	Funcionalidades
+Autenticación	Login, logout, gestión de sesiones, roles (admin, veterinario, farmacia).
+Usuarios	CRUD, soft delete, asignación de roles, confirmaciones SweetAlert2.
+Clientes	CRUD, soft delete, búsqueda por nombre/identificación.
+Mascotas	CRUD, subida de imágenes, selección de dueño, ficha médica.
+Consultas	CRUD, selector de servicios (precios predefinidos), peso, temperatura, diagnóstico, tratamiento, próxima visita, recordatorios.
+Medicamentos	CRUD con lotes (FIFO), cálculo de stock, toggle de IVA, alertas de stock bajo, desactivación/reactivación.
+Servicios	CRUD de servicios veterinarios (consulta, peluquería, etc.), usados en consultas.
+Ventas	Carrito, búsqueda de cliente/mascota, descuento, exención de IVA, métodos de pago, PDF, WhatsApp, cancelación con SweetAlert2.
+Dashboard	Tarjetas resumen, recordatorios del día, alertas de stock, gráfico de ventas anual.
+Seguridad	CSRF, sanitización, regeneración de sesión, hashing de contraseñas.
+📈 Hoja de ruta
 
------------------------------------------------------------
+    Arquitectura y autoloading
 
-## Instalación
+    Autenticación y roles
 
-1. Clonar el repositorio
-2. Crear la base de datos usando `database/vetapp.sql`
-3. Configurar credenciales en `app/config/Database.php`
-4. Ajustar `BASE_URL` en `app/config/config.php`
-5. Acceder desde: http://localhost/vetapp/public
+    Clientes y mascotas
 
+    Consultas médicas con recordatorios
 
----
+    Inventario de medicamentos (lotes, FIFO)
 
-## Estado del proyecto
+    Módulo de ventas (PDF, WhatsApp, exención IVA)
 
-🚧 En desarrollo  
-Actualmente se está implementando el módulo de **autenticación y usuarios**.
+    Gestión de servicios
 
----
+    Mejoras de seguridad (CSRF, sanitización)
 
-## Autor
+    Facturación electrónica (SRI Ecuador) – pendiente de estudio
 
-Proyecto desarrollado por **Christian Rodríguez**  
-Como ejercicio de arquitectura MVC y buenas prácticas en PHP.
+    Reportes (ventas, consultas, inventario)
+
+    API REST para app móvil (futuro)
+
+👨‍💻 Autor
+
+Christian Rodríguez
+Desarrollador de software enfocado en código limpio y arquitectura backend.
+Proyecto desarrollado como ejercicio práctico de MVC, Repository Pattern y buenas prácticas de seguridad en PHP puro.
