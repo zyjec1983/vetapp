@@ -115,7 +115,9 @@ Security	CSRF tokens, input sanitization, session regeneration, password hashing
 Christian Rodríguez
 Software Developer focused on Clean Code and Backend Architecture.
 Project developed as a practical exercise in MVC, Repository Pattern, and security best practices using vanilla PHP.
-🇪🇸 Versión en Español
+
+==================================================================================================================
+Versión en Español
 VetApp 🐾 - Sistema de Gestión Veterinaria
 
 VetApp es un sistema robusto enfocado en backend, construido con PHP 8.1+ puro, siguiendo una arquitectura MVC + Repository + Middleware para garantizar escalabilidad, seguridad y código limpio.
