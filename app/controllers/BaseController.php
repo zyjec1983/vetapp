@@ -1,8 +1,11 @@
 <?php
 /**
- * app/controllers/BaseController.php
+ * Location: vetapp/app/controllers/BaseController.php
  */
 
+require_once __DIR__ . '/../config/Database.php';
+require_once __DIR__ . '/../repositories/UserRepository.php';
+require_once __DIR__ . '/../repositories/RoleRepository.php';
 require_once __DIR__ . '/../helpers/csrf.php';
 require_once __DIR__ . '/../helpers/sanitize.php';
 
@@ -12,18 +15,23 @@ class BaseController
     protected $userRepository;
     protected $roleRepository;
 
+    // ********** CONSTRUCTOR: INICIALIZA CONEXIÓN Y REPOSITORIOS GLOBALES **********
     public function __construct()
     {
-        // ... (tu código existente)
-        // Asegurar que la sesión esté iniciada para CSRF
+        // ********** INICIALIZAR CONEXIÓN A BASE DE DATOS **********
+        $this->db = Database::getInstance()->getConnection();
+
+        // ********** INICIALIZAR REPOSITORIOS GLOBALES **********
+        $this->userRepository = new UserRepository($this->db);
+        $this->roleRepository = new RoleRepository($this->db);
+
+        // ********** ASEGURAR QUE LA SESIÓN ESTÉ INICIADA PARA CSRF **********
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
     }
 
-    /**
-     * Valida el token CSRF en peticiones POST
-     */
+    // ********** VALIDA EL TOKEN CSRF EN PETICIONES POST **********
     protected function validateCSRF()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -35,12 +43,7 @@ class BaseController
         }
     }
 
-    /**
-     * Valida campos requeridos y devuelve array de errores
-     * @param array $fields ['campo' => 'Nombre legible', ...]
-     * @param array $data Datos a validar
-     * @return array
-     */
+    // ********** VALIDA CAMPOS REQUERIDOS Y DEVUELVE ARRAY DE ERRORES **********
     protected function validateRequiredFields($fields, $data)
     {
         $errors = [];
@@ -52,9 +55,7 @@ class BaseController
         return $errors;
     }
 
-    /**
-     * Sanitiza los datos de entrada (globalmente para $_POST o $_GET)
-     */
+    // ********** SANITIZA LOS DATOS DE ENTRADA **********
     protected function sanitizeInputData($data)
     {
         return sanitizeArray($data);

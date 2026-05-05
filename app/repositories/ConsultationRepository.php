@@ -13,7 +13,8 @@ class ConsultationRepository
      */
     public function __construct($db)
     {
-        $this->db = $db;
+        //$this->db = $db;
+        $this->db = Database::getInstance()->getConnection();
     }
 
     /**
