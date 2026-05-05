@@ -116,7 +116,6 @@ Christian Rodríguez
 Software Developer focused on Clean Code and Backend Architecture.
 Project developed as a practical exercise in MVC, Repository Pattern, and security best practices using vanilla PHP.
 
----------------------------------------------------------------------------------------------------------
 
 Versión en Español
 VetApp 🐾 - Sistema de Gestión Veterinaria
