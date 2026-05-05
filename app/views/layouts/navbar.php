@@ -9,11 +9,12 @@ $currentUser = currentUser() ?? [];
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
-    <button class="navbar-toggler me-2 d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
-        <span class="navbar-toggler-icon"></span>
-    </button>
+        <!-- Botón para mostrar sidebar en móvil (visible solo en móvil) -->
+        <button class="navbar-toggler me-2" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Mostrar menú">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-    <a class="navbar-brand" href="<?= BASE_URL ?>dashboard.php">VetApp</a>
+        <a class="navbar-brand" href="<?= BASE_URL ?>dashboard.php">VetApp</a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#vetNavbar">
             <span class="navbar-toggler-icon"></span>

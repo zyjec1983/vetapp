@@ -26,10 +26,31 @@ require_once __DIR__ . '/../../helpers/sanitize.php';
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title ?? 'VetApp' ?></title>
 
     <link rel="stylesheet" href="<?= BASE_URL ?>css/bootstrap.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 </head>
+
+<!-- Estilos para footer siempre al fondo -->
+<style>
+    /* Footer siempre al fondo (sticky footer) */
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+    
+    /* El contenido principal ocupa el espacio disponible */
+    .container-fluid {
+        flex: 1;
+        padding-bottom: 2rem;
+    }
+    
+    footer {
+        margin-top: auto;
+    }
+</style>
 
 <body class="bg-light"></body>

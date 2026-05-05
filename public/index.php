@@ -39,6 +39,13 @@ unset($_SESSION['error']);
 
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/style.css">
+    
+    <style>
+        /* Solo este cambio para que ocupe 100% en móvil */
+        .login-card {
+            width: 100%;
+        }
+    </style>
 </head>
 
 <body>

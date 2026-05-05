@@ -9,9 +9,8 @@ html, body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen;
 }
 
-/* Fondo principal */
+/* Fondo principal - solo en escritorio */
 body {
-    /*background-image: url('../img/login-bg.jpg');*/
     background-image: url('../img/login-bg-my-pets.png');
     background-size: cover;
     background-position: center;
@@ -32,18 +31,17 @@ body::before {
     display: flex;
     align-items: center;
     justify-content: flex-end;
+    padding: 1rem;
 }
 
 .login-card {
-    max-width: 400px;
     width: 100%;
+    max-width: 400px;
     margin-right: 40px;
     background: rgba(255,255,255,0.10);
     backdrop-filter: blur(8px);
     border-radius: 14px;
 }
-
-
 
 /* Inputs */
 .login-card .form-control {
@@ -56,9 +54,22 @@ body::before {
     font-weight: 600;
 }
 
-/* Responsive */
+/* Responsive - Móvil */
 @media (max-width: 576px) {
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .login-wrapper {
+        justify-content: center;
+        padding: 0.5rem;
+    }
+    
     .login-card {
         max-width: 100%;
+        width: 100%;
+        margin-right: 0;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: none;
     }
 }
