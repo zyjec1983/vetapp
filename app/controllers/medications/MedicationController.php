@@ -517,5 +517,36 @@ class MedicationController extends BaseController
         require_once __DIR__ . '/../../views/medications/index.php';
     }
 
+    /**
+     * Generar PDF con el listado de stock actual en vitrinas/perchas
+     */
+    public function stockPdf()
+    {
+        $type = $_GET['type'] ?? '';
+        $allowedTypes = ['medicamentos', 'accesorios', 'todos'];
+        if (!in_array($type, $allowedTypes)) {
+            $type = '';
+        }
+
+        $products = $this->medRepo->getStockReport($type);
+
+        if (empty($products)) {
+            $_SESSION['error'] = 'No hay productos con stock para generar el reporte.';
+            header('Location: ' . BASE_URL . 'medications.php');
+            exit;
+        }
+
+        require_once ROOT_PATH . '/vendor/dompdf/autoload.inc.php';
+
+        $totalItems = count($products);
+        $totalValue = 0;
+        foreach ($products as $p) {
+            $totalValue += (float)$p['sale_price'] * (int)$p['stock_total'];
+        }
+
+        require_once __DIR__ . '/../../views/medications/stock_pdf.php';
+        exit;
+    }
+
 
 }

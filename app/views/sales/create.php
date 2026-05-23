@@ -5,6 +5,11 @@
 $title = 'Nueva Venta | VetApp';
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/navbar.php';
+
+$clientCreated = isset($_GET['client_created']) && $_GET['client_created'] == '1';
+$newClientId = $_GET['client_id'] ?? '';
+$newClientName = urldecode($_GET['client_name'] ?? '');
+$newClientIdentification = urldecode($_GET['client_identification'] ?? '');
 ?>
 
 <div class="container-fluid">
@@ -19,40 +24,75 @@ require_once __DIR__ . '/../layouts/navbar.php';
             <div class="row">
                 <form id="saleForm" method="POST" action="<?= BASE_URL ?>sales.php?action=store">
 
-                    <!-- ********** GENERA TOKEN ********** -->
                     <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
 
                     <div class="row">
                         <div class="col-md-4">
                             <div class="card shadow-sm mb-4">
-
                                 <div class="card-header bg-primary text-white">Información General</div>
                                 <div class="card-body">
+
+                                    <!-- Tipo de cliente -->
                                     <div class="mb-3">
-                                        <div class="mb-3">
-                                            <label class="form-label">Cliente / Mascota</label>
-
-                                            <div class="input-group">
-                                                <input type="text" id="clientSearch" class="form-control"
-                                                    placeholder="Buscar cliente o mascota...">
-                                                <button class="btn btn-primary" type="button" id="clientSearchBtn">
-                                                    <i class="bi bi-search"></i>
-                                                </button>
+                                        <label class="form-label fw-bold">Tipo de Facturación</label>
+                                        <div class="d-flex gap-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="client_type"
+                                                       id="clientTypeRegistered" value="registered" checked>
+                                                <label class="form-check-label" for="clientTypeRegistered">
+                                                    <i class="bi bi-person me-1"></i>Cliente registrado
+                                                </label>
                                             </div>
-
-                                            <!-- Resultados -->
-                                            <div id="clientResults" class="list-group mt-2"
-                                                style="max-height: 250px; overflow-y: auto;"></div>
-
-                                            <!-- Seleccionado -->
-                                            <div id="selectedClient" class="mt-2"></div>
-
-                                            <!-- ID real -->
-                                            <input type="hidden" name="id_client" id="clientId">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="client_type"
+                                                       id="clientTypeCF" value="consumidor_final">
+                                                <label class="form-check-label" for="clientTypeCF">
+                                                    <i class="bi bi-receipt me-1"></i>Consumidor Final
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <div class="mb-3">
+                                    <!-- Buscador de cliente (solo registrado) -->
+                                    <div id="clientSearchSection">
+                                        <label class="form-label">Cliente / Mascota</label>
+                                        <div class="input-group">
+                                            <input type="text" id="clientSearch" class="form-control"
+                                                placeholder="Buscar cliente o mascota...">
+                                            <button class="btn btn-primary" type="button" id="clientSearchBtn">
+                                                <i class="bi bi-search"></i>
+                                            </button>
+                                            <a href="<?= BASE_URL ?>clients.php?action=create" class="btn btn-outline-success"
+                                               id="btnNewClient" title="Crear nuevo cliente">
+                                                <i class="bi bi-person-plus"></i> <span class="d-none d-sm-inline">Nuevo Cliente</span>
+                                            </a>
+                                        </div>
+                                        <div id="clientResults" class="list-group mt-2"
+                                            style="max-height: 250px; overflow-y: auto;"></div>
+                                        <div id="selectedClient" class="mt-2"></div>
+                                    </div>
+
+                                    <!-- Badge Consumidor Final -->
+                                    <div id="cfBadgeSection" style="display:none;">
+                                        <div class="alert alert-warning py-2 mb-0">
+                                            <i class="bi bi-receipt me-1"></i>
+                                            <strong>CONSUMIDOR FINAL</strong><br>
+                                            <small class="text-muted">RUC: 9999999999999</small>
+                                        </div>
+                                    </div>
+
+                                    <!-- Alerta $150 -->
+                                    <div id="cfLimitAlert" class="alert alert-danger py-2 mt-2" style="display:none;">
+                                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                        <strong>El monto supera $150.00</strong><br>
+                                        <small>Para facturación electrónica como Consumidor Final, el SRI exige un máximo de $150. Debe registrar un cliente.</small>
+                                    </div>
+
+                                    <input type="hidden" name="id_client" id="clientId">
+                                    <input type="hidden" id="cfClientId" value="<?= $cfPlaceholderId ?? '' ?>">
+
+                                    <!-- Observaciones -->
+                                    <div class="mb-3 mt-3">
                                         <label class="form-label">Observaciones</label>
                                         <textarea name="observations" class="form-control" rows="2"></textarea>
                                     </div>
@@ -169,6 +209,31 @@ require_once __DIR__ . '/../layouts/navbar.php';
     let cart = [];
     let searchTimeout;
     let clientTimeout;
+    let isConsumidorFinal = false;
+    let currentTotal = 0;
+
+    // =========================
+    // CART PERSISTENCE (localStorage)
+    // =========================
+    function saveCartToStorage() {
+        localStorage.setItem('vetapp_cart', JSON.stringify(cart));
+    }
+
+    function loadCartFromStorage() {
+        const saved = localStorage.getItem('vetapp_cart');
+        if (saved) {
+            try {
+                cart = JSON.parse(saved);
+                renderCart();
+            } catch (e) {
+                localStorage.removeItem('vetapp_cart');
+            }
+        }
+    }
+
+    function clearCartFromStorage() {
+        localStorage.removeItem('vetapp_cart');
+    }
 
     // =========================
     // MEDICATION SEARCH
@@ -184,7 +249,6 @@ require_once __DIR__ . '/../layouts/navbar.php';
 
     function searchMedications() {
         const q = searchInput.value.trim();
-
         if (q.length < 2) {
             resultsDiv.innerHTML = '';
             return;
@@ -194,17 +258,14 @@ require_once __DIR__ . '/../layouts/navbar.php';
             .then(res => res.json())
             .then(data => {
                 resultsDiv.innerHTML = '';
-
                 if (data.length === 0) {
                     resultsDiv.innerHTML = '<div class="list-group-item text-muted">No se encontraron medicamentos.</div>';
                     return;
                 }
-
                 data.forEach(med => {
                     const btn = document.createElement('button');
                     btn.type = 'button';
                     btn.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
-
                     btn.innerHTML = `
                         <div>
                             <strong>${med.name}</strong><br>
@@ -215,7 +276,6 @@ require_once __DIR__ . '/../layouts/navbar.php';
                         </div>
                         <i class="bi bi-plus-circle text-success fs-5"></i>
                     `;
-
                     btn.addEventListener('click', () => addToCart(med));
                     resultsDiv.appendChild(btn);
                 });
@@ -231,7 +291,6 @@ require_once __DIR__ . '/../layouts/navbar.php';
     // =========================
     function addToCart(med) {
         const existing = cart.find(item => item.id_medication === med.id_medication);
-
         if (existing) {
             if (existing.quantity + 1 > med.stock) {
                 Swal.fire('Stock insuficiente', 'No hay suficiente stock disponible.', 'warning');
@@ -248,20 +307,18 @@ require_once __DIR__ . '/../layouts/navbar.php';
                 taxable: med.taxable
             });
         }
-
         renderCart();
+        saveCartToStorage();
     }
 
     function renderCart() {
         const tbody = document.getElementById('cartItems');
         tbody.innerHTML = '';
-
         let subtotal = 0;
 
         cart.forEach((item, index) => {
             const lineTotal = item.unit_price * item.quantity;
             subtotal += lineTotal;
-
             tbody.innerHTML += `
                 <tr>
                     <td>${item.name}</td>
@@ -287,21 +344,20 @@ require_once __DIR__ . '/../layouts/navbar.php';
 
     function updateQty(index, newQty) {
         newQty = parseInt(newQty);
-
         if (isNaN(newQty) || newQty < 1) newQty = 1;
-
         if (newQty > cart[index].stock) {
             Swal.fire('Stock insuficiente', 'Cantidad supera el stock disponible.', 'warning');
             newQty = cart[index].stock;
         }
-
         cart[index].quantity = newQty;
         renderCart();
+        saveCartToStorage();
     }
 
     function removeItem(index) {
         cart.splice(index, 1);
         renderCart();
+        saveCartToStorage();
     }
 
     // =========================
@@ -312,7 +368,6 @@ require_once __DIR__ . '/../layouts/navbar.php';
         const discountAmount = subtotal * (discountPercent / 100);
         const base = subtotal - discountAmount;
 
-        // Verificar si el switch de exención de IVA está activado
         const isExempt = document.getElementById('ivaExemptSwitch').checked;
         let iva = 0;
 
@@ -328,6 +383,7 @@ require_once __DIR__ . '/../layouts/navbar.php';
         }
 
         const total = base + iva;
+        currentTotal = total;
 
         document.getElementById('subtotal').innerText = `$${subtotal.toFixed(2)}`;
         document.getElementById('iva').innerText = `$${iva.toFixed(2)}`;
@@ -337,7 +393,10 @@ require_once __DIR__ . '/../layouts/navbar.php';
         document.getElementById('taxTotalInput').value = iva.toFixed(2);
         document.getElementById('totalInput').value = total.toFixed(2);
         document.getElementById('discountInput').value = discountAmount.toFixed(2);
+
+        checkCFLimit();
     }
+
     document.getElementById('discountPercent').addEventListener('input', () => {
         if (cart.length) {
             let subtotal = cart.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
@@ -353,13 +412,69 @@ require_once __DIR__ . '/../layouts/navbar.php';
     });
 
     // =========================
+    // CLIENT TYPE TOGGLE
+    // =========================
+    const clientTypeRegistered = document.getElementById('clientTypeRegistered');
+    const clientTypeCF = document.getElementById('clientTypeCF');
+    const clientSearchSection = document.getElementById('clientSearchSection');
+    const cfBadgeSection = document.getElementById('cfBadgeSection');
+    const cfLimitAlert = document.getElementById('cfLimitAlert');
+    const clientIdInput = document.getElementById('clientId');
+
+    function toggleClientType() {
+        if (clientTypeCF.checked) {
+            isConsumidorFinal = true;
+            clientSearchSection.style.display = 'none';
+            cfBadgeSection.style.display = '';
+            clearClientSelection();
+            clientIdInput.value = document.getElementById('cfClientId').value;
+            checkCFLimit();
+        } else {
+            isConsumidorFinal = false;
+            clientSearchSection.style.display = '';
+            cfBadgeSection.style.display = 'none';
+            cfLimitAlert.style.display = 'none';
+            clientTypeCF.disabled = false;
+            clientTypeCF.parentElement.classList.remove('opacity-50');
+        }
+    }
+
+    function clearClientSelection() {
+        document.getElementById('selectedClient').innerHTML = '';
+        document.getElementById('clientResults').innerHTML = '';
+        document.getElementById('clientSearch').value = '';
+    }
+
+    function checkCFLimit() {
+        if (!isConsumidorFinal) return;
+
+        if (currentTotal >= 150) {
+            cfLimitAlert.style.display = '';
+            clientTypeCF.disabled = true;
+            clientTypeCF.checked = false;
+            clientTypeRegistered.checked = true;
+            toggleClientType();
+            Swal.fire({
+                title: 'Límite Consumidor Final',
+                html: 'El total de la venta ($<strong>' + currentTotal.toFixed(2) + '</strong>) supera el límite de $150.00 establecido por el SRI.<br><br>Debe registrar un cliente con identificación real.',
+                icon: 'warning',
+                confirmButtonText: 'Entendido'
+            });
+        } else {
+            cfLimitAlert.style.display = 'none';
+        }
+    }
+
+    clientTypeRegistered.addEventListener('change', toggleClientType);
+    clientTypeCF.addEventListener('change', toggleClientType);
+
+    // =========================
     // CLIENT SEARCH
     // =========================
     const clientInput = document.getElementById('clientSearch');
     const clientBtn = document.getElementById('clientSearchBtn');
     const clientResults = document.getElementById('clientResults');
     const selectedClientDiv = document.getElementById('selectedClient');
-    const clientIdInput = document.getElementById('clientId');
 
     function debounceClientSearch() {
         clearTimeout(clientTimeout);
@@ -368,7 +483,6 @@ require_once __DIR__ . '/../layouts/navbar.php';
 
     function searchClients() {
         const q = clientInput.value.trim();
-
         if (q.length < 2) {
             clientResults.innerHTML = '';
             return;
@@ -381,6 +495,20 @@ require_once __DIR__ . '/../layouts/navbar.php';
 
                 if (data.length === 0) {
                     clientResults.innerHTML = '<div class="list-group-item text-muted">Sin resultados</div>';
+
+                    Swal.fire({
+                        title: 'Cliente no encontrado',
+                        html: 'No se encontraron resultados para "<strong>' + q + '</strong>".<br>¿Desea registrar un nuevo cliente?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#0d6efd',
+                        cancelButtonText: 'Seguir buscando',
+                        confirmButtonText: 'Crear nuevo cliente'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            navigateToCreateClient();
+                        }
+                    });
                     return;
                 }
 
@@ -388,12 +516,10 @@ require_once __DIR__ . '/../layouts/navbar.php';
                     const btn = document.createElement('button');
                     btn.type = 'button';
                     btn.className = 'list-group-item list-group-item-action';
-
                     btn.innerHTML = `
                         <strong>${item.client_name}</strong><br>
                         <small>Mascota: ${item.pet_name ? item.pet_name : '—'}</small>
                     `;
-
                     btn.addEventListener('click', () => selectClient(item));
                     clientResults.appendChild(btn);
                 });
@@ -406,28 +532,48 @@ require_once __DIR__ . '/../layouts/navbar.php';
 
     function selectClient(item) {
         clientIdInput.value = item.id_client;
-
         selectedClientDiv.innerHTML = `
             <div class="alert alert-success p-2">
                 <strong>${item.client_name}</strong><br>
                 <small>Mascota: ${item.pet_name ? item.pet_name : '—'}</small>
             </div>
         `;
-
         clientResults.innerHTML = '';
         clientInput.value = '';
     }
 
+    function navigateToCreateClient() {
+        saveCartToStorage();
+        window.location.href = '<?= BASE_URL ?>clients.php?action=create';
+    }
+
+    // New client button
+    document.getElementById('btnNewClient').addEventListener('click', function(e) {
+        e.preventDefault();
+        navigateToCreateClient();
+    });
+
     // =========================
     // FORM SUBMIT
     // =========================
-    document.getElementById('saleForm').addEventListener('submit', function (e) {
-
+    document.getElementById('saleForm').addEventListener('submit', function(e) {
         const clientId = document.getElementById('clientId').value;
 
         if (!clientId) {
             e.preventDefault();
-            Swal.fire('Error', 'Debe seleccionar un cliente.', 'error');
+            Swal.fire({
+                title: 'Cliente requerido',
+                html: 'Debe seleccionar un cliente o usar Consumidor Final para continuar.',
+                icon: 'error',
+                showCancelButton: true,
+                confirmButtonColor: '#0d6efd',
+                cancelButtonText: 'Buscar cliente',
+                confirmButtonText: 'Crear nuevo cliente'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    navigateToCreateClient();
+                }
+            });
             return false;
         }
 
@@ -438,7 +584,6 @@ require_once __DIR__ . '/../layouts/navbar.php';
         }
 
         const invalid = cart.some(item => item.quantity > item.stock);
-
         if (invalid) {
             e.preventDefault();
             Swal.fire('Error', 'Hay productos sin stock suficiente.', 'error');
@@ -452,6 +597,9 @@ require_once __DIR__ . '/../layouts/navbar.php';
         }));
 
         document.getElementById('cartData').value = JSON.stringify(cartForBackend);
+
+        // Clear cart after submit
+        clearCartFromStorage();
     });
 
     // =========================
@@ -464,6 +612,33 @@ require_once __DIR__ . '/../layouts/navbar.php';
     clientBtn.addEventListener('click', searchClients);
     clientInput.addEventListener('input', debounceClientSearch);
     clientInput.addEventListener('keypress', e => { if (e.key === 'Enter') searchClients(); });
+
+    // =========================
+    // ON LOAD
+    // =========================
+    loadCartFromStorage();
+
+    <?php if ($clientCreated): ?>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            icon: 'success',
+            title: 'Cliente Creado',
+            text: '<?= addslashes($newClientName) ?> se ha registrado exitosamente.',
+            confirmButtonText: 'OK',
+            timer: 3000,
+            timerProgressBar: true
+        }).then(() => {
+            const searchInput = document.getElementById('clientSearch');
+            const nameParts = '<?= addslashes($newClientName) ?>'.split(' ');
+            searchInput.value = nameParts[0] || '';
+            searchInput.focus();
+            searchClients();
+        });
+
+        clientTypeRegistered.checked = true;
+        toggleClientType();
+    });
+    <?php endif; ?>
 </script>
 
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>

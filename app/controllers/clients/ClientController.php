@@ -77,8 +77,16 @@ class ClientController extends BaseController
         if (!empty($errors)) {
             $_SESSION['errors'] = $errors;
             $_SESSION['old'] = $data;
+            if (!empty($data['return_to_sales'])) {
+                $_SESSION['return_to'] = 'sales_create';
+            }
             header('Location: ' . BASE_URL . 'clients.php?action=create');
             exit;
+        }
+
+        // Capture return_to flag before creating
+        if (!empty($data['return_to_sales'])) {
+            $_SESSION['return_to'] = 'sales_create';
         }
 
         // Crear modelo con datos sanitizados
@@ -95,12 +103,27 @@ class ClientController extends BaseController
         ]);
 
         if ($this->clientRepo->create($client)) {
+            $newClientId = $this->db->lastInsertId();
             $_SESSION['success'] = 'Cliente creado correctamente.';
+
+            $returnTo = $_SESSION['return_to'] ?? null;
+            unset($_SESSION['return_to']);
+
+            if ($returnTo === 'sales_create' && $newClientId) {
+                $client = $this->clientRepo->findById($newClientId);
+                if ($client) {
+                    $fullName = urlencode($client->getName() . ' ' . $client->getLastname1());
+                    $identification = urlencode($client->getIdentification() ?? '');
+                    header('Location: ' . BASE_URL . "sales.php?action=create&client_created=1&client_id=$newClientId&client_name=$fullName&client_identification=$identification");
+                    exit;
+                }
+            }
+
+            header('Location: ' . BASE_URL . 'clients.php');
         } else {
             $_SESSION['error'] = 'Error al guardar el cliente.';
+            header('Location: ' . BASE_URL . 'clients.php');
         }
-
-        header('Location: ' . BASE_URL . 'clients.php');
         exit;
     }
 

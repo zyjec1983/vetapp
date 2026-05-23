@@ -62,6 +62,9 @@ switch ($action) {
         else
             header('Location: ' . BASE_URL . 'medications.php');
         break;
+    case 'stockPdf':
+        $controller->stockPdf();
+        break;
     default:
         $controller->index();
 }

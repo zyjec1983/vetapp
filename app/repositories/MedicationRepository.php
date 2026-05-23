@@ -288,5 +288,40 @@ class MedicationRepository
         return (int) $stmt->fetchColumn();
     }
 
+    /**
+     * Obtener reporte de stock para PDF (solo productos con stock > 0)
+     * @param string $type 'medicamentos', 'accesorios', '' (todos)
+     * @return array
+     */
+    public function getStockReport($type = '')
+    {
+        $where = "m.active = 1";
+        if ($type === 'medicamentos') {
+            $where .= " AND m.category NOT IN ('Accesorios y otros', 'Accesorio')";
+        } elseif ($type === 'accesorios') {
+            $where .= " AND m.category IN ('Accesorios y otros', 'Accesorio')";
+        }
+
+        $sql = "SELECT 
+                    m.id_medication,
+                    m.code,
+                    m.name,
+                    m.category,
+                    m.sale_price,
+                    m.location,
+                    a.name AS active_name,
+                    COALESCE(SUM(b.quantity_remaining), 0) AS stock_total
+                FROM medications m
+                LEFT JOIN active_ingredients a ON m.id_active = a.id_active
+                LEFT JOIN medication_batches b ON m.id_medication = b.id_medication
+                WHERE $where
+                GROUP BY m.id_medication
+                HAVING stock_total > 0
+                ORDER BY m.category ASC, m.name ASC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 
 }

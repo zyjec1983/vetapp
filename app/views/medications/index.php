@@ -45,6 +45,11 @@ require_once __DIR__ . '/../layouts/navbar.php';
                         </div>
                         <?php if (isset($_GET['type']) && $_GET['type'] !== ''): ?>
                             <div class="col-md-2">
+                                <a href="<?= BASE_URL ?>medications.php?action=stockPdf&type=<?= urlencode($_GET['type']) ?>" class="btn btn-success w-100" target="_blank">
+                                    <i class="bi bi-file-earmark-pdf me-1"></i> Stock PDF
+                                </a>
+                            </div>
+                            <div class="col-md-2">
                                 <a href="<?= BASE_URL ?>medications.php" class="btn btn-outline-secondary w-100">Limpiar
                                     filtro</a>
                             </div>

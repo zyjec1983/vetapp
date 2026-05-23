@@ -53,68 +53,76 @@ require_once __DIR__ . '/../layouts/navbar.php';
                         <!-- ********** genera token ********** -->
                         <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
 
-                        <h6 class="text-primary text-uppercase small fw-bold mb-3">Información Personal</h6>
-                        <div class="row g-3 mb-4">
-                            <div class="col-12 col-md-4">
-                                <label class="form-label fw-bold small">Cédula o Pasaporte</label>
-                                <input type="text" name="identification" class="form-control" maxlength="20"
-                                    value="<?= htmlspecialchars(old('identification')) ?>">
-                            </div>
-                            <div class="col-12 col-md-4">
-                                <label class="form-label fw-bold small">Primer Nombre *</label>
-                                <input type="text" name="name" class="form-control" required
-                                    value="<?= htmlspecialchars(old('name')) ?>">
-                            </div>
-                            <div class="col-12 col-md-4">
-                                <label class="form-label fw-bold small">Segundo Nombre</label>
-                                <input type="text" name="middlename" class="form-control"
-                                    value="<?= htmlspecialchars(old('middlename')) ?>">
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <label class="form-label fw-bold small">Apellido Paterno *</label>
-                                <input type="text" name="lastname1" class="form-control" required
-                                    value="<?= htmlspecialchars(old('lastname1')) ?>">
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <label class="form-label fw-bold small">Apellido Materno</label>
-                                <input type="text" name="lastname2" class="form-control"
-                                    value="<?= htmlspecialchars(old('lastname2')) ?>">
-                            </div>
+                    <h6 class="text-primary text-uppercase small fw-bold mb-3">Información Personal</h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-12 col-md-4">
+                            <label class="form-label fw-bold small">Cédula o Pasaporte</label>
+                            <input type="text" name="identification" class="form-control" maxlength="20"
+                                value="<?= htmlspecialchars(old('identification')) ?>">
                         </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label fw-bold small">Primer Nombre *</label>
+                            <input type="text" name="name" class="form-control" required
+                                value="<?= htmlspecialchars(old('name')) ?>">
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label fw-bold small">Segundo Nombre</label>
+                            <input type="text" name="middlename" class="form-control"
+                                value="<?= htmlspecialchars(old('middlename')) ?>">
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-bold small">Apellido Paterno *</label>
+                            <input type="text" name="lastname1" class="form-control" required
+                                value="<?= htmlspecialchars(old('lastname1')) ?>">
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-bold small">Apellido Materno</label>
+                            <input type="text" name="lastname2" class="form-control"
+                                value="<?= htmlspecialchars(old('lastname2')) ?>">
+                        </div>
+                    </div>
 
-                        <h6 class="text-primary text-uppercase small fw-bold mb-3">Contacto</h6>
-                        <div class="row g-3 mb-4">
-                            <div class="col-12 col-md-6">
-                                <label class="form-label fw-bold small">Teléfono *</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-telephone"></i></span>
-                                    <input type="text" name="phone" class="form-control" required
-                                        value="<?= htmlspecialchars(old('phone')) ?>">
-                                </div>
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <label class="form-label fw-bold small">Correo Electrónico</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                                    <input type="email" name="email" class="form-control"
-                                        value="<?= htmlspecialchars(old('email')) ?>">
-                                </div>
+                    <h6 class="text-primary text-uppercase small fw-bold mb-3">Contacto</h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-bold small">Teléfono *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                <input type="text" name="phone" class="form-control" required
+                                    value="<?= htmlspecialchars(old('phone')) ?>">
                             </div>
                         </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-bold small">Correo Electrónico</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                <input type="email" name="email" class="form-control"
+                                    value="<?= htmlspecialchars(old('email')) ?>">
+                            </div>
+                        </div>
+                    </div>
 
-                        <h6 class="text-primary text-uppercase small fw-bold mb-3">Dirección y Observaciones</h6>
-                        <div class="row g-3 mb-4">
-                            <div class="col-12">
-                                <label class="form-label fw-bold small">Dirección</label>
-                                <textarea name="address" class="form-control"
-                                    rows="2"><?= htmlspecialchars(old('address')) ?></textarea>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label fw-bold small">Observaciones</label>
-                                <textarea name="observations" class="form-control"
-                                    rows="2"><?= htmlspecialchars(old('observations')) ?></textarea>
-                            </div>
+                    <h6 class="text-primary text-uppercase small fw-bold mb-3">Dirección y Observaciones</h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-12">
+                            <label class="form-label fw-bold small">Dirección</label>
+                            <textarea name="address" class="form-control"
+                                rows="2"><?= htmlspecialchars(old('address')) ?></textarea>
                         </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold small">Observaciones</label>
+                            <textarea name="observations" class="form-control"
+                                rows="2"><?= htmlspecialchars(old('observations')) ?></textarea>
+                        </div>
+                    </div>
+
+                    <?php if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'sales.php') !== false): ?>
+                        <input type="hidden" name="return_to_sales" value="1">
+                        <div class="alert alert-info py-2 mb-3">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Al guardar, será redirigido de vuelta a <strong>Nueva Venta</strong>.
+                        </div>
+                    <?php endif; ?>
 
                         <div class="d-flex justify-content-end gap-2 border-top pt-4">
                             <a href="<?= BASE_URL ?>clients.php" class="btn btn-outline-secondary px-4">Cancelar</a>

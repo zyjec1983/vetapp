@@ -1,0 +1,2 @@
+<?php
+// Directory access denied

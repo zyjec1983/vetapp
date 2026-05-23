@@ -200,10 +200,37 @@ class SaleRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getByDateRange($from, $to)
+    {
+        $sql = "SELECT s.*, c.name as client_name, u.name as user_name
+                FROM sales s
+                LEFT JOIN clients c ON s.id_client = c.id_client
+                LEFT JOIN users u ON s.id_user = u.id_user
+                WHERE DATE(s.sale_date) BETWEEN :from AND :to
+                ORDER BY s.sale_date DESC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':from' => $from, ':to' => $to]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getSalesSummary($from, $to)
+    {
+        $sql = "SELECT
+                    COUNT(*) as total_sales,
+                    COALESCE(SUM(total), 0) as total_amount,
+                    COALESCE(SUM(subtotal), 0) as subtotal_amount,
+                    COALESCE(SUM(tax_total), 0) as tax_amount,
+                    COALESCE(SUM(discount), 0) as discount_amount
+                FROM sales
+                WHERE status = 'paid' AND DATE(sale_date) BETWEEN :from AND :to";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':from' => $from, ':to' => $to]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function findById($id)
     {
-        // Obtener cabecera
-        $sql = "SELECT s.*, c.name AS client_name, c.phone AS client_phone
+        $sql = "SELECT s.*, c.name AS client_name, c.phone AS client_phone, c.identification AS client_identification, c.email AS client_email
         FROM sales s
         LEFT JOIN clients c ON s.id_client = c.id_client
         WHERE s.id_sale = :id";

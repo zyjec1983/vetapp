@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<factura id="comprobante" version="1.1.0">
+  <infoTributaria>
+    <ambiente>1</ambiente>
+    <tipoEmision>1</tipoEmision>
+    <razonSocial>Veterinaria Sucursal Norte C.A.</razonSocial>
+    <nombreComercial>VetApp Sucursal Norte</nombreComercial>
+    <ruc>1234567890001</ruc>
+    <claveAcceso>2105202601123456789000110010010000000025146209813</claveAcceso>
+    <codDoc>01</codDoc>
+    <estab>001</estab>
+    <ptoEmi>001</ptoEmi>
+    <secuencial>000000002</secuencial>
+    <dirMatriz>Calle Norte 456, Quito</dirMatriz>
+  </infoTributaria>
+  <infoFactura>
+    <fechaEmision>21/05/2026</fechaEmision>
+    <dirEstablecimiento>Calle Norte 456, Quito</dirEstablecimiento>
+    <contribuyenteEspecial/>
+    <obligadoContabilidad>0</obligadoContabilidad>
+    <tipoIdentificacionComprador>05</tipoIdentificacionComprador>
+    <guiaRemision/>
+    <razonSocialComprador>Veronica</razonSocialComprador>
+    <identificacionComprador>0987654321</identificacionComprador>
+    <totalSinImpuestos>1.50</totalSinImpuestos>
+    <totalConImpuestos>
+      <totalImpuesto>
+        <codigo>2</codigo>
+        <codigoPorcentaje>0</codigoPorcentaje>
+        <baseImponible>1.50</baseImponible>
+        <valor>0.00</valor>
+      </totalImpuesto>
+    </totalConImpuestos>
+    <propina>0.00</propina>
+    <importeTotal>1.50</importeTotal>
+    <moneda>DOLAR</moneda>
+    <pagos>
+      <pago>
+        <formaPago>01</formaPago>
+        <total>1.50</total>
+        <plazo/>
+        <unidadTiempo/>
+      </pago>
+    </pagos>
+  </infoFactura>
+  <detalles>
+    <detalle>
+      <codigoPrincipal>MED-2</codigoPrincipal>
+      <codigoAuxiliar/>
+      <descripcion>Amoxicilina 500mg</descripcion>
+      <cantidad>1.00</cantidad>
+      <precioUnitario>1.50</precioUnitario>
+      <descuento>0.00</descuento>
+      <precioTotalSinImpuesto>1.50</precioTotalSinImpuesto>
+      <impuestos>
+        <impuesto>
+          <codigo>2</codigo>
+          <codigoPorcentaje>0</codigoPorcentaje>
+          <tarifa>0.00</tarifa>
+          <baseImponible>1.50</baseImponible>
+          <valor>0.00</valor>
+        </impuesto>
+      </impuestos>
+    </detalle>
+  </detalles>
+  <infoAdicional>
+    <campoAdicional nombre="email" valor="lharo@fake.com"/>
+  </infoAdicional>
+</factura>

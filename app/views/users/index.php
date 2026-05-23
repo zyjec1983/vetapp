@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Location: vetapp/app/views/users/index.php
  * View for listing all users (admin only)
@@ -19,7 +20,7 @@ require_once __DIR__ . '/../layouts/navbar.php';
             <!-- ******************* BOTON DE CREACIÓN DE USUARIO ****************** -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="">Gestión de Usuarios</h2>
-                <a href="/vetapp/public/users.php?action=create" class="btn btn-primary">
+                <a href="<?= BASE_URL ?>users.php?action=create" class="btn btn-primary">
                     <i class="bi bi-person-plus-fill me-1"></i> Nuevo Usuario
                 </a>
             </div>
@@ -59,21 +60,6 @@ require_once __DIR__ . '/../layouts/navbar.php';
                                             <?php endif; ?>
                                         </td>
 
-                                        <!-- ******************* BOTON DE ACCIÓN EDITAR/ELIMINAR ****************** -->
-                                        <!-- <td class="text-center">
-                                            <div class="btn-group" role="group">
-                                                <a href="<?= BASE_URL ?>users.php?action=edit&id=<?= $user['id_user'] ?>"
-                                                    class="btn btn-outline-info btn-sm" title="Editar Usuario">
-                                                    <i class="bi bi-pencil-square"></i>
-                                                </a>
-                                                <button type="button" class="btn btn-outline-danger btn-sm"
-                                                    title="Eliminar Usuario"
-                                                    onclick="confirmDelete(<?= $user['id_user'] ?>)">
-                                                    <i class="bi bi-trash3"></i>
-                                                </button>
-                                            </div>  -->
-
-
                                         <td>
                                             <!-- ******************* BOTON EDITAR USUARIO ******************* -->
                                             <a href="<?= BASE_URL ?>users.php?action=edit&id=<?= $user['id_user'] ?>"
@@ -87,7 +73,7 @@ require_once __DIR__ . '/../layouts/navbar.php';
                                                 <i class="bi bi-person-x"></i>
                                             </a>
                                         </td>
-                                        </td>
+                                        
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>
@@ -102,7 +88,7 @@ require_once __DIR__ . '/../layouts/navbar.php';
 
 <script>
     document.querySelectorAll('.btn-delete').forEach(button => {
-        button.addEventListener('click', function (e) {
+        button.addEventListener('click', function(e) {
             e.preventDefault();
 
             const url = this.href;

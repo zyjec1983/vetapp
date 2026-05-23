@@ -35,4 +35,11 @@ define('DB_PORT', '3306');        // Puerto de MySQL (por defecto 3306)
 define('DB_NAME', 'vetapp1');
 define('DB_USER', 'root');
 define('DB_PASS', '');
+
+// ==================================================
+// CONFIGURACIÓN FACTURACIÓN ELECTRÓNICA SRI
+// ==================================================
+define('SRI_AMBIENTE', 'pruebas'); // pruebas | produccion
+define('SRI_IVA_TASA', 0.15);
+define('SRI_IVA_PORCENTAJE', 15);
 define('DB_CHARSET', 'utf8mb4');

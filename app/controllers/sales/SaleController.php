@@ -43,10 +43,13 @@ class SaleController extends BaseController
         }
     }
 
-    // ********** Listar todas las ventas **********
+    // ********** Listar todas las ventas con filtro de fechas **********
     public function index()
     {
-        $sales = $this->saleRepo->getAll();
+        $from = $_GET['from'] ?? date('Y-m-01');
+        $to = $_GET['to'] ?? date('Y-m-d');
+        $sales = $this->saleRepo->getByDateRange($from, $to);
+        $summary = $this->saleRepo->getSalesSummary($from, $to);
         require_once __DIR__ . '/../../views/sales/index.php';
     }
 
@@ -54,6 +57,16 @@ class SaleController extends BaseController
     public function create()
     {
         $clients = $this->clientRepo->getAll();
+
+        // Get Consumidor Final placeholder ID
+        $cfPlaceholderId = null;
+        $stmt = $this->db->prepare("SELECT id_client FROM clients WHERE identification = '9999999999999' LIMIT 1");
+        $stmt->execute();
+        $cfRow = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($cfRow) {
+            $cfPlaceholderId = $cfRow['id_client'];
+        }
+
         require_once __DIR__ . '/../../views/sales/create.php';
     }
 
@@ -81,7 +94,7 @@ class SaleController extends BaseController
         }
 
         // Recibir datos del carrito (enviado como JSON)
-        $cart = json_decode($data['cart'] ?? '[]', true);
+        $cart = json_decode($_POST['cart'] ?? '[]', true);
         if (empty($cart)) {
             $_SESSION['error'] = 'No hay productos en la venta.';
             header('Location: ' . BASE_URL . 'sales.php?action=create');
@@ -308,5 +321,107 @@ class SaleController extends BaseController
     </body>
     </html>';
         return $html;
+    }
+
+    // ========== MÉTODOS DE FACTURACIÓN ELECTRÓNICA SRI ==========
+
+    /**
+     * Mostrar vista de selección de empresa para enviar al SRI.
+     */
+    public function selectCompany($saleId)
+    {
+        $saleData = $this->saleRepo->findById($saleId);
+        if (!$saleData) {
+            $_SESSION['error'] = 'Venta no encontrada.';
+            header('Location: ' . BASE_URL . 'sales.php');
+            exit;
+        }
+
+        // Verificar que no ya tenga factura electrónica
+        require_once __DIR__ . '/../../repositories/ElectronicInvoiceRepository.php';
+        $invoiceRepo = new ElectronicInvoiceRepository();
+        if ($invoiceRepo->existsForSale($saleId)) {
+            $_SESSION['error'] = 'Esta venta ya tiene factura electrónica.';
+            header('Location: ' . BASE_URL . 'sales.php?action=show&id=' . $saleId);
+            exit;
+        }
+
+        // Obtener empresas activas
+        require_once __DIR__ . '/../../repositories/CompanySettingRepository.php';
+        $companyRepo = new CompanySettingRepository();
+        $companies = $companyRepo->getActivas();
+
+        require_once __DIR__ . '/../../views/sales/sri_select_company.php';
+    }
+
+    /**
+     * Imprimir ticket térmico (58mm o 80mm).
+     */
+    public function printTicket($id)
+    {
+        $saleData = $this->saleRepo->findById($id);
+        if (!$saleData) {
+            $_SESSION['error'] = 'Venta no encontrada.';
+            header('Location: ' . BASE_URL . 'sales.php');
+            exit;
+        }
+
+        // Obtener datos de la factura electrónica
+        require_once __DIR__ . '/../../repositories/ElectronicInvoiceRepository.php';
+        require_once __DIR__ . '/../../repositories/CompanySettingRepository.php';
+        $invoiceRepo = new ElectronicInvoiceRepository();
+        $companyRepo = new CompanySettingRepository();
+
+        $invoiceData = $invoiceRepo->findBySaleId($id);
+        $companyData = $companyRepo->findById($saleData['sale']['company_id'] ?? 1);
+
+        if (!$companyData) {
+            // Fallback: usar datos genéricos si no hay empresa
+            $companyData = [
+                'commercial_name' => 'VetApp',
+                'business_name' => 'VetApp',
+                'ruc' => '1234567890001',
+                'address' => '',
+                'phone' => '',
+                'ambiente' => 'pruebas',
+            ];
+        }
+
+        require_once __DIR__ . '/../../views/sales/print_ticket.php';
+    }
+
+    /**
+     * Imprimir factura en formato A5 (inyección/láser).
+     */
+    public function printA5($id)
+    {
+        $saleData = $this->saleRepo->findById($id);
+        if (!$saleData) {
+            $_SESSION['error'] = 'Venta no encontrada.';
+            header('Location: ' . BASE_URL . 'sales.php');
+            exit;
+        }
+
+        require_once __DIR__ . '/../../repositories/ElectronicInvoiceRepository.php';
+        require_once __DIR__ . '/../../repositories/CompanySettingRepository.php';
+        $invoiceRepo = new ElectronicInvoiceRepository();
+        $companyRepo = new CompanySettingRepository();
+
+        $invoiceData = $invoiceRepo->findBySaleId($id);
+        $companyData = $companyRepo->findById($saleData['sale']['company_id'] ?? 1);
+
+        if (!$companyData) {
+            $companyData = [
+                'commercial_name' => 'VetApp',
+                'business_name' => 'VetApp',
+                'ruc' => '1234567890001',
+                'address' => '',
+                'phone' => '',
+                'email' => '',
+                'ambiente' => 'pruebas',
+            ];
+        }
+
+        require_once __DIR__ . '/../../views/sales/print_a5.php';
     }
 }

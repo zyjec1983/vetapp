@@ -41,6 +41,14 @@ $currentUser = currentUser() ?? [];
                     </li>
                 <?php endif; ?>
 
+                <?php if (hasRole('admin') || hasRole('pharmacy')): ?>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?= BASE_URL ?>settings.php" title="Configuración de empresas/RUCs">
+                            <i class="bi bi-gear me-1"></i>Configuración
+                        </a>
+                    </li>
+                <?php endif; ?>
+
             </ul>
 
             <!-- ************** Nombre de usuario y cerrar sesión ************* -->

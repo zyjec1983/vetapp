@@ -1,12 +1,17 @@
 <?php
 /**
  * Location: vetapp/app/views/sales/show.php
- * Detalle de una venta
+ * Detalle de una venta con facturación electrónica SRI
  */
 
 $title = 'Detalle de Venta | VetApp';
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/navbar.php';
+
+// Verificar si tiene factura electrónica
+require_once __DIR__ . '/../../repositories/ElectronicInvoiceRepository.php';
+$invoiceRepo = new ElectronicInvoiceRepository();
+$invoice = $invoiceRepo->findBySaleId($saleData['sale']['id_sale']);
 ?>
 
 <div class="container-fluid">
@@ -30,7 +35,21 @@ require_once __DIR__ . '/../layouts/navbar.php';
                             <p><strong>Fecha:</strong>
                                 <?= date('d/m/Y H:i', strtotime($saleData['sale']['sale_date'])) ?></p>
                             <p><strong>Cliente:</strong>
-                                <?= htmlspecialchars($saleData['sale']['client_name'] ?? 'Consumidor final') ?></p>
+                                <?php
+                                $clientName = $saleData['sale']['client_name'] ?? 'Consumidor Final';
+                                $clientIdent = $saleData['sale']['client_identification'] ?? '';
+                                $isCF = ($clientIdent === '9999999999999' || stripos($clientName, 'consumidor') !== false);
+                                ?>
+                                <?php if ($isCF): ?>
+                                    <span class="badge bg-warning text-dark">CONSUMIDOR FINAL</span>
+                                    <br><small class="text-muted">RUC: 9999999999999</small>
+                                <?php else: ?>
+                                    <?= htmlspecialchars($clientName) ?>
+                                    <?php if ($clientIdent): ?>
+                                        <br><small class="text-muted">ID: <?= htmlspecialchars($clientIdent) ?></small>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                            </p>
                             <p><strong>Atendido por:</strong> Usuario ID <?= $saleData['sale']['id_user'] ?></p>
                         </div>
                         <div class="col-md-6">
@@ -103,14 +122,59 @@ require_once __DIR__ . '/../layouts/navbar.php';
                     <!-- ********* Boton volver ********* -->
                     <a href="<?= BASE_URL ?>sales.php" class="btn btn-secondary">Volver</a>
 
-                    <!-- ********* Boton VER PDF ********* -->
                     <?php if ($saleData['sale']['status'] != 'cancelled'): ?>
+                        <!-- ********* Boton VER PDF ********* -->
                         <a href="<?= BASE_URL ?>sales.php?action=pdf&id=<?= $saleData['sale']['id_sale'] ?>"
                             class="btn btn-info px-4 py-2 shadow-sm text-white" target="_blank">
                             <i class="bi bi-file-pdf me-1"></i> Ver PDF
                         </a>
 
-                        <!-- ********* Boton ENVIAR POR WHATSAPP ********* -->
+                        <?php if ($invoice): ?>
+                            <!-- Ya tiene factura electrónica SRI -->
+                            <?php if ($invoice['estado_sri'] === 'autorizada'): ?>
+                                <div class="alert alert-success py-2 mt-3 mb-2">
+                                    <i class="bi bi-check-circle-fill me-1"></i>
+                                    <strong>Factura Electrónica Autorizada por el SRI</strong>
+                                    <?php if ($invoice['numero_autorizacion']): ?>
+                                        <br><small>Nº Aut: <?= htmlspecialchars($invoice['numero_autorizacion']) ?></small>
+                                    <?php endif; ?>
+                                </div>
+
+                                <!-- Opciones de impresión -->
+                                <div class="d-flex flex-wrap gap-2 mt-2 mb-2">
+                                    <a href="<?= BASE_URL ?>sales.php?action=printTicket&id=<?= $saleData['sale']['id_sale'] ?>&width=58"
+                                       class="btn btn-outline-dark btn-sm" target="_blank">
+                                        🧾 Ticket 58mm
+                                    </a>
+                                    <a href="<?= BASE_URL ?>sales.php?action=printTicket&id=<?= $saleData['sale']['id_sale'] ?>&width=80"
+                                       class="btn btn-outline-dark btn-sm" target="_blank">
+                                        🧾 Ticket 80mm
+                                    </a>
+                                    <a href="<?= BASE_URL ?>sales.php?action=printA5&id=<?= $saleData['sale']['id_sale'] ?>"
+                                       class="btn btn-outline-primary btn-sm" target="_blank">
+                                        📄 Hoja A5
+                                    </a>
+                                </div>
+                            <?php elseif ($invoice['estado_sri'] === 'rechazada'): ?>
+                                <div class="alert alert-danger py-2 mt-3 mb-2">
+                                    <i class="bi bi-x-circle-fill me-1"></i>
+                                    <strong>Rechazada por el SRI:</strong> <?= htmlspecialchars($invoice['mensaje_sri']) ?>
+                                </div>
+                            <?php else: ?>
+                                <div class="alert alert-warning py-2 mt-3 mb-2">
+                                    <i class="bi bi-hourglass-split me-1"></i>
+                                    <strong>Estado SRI:</strong> <?= ucfirst($invoice['estado_sri']) ?>
+                                </div>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <!-- No tiene factura electrónica aún -->
+                            <a href="<?= BASE_URL ?>sales.php?action=selectCompany&id=<?= $saleData['sale']['id_sale'] ?>"
+                               class="btn btn-success px-4 py-2 shadow-sm">
+                                <i class="bi bi-send me-1"></i> Facturar Electrónicamente
+                            </a>
+                        <?php endif; ?>
+
+                        <!-- ********* ENVIAR POR WHATSAPP ********* -->
                         <?php
                         $clientPhone = $saleData['sale']['client_phone'] ?? '';
                         if ($clientPhone):
@@ -118,7 +182,6 @@ require_once __DIR__ . '/../layouts/navbar.php';
                             if (str_starts_with($phone, '0')) {
                                 $phone = '593' . substr($phone, 1);
                             }
-                            // Generar URL del PDF
                             $pdfUrl = BASE_URL . "sales.php?action=pdf&id=" . $saleData['sale']['id_sale'];
                             $message = "Estimado cliente, su factura {$saleData['sale']['sale_code']} está disponible.\n";
                             $message .= "Total: $" . number_format($saleData['sale']['total'], 2) . "\n";
@@ -139,15 +202,12 @@ require_once __DIR__ . '/../layouts/navbar.php';
                             data-code="<?= htmlspecialchars($saleData['sale']['sale_code']) ?>">
                             <i class="bi bi-x-circle me-1"></i> Cancelar Venta
                         </button>
-
-                    </div>
-                <?php endif; ?>
+                    <?php endif; ?>
+                </div>
             </div>
+        </main>
     </div>
-    </main>
 </div>
-</div>
-
 
 <script>
 document.getElementById('btnCancelSale')?.addEventListener('click', function(e) {

@@ -10,7 +10,8 @@ function sanitizeInput($data){
     if ($data === null) return '';
     $data = trim($data);
     $data = stripslashes($data);
-    $data = htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
+    $data = strip_tags($data);
+    $data = htmlspecialchars($data, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     return $data;
 }
 

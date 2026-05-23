@@ -73,9 +73,17 @@ $currentUser = currentUser() ?? [];
                     </ul>
                 </li>
 
+                <hr class="text-white">
+
                 <li class="nav-item">
                     <a class="nav-link text-white" href="<?= BASE_URL ?>sales.php">
-                        <i class="bi bi-cart3 me-2"></i> Ventas
+                        <i class="bi bi-list-check me-2"></i> Gestión de Ventas
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="<?= BASE_URL ?>sales.php?action=create">
+                        <i class="bi bi-cart-plus me-2"></i> Nueva Venta
                     </a>
                 </li>
             <?php endif; ?>

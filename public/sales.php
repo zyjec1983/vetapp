@@ -46,6 +46,31 @@ switch ($action) {
         else
             header('Location: ' . BASE_URL . 'sales.php');
         break;
+
+    case 'selectCompany':
+        $id = $_GET['id'] ?? null;
+        if ($id)
+            $controller->selectCompany($id);
+        else
+            header('Location: ' . BASE_URL . 'sales.php');
+        break;
+
+    case 'printTicket':
+        $id = $_GET['id'] ?? null;
+        if ($id)
+            $controller->printTicket($id);
+        else
+            header('Location: ' . BASE_URL . 'sales.php');
+        break;
+
+    case 'printA5':
+        $id = $_GET['id'] ?? null;
+        if ($id)
+            $controller->printA5($id);
+        else
+            header('Location: ' . BASE_URL . 'sales.php');
+        break;
+
     default:
         $controller->index();
 }
