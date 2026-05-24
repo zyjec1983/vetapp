@@ -54,9 +54,10 @@ require_once __DIR__ . '/../layouts/navbar.php';
                             </div>
                         </div>
                     <?php else: ?>
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0"><i class="bi bi-send me-2"></i>Seleccione el Establecimiento para Facturar</h5>
-                        </div>
+                        <div class="card shadow">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="bi bi-send me-2"></i>Seleccione el Establecimiento para Facturar</h5>
+                            </div>
                         <div class="card-body">
                             <p class="text-muted">
                                 Esta venta será facturada electrónicamente. Seleccione con qué RUC/establecimiento
@@ -100,6 +101,7 @@ require_once __DIR__ . '/../layouts/navbar.php';
                             <?php endif; ?>
                         </div>
                     </div>
+                    <?php endif; ?>
 
                     <!-- Estado del proceso -->
                     <div id="sriStatus" class="card shadow mt-3" style="display:none;">

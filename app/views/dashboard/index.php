@@ -44,8 +44,24 @@ require_once __DIR__ . '/../layouts/navbar.php';
                 <h2 class="h3 fw-bold text-dark"><i class="bi bi-speedometer2 me-2"></i>Panel de Administración</h2>
                 <div class="btn-toolbar mb-2 mb-md-0">
                     <div class="btn-group me-2">
-                        <button type="button" class="btn btn-sm btn-outline-primary"><i class="bi bi-plus-lg"></i>
-                            Registro Rápido</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+                            <i class="bi bi-plus-lg"></i> Registro Rápido
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="<?= BASE_URL ?>clients.php?action=create">
+                                <i class="bi bi-person-plus me-1"></i>Nuevo Cliente
+                            </a></li>
+                            <li><a class="dropdown-item" href="<?= BASE_URL ?>pets.php?action=create">
+                                <i class="bi bi-heart me-1"></i>Nueva Mascota
+                            </a></li>
+                            <li><a class="dropdown-item" href="<?= BASE_URL ?>consultations.php?action=create">
+                                <i class="bi bi-clipboard2-pulse me-1"></i>Nueva Consulta
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="<?= BASE_URL ?>sales.php?action=create">
+                                <i class="bi bi-cart-plus me-1"></i>Nueva Venta
+                            </a></li>
+                        </ul>
                     </div>
                 </div>
             </div>

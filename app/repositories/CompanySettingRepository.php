@@ -53,11 +53,11 @@ class CompanySettingRepository
     public function create(CompanySettingModel $company)
     {
         $sql = "INSERT INTO company_settings (
-            ruc, business_name, commercial_name, address, phone, email,
+            ruc, business_name, commercial_name, address, phone, whatsapp_phone, app_title, logo_path, email,
             accountant, special_contributor, establishment_code,
             emission_point, certificate_path, ambiente, activo
         ) VALUES (
-            :ruc, :business_name, :commercial_name, :address, :phone, :email,
+            :ruc, :business_name, :commercial_name, :address, :phone, :whatsapp_phone, :app_title, :logo_path, :email,
             :accountant, :special_contributor, :establishment_code,
             :emission_point, :certificate_path, :ambiente, :activo
         )";
@@ -68,6 +68,9 @@ class CompanySettingRepository
             ':commercial_name' => $company->getCommercialName(),
             ':address' => $company->getAddress(),
             ':phone' => $company->getPhone(),
+            ':whatsapp_phone' => $company->getWhatsappPhone(),
+            ':app_title' => $company->getAppTitle(),
+            ':logo_path' => $company->getLogoPath(),
             ':email' => $company->getEmail(),
             ':accountant' => $company->getAccountant() === 'SI' ? 1 : 0,
             ':special_contributor' => $company->getSpecialContributor() ? 1 : 0,
@@ -88,6 +91,9 @@ class CompanySettingRepository
             commercial_name = :commercial_name,
             address = :address,
             phone = :phone,
+            whatsapp_phone = :whatsapp_phone,
+            app_title = :app_title,
+            logo_path = :logo_path,
             email = :email,
             accountant = :accountant,
             special_contributor = :special_contributor,
@@ -106,6 +112,9 @@ class CompanySettingRepository
             ':commercial_name' => $company->getCommercialName(),
             ':address' => $company->getAddress(),
             ':phone' => $company->getPhone(),
+            ':whatsapp_phone' => $company->getWhatsappPhone(),
+            ':app_title' => $company->getAppTitle(),
+            ':logo_path' => $company->getLogoPath(),
             ':email' => $company->getEmail(),
             ':accountant' => $company->getAccountant() === 'SI' ? 1 : 0,
             ':special_contributor' => $company->getSpecialContributor() ? 1 : 0,
@@ -136,6 +145,77 @@ class CompanySettingRepository
         $sql = "UPDATE company_settings SET deleted_at = NULL, updated_at = NOW() WHERE id = :id";
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([':id' => $id]);
+    }
+
+    /**
+     * Update only the WhatsApp phone number for a company.
+     */
+    public function updateWhatsappPhone($id, $phone)
+    {
+        $sql = "UPDATE company_settings SET whatsapp_phone = :phone, updated_at = NOW() WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([':id' => $id, ':phone' => $phone ?: null]);
+    }
+
+    /**
+     * Update appearance settings (title) for a company.
+     */
+    public function updateAppearance($id, $title)
+    {
+        $sql = "UPDATE company_settings SET app_title = :title, updated_at = NOW() WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([':id' => $id, ':title' => $title ?: null]);
+    }
+
+    /**
+     * Update just the logo_path for a company.
+     */
+    public function updateLogoPath($companyId, $path)
+    {
+        $sql = "UPDATE company_settings SET logo_path = :path, updated_at = NOW() WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([':id' => $companyId, ':path' => $path]);
+    }
+
+    /**
+     * Upload logo image file to protected directory.
+     * Returns the stored path or false on error.
+     */
+    public function uploadLogo($companyId, $file)
+    {
+        $allowedExt = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+
+        if (!in_array($ext, $allowedExt)) {
+            return ['success' => false, 'error' => 'Solo se aceptan imágenes: jpg, png, gif, webp'];
+        }
+
+        if ($file['size'] > 1 * 1024 * 1024) {
+            return ['success' => false, 'error' => 'La imagen no debe superar 1MB'];
+        }
+
+        $dir = STORAGE_PATH . '/logos/';
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        $company = $this->findById($companyId);
+        $ruc = $company['ruc'] ?? 'unknown';
+        $filename = $ruc . '_logo_' . time() . '.' . $ext;
+        $destPath = $dir . $filename;
+
+        if (!move_uploaded_file($file['tmp_name'], $destPath)) {
+            return ['success' => false, 'error' => 'Error al mover el archivo'];
+        }
+
+        // Delete old logo if exists
+        if (!empty($company['logo_path']) && file_exists($company['logo_path'])) {
+            unlink($company['logo_path']);
+        }
+
+        $this->updateLogoPath($companyId, $destPath);
+
+        return ['success' => true, 'path' => $destPath];
     }
 
     public function getDeleted()

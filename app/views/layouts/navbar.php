@@ -5,6 +5,24 @@
  */
 
 $currentUser = currentUser() ?? [];
+
+// Cargar personalización de la primera empresa activa
+$companyTitle = 'VetApp';
+$companyLogoUrl = null;
+try {
+    require_once __DIR__ . '/../../repositories/CompanySettingRepository.php';
+    $navCompanyRepo = new CompanySettingRepository();
+    $activeCompanies = $navCompanyRepo->getActivas();
+    if (!empty($activeCompanies)) {
+        $first = $activeCompanies[0];
+        $companyTitle = !empty($first['app_title']) ? $first['app_title'] : (!empty($first['commercial_name']) ? $first['commercial_name'] : 'VetApp');
+        if (!empty($first['logo_path']) && file_exists($first['logo_path'])) {
+            $companyLogoUrl = BASE_URL . '../storage/logos/' . basename($first['logo_path']);
+        }
+    }
+} catch (Exception $e) {
+    $companyTitle = 'VetApp';
+}
 ?>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -14,7 +32,12 @@ $currentUser = currentUser() ?? [];
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <a class="navbar-brand" href="<?= BASE_URL ?>dashboard.php">VetApp</a>
+        <a class="navbar-brand d-flex align-items-center gap-2" href="<?= BASE_URL ?>dashboard.php">
+            <?php if ($companyLogoUrl): ?>
+                <img src="<?= $companyLogoUrl ?>" alt="Logo" height="30" style="border-radius:4px;" onerror="this.style.display='none'">
+            <?php endif; ?>
+            <?= htmlspecialchars($companyTitle) ?>
+        </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#vetNavbar">
             <span class="navbar-toggler-icon"></span>
@@ -31,41 +54,52 @@ $currentUser = currentUser() ?? [];
 
                 <?php if (hasRole('veterinarian')): ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= BASE_URL ?>consultations">Consultas</a>
+                        <a class="nav-link" href="<?= BASE_URL ?>consultations.php">Consultas</a>
                     </li>
                 <?php endif; ?>
 
                 <?php if (hasRole('pharmacy')): ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= BASE_URL ?>sales">Ventas</a>
+                        <a class="nav-link" href="<?= BASE_URL ?>sales.php">Ventas</a>
                     </li>
                 <?php endif; ?>
 
                 <?php if (hasRole('admin') || hasRole('pharmacy')): ?>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= BASE_URL ?>settings.php" title="Configuración de empresas/RUCs">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="bi bi-gear me-1"></i>Configuración
                         </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="<?= BASE_URL ?>settings.php">
+                                <i class="bi bi-building me-1"></i>Empresa / RUC
+                            </a></li>
+                            <li><a class="dropdown-item" href="<?= BASE_URL ?>settings.php?action=whatsapp">
+                                <i class="bi bi-whatsapp me-1"></i>WhatsApp
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="<?= BASE_URL ?>settings.php?action=personalization">
+                                <i class="bi bi-palette me-1"></i>Personalización
+                            </a></li>
+                        </ul>
                     </li>
                 <?php endif; ?>
 
             </ul>
 
-            <!-- ************** Nombre de usuario y cerrar sesión ************* -->
-            <span class="navbar-text me-3 text-white">
-                <strong>
-                    <?php echo ($currentUser['name']) . ' ' .($currentUser['lastname1']);?>
-                </strong>                
-            </span>
-
-            <button type="button" class="btn btn-outline-light btn-sm" data-bs-toggle="modal"
-                data-bs-target="#logoutModal">
-                Cerrar sesión
-            </button>
+            <!-- Nombre de usuario y cerrar sesión agrupados -->
+            <div class="d-flex align-items-center gap-2">
+                <span class="navbar-text text-white">
+                    <i class="bi bi-person-circle me-1"></i>
+                    <strong><?= htmlspecialchars($currentUser['name'] ?? '') . ' ' . htmlspecialchars($currentUser['lastname1'] ?? '') ?></strong>
+                </span>
+                <button type="button" class="btn btn-outline-light btn-sm" data-bs-toggle="modal" data-bs-target="#logoutModal">
+                    <i class="bi bi-box-arrow-right me-1"></i> Cerrar sesión
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- ************** Modal de confirmación de cierre de sesión ************* -->
+    <!-- Modal de confirmación de cierre de sesión -->
     <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -74,7 +108,7 @@ $currentUser = currentUser() ?? [];
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-dark">
-                    ¿Estás seguro de que deseas cerrar tu sesión en <strong>VetApp</strong>?
+                    ¿Estás seguro de que deseas cerrar tu sesión en <strong><?= htmlspecialchars($companyTitle) ?></strong>?
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>

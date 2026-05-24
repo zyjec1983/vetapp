@@ -1,1 +1,11 @@
 [2026-05-22 08:31:28] Unexpected SRI response
+[2026-05-23 10:36:36] XML generado: 2305202601092001873600110010010000000021645324817 (ambiente: pruebas)
+[2026-05-23 10:36:36] firmarXml error: No se pudo leer el certificado PKCS#12
+[2026-05-23 10:36:37] SOAP request sent (hash: 892bd213402a7cc2)
+[2026-05-23 10:36:37] No se encontró 'estado' en la respuesta SRI. Estructura: {"RespuestaRecepcionComprobante":{"comprobantes":{"comprobante":{"claveAcceso":"N\/A","mensajes":{"mensaje":{"identificador":"35","mensaje":"ARCHIVO NO CUMPLE ESTRUCTURA XML","informacionAdicional":"ec.gob.sri.comprobantes.electronicos.api.excepcion.ConversionArchivoXMLException: Error al convertir el archivo xml","tipo":"ERROR"}}}}}}
+[2026-05-23 10:36:37] PRUEBAS: Fallback de rechazada -> Autorizada en pruebas (simulación — SRI rechazó: No se pudo determinar el estado de la respuesta del SRI)
+[2026-05-23 10:43:07] XML NotaCredito generado: 2305202604092001873600110010010000000017186015310 (ambiente: pruebas)
+[2026-05-23 10:43:07] firmarXml error: No se pudo leer el certificado PKCS#12
+[2026-05-23 10:43:07] SOAP request sent (hash: a758171b77787429)
+[2026-05-23 10:43:07] No se encontró 'estado' en la respuesta SRI. Estructura: {"RespuestaRecepcionComprobante":{"comprobantes":{"comprobante":{"claveAcceso":"N\/A","mensajes":{"mensaje":{"identificador":"35","mensaje":"ARCHIVO NO CUMPLE ESTRUCTURA XML","informacionAdicional":"ec.gob.sri.comprobantes.electronicos.api.excepcion.ConversionArchivoXMLException: Error al convertir el archivo xml","tipo":"ERROR"}}}}}}
+[2026-05-23 10:43:07] PRUEBAS NC: Fallback de rechazada -> Autorizada en pruebas (simulación — SRI rechazó: No se pudo determinar el estado de la respuesta del SRI)

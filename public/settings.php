@@ -245,6 +245,81 @@ switch ($action) {
         require_once __DIR__ . '/../app/views/settings/deleted_companies.php';
         break;
 
+    case 'whatsapp':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (!verifyCSRFToken($_POST['csrf_token'] ?? '')) {
+                http_response_code(403);
+                die('Error CSRF');
+            }
+
+            $whatsapps = $_POST['whatsapp'] ?? [];
+            $count = 0;
+            foreach ($whatsapps as $id => $phone) {
+                $phone = preg_replace('/\D/', '', trim($phone));
+                if ($repo->updateWhatsappPhone((int)$id, $phone)) {
+                    $count++;
+                }
+            }
+
+            $_SESSION['success'] = "$count número(s) de WhatsApp actualizado(s) correctamente.";
+            header('Location: ' . BASE_URL . 'settings.php?action=whatsapp');
+            exit;
+        }
+
+        $companies = $repo->getActivas();
+        require_once __DIR__ . '/../app/views/settings/whatsapp.php';
+        break;
+
+    case 'personalization':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (!verifyCSRFToken($_POST['csrf_token'] ?? '')) {
+                http_response_code(403);
+                die('Error CSRF');
+            }
+
+            // Update titles
+            $titles = $_POST['title'] ?? [];
+            foreach ($titles as $id => $title) {
+                $title = trim(sanitizeInput($title));
+                $repo->updateAppearance((int)$id, $title);
+            }
+
+            // Upload logos
+            if (!empty($_FILES['logo'])) {
+                foreach ($_FILES['logo']['name'] as $id => $name) {
+                    if (empty($name)) continue;
+                    $file = [
+                        'name' => $_FILES['logo']['name'][$id],
+                        'type' => $_FILES['logo']['type'][$id],
+                        'tmp_name' => $_FILES['logo']['tmp_name'][$id],
+                        'error' => $_FILES['logo']['error'][$id],
+                        'size' => $_FILES['logo']['size'][$id],
+                    ];
+                    $repo->uploadLogo((int)$id, $file);
+                }
+            }
+
+            // Handle logo removals
+            $removals = $_POST['remove_logo'] ?? [];
+            foreach ($removals as $id => $val) {
+                if ($val) {
+                    $company = $repo->findById((int)$id);
+                    if ($company && !empty($company['logo_path']) && file_exists($company['logo_path'])) {
+                        unlink($company['logo_path']);
+                    }
+                    $repo->updateLogoPath((int)$id, null);
+                }
+            }
+
+            $_SESSION['success'] = 'Personalización actualizada correctamente.';
+            header('Location: ' . BASE_URL . 'settings.php?action=personalization');
+            exit;
+        }
+
+        $companies = $repo->getActivas();
+        require_once __DIR__ . '/../app/views/settings/personalization.php';
+        break;
+
     default:
         header('Location: ' . BASE_URL . 'settings.php');
         exit;

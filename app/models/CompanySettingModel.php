@@ -14,6 +14,9 @@ class CompanySettingModel
     private $ruc;
     private $address;
     private $phone;
+    private $whatsapp_phone;
+    private $app_title;
+    private $logo_path;
     private $email;
     private $accountant;           // Obligado contabilidad (0/1)
     private $special_contributor;  // Contribuyente especial (0/1)
@@ -49,6 +52,9 @@ class CompanySettingModel
     public function getRuc() { return $this->ruc; }
     public function getAddress() { return $this->address; }
     public function getPhone() { return $this->phone; }
+    public function getWhatsappPhone() { return $this->whatsapp_phone; }
+    public function getAppTitle() { return $this->app_title; }
+    public function getLogoPath() { return $this->logo_path; }
     public function getEmail() { return $this->email; }
     public function getAccountant() { return $this->accountant ? 'SI' : 'NO'; }
     public function getSpecialContributor() { return $this->special_contributor; }
@@ -69,6 +75,9 @@ class CompanySettingModel
     public function setRuc($val) { $this->ruc = $val; }
     public function setAddress($val) { $this->address = $val; }
     public function setPhone($val) { $this->phone = $val; }
+    public function setWhatsappPhone($val) { $this->whatsapp_phone = $val; }
+    public function setAppTitle($val) { $this->app_title = $val; }
+    public function setLogoPath($val) { $this->logo_path = $val; }
     public function setEmail($val) { $this->email = $val; }
     public function setAccountant($val) { $this->accountant = (bool)$val; }
     public function setSpecialContributor($val) { $this->special_contributor = (bool)$val; }

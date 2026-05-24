@@ -12,195 +12,233 @@ $newClientName = urldecode($_GET['client_name'] ?? '');
 $newClientIdentification = urldecode($_GET['client_identification'] ?? '');
 ?>
 
+<style>
+.item-enter {
+    animation: slideIn 0.25s ease-out;
+}
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-12px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+.client-result:hover {
+    background-color: #f0f7ff;
+}
+.search-highlight em {
+    font-style: normal;
+    background-color: #fff3cd;
+    padding: 0 2px;
+    border-radius: 2px;
+}
+.cart-mobile-card {
+    display: none;
+}
+@media (max-width: 575.98px) {
+    .cart-table-desktop { display: none !important; }
+    .cart-mobile-card { display: block !important; }
+}
+</style>
+
 <div class="container-fluid">
     <div class="row">
         <?php require_once __DIR__ . '/../layouts/aside.php'; ?>
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-4">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2><i class="bi bi-cart-plus me-2"></i>Nueva Venta</h2>
-                <a href="<?= BASE_URL ?>sales.php" class="btn btn-secondary">Volver</a>
-            </div>
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="<?= BASE_URL ?>sales.php"><i class="bi bi-receipt me-1"></i>Ventas</a></li>
+                    <li class="breadcrumb-item active">Nueva Venta</li>
+                </ol>
+            </nav>
 
-            <div class="row">
-                <form id="saleForm" method="POST" action="<?= BASE_URL ?>sales.php?action=store">
+            <form id="saleForm" method="POST" action="<?= BASE_URL ?>sales.php?action=store">
+                <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
 
-                    <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
-
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="card shadow-sm mb-4">
-                                <div class="card-header bg-primary text-white">Información General</div>
-                                <div class="card-body">
-
-                                    <!-- Tipo de cliente -->
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold">Tipo de Facturación</label>
-                                        <div class="d-flex gap-3">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="client_type"
-                                                       id="clientTypeRegistered" value="registered" checked>
-                                                <label class="form-check-label" for="clientTypeRegistered">
-                                                    <i class="bi bi-person me-1"></i>Cliente registrado
-                                                </label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="client_type"
-                                                       id="clientTypeCF" value="consumidor_final">
-                                                <label class="form-check-label" for="clientTypeCF">
-                                                    <i class="bi bi-receipt me-1"></i>Consumidor Final
-                                                </label>
-                                            </div>
-                                        </div>
+                <div class="row g-3">
+                    <!-- Left column: Cliente + Búsqueda -->
+                    <div class="col-lg-4">
+                        <!-- Card: Cliente -->
+                        <div class="card shadow-sm mb-3">
+                            <div class="card-header bg-primary text-white d-flex align-items-center gap-2 py-2">
+                                <i class="bi bi-person-badge fs-5"></i>
+                                <span class="fw-semibold">Información del Cliente</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold text-muted">Tipo de Facturación</label>
+                                    <div class="btn-group w-100" role="group">
+                                        <input type="radio" class="btn-check" name="client_type" id="clientTypeRegistered" value="registered" checked>
+                                        <label class="btn btn-outline-primary" for="clientTypeRegistered">
+                                            <i class="bi bi-person me-1"></i>Registrado
+                                        </label>
+                                        <input type="radio" class="btn-check" name="client_type" id="clientTypeCF" value="consumidor_final">
+                                        <label class="btn btn-outline-warning" for="clientTypeCF">
+                                            <i class="bi bi-receipt me-1"></i>Consumidor Final
+                                        </label>
                                     </div>
+                                </div>
 
-                                    <!-- Buscador de cliente (solo registrado) -->
-                                    <div id="clientSearchSection">
-                                        <label class="form-label">Cliente / Mascota</label>
-                                        <div class="input-group">
-                                            <input type="text" id="clientSearch" class="form-control"
-                                                placeholder="Buscar cliente o mascota...">
-                                            <button class="btn btn-primary" type="button" id="clientSearchBtn">
-                                                <i class="bi bi-search"></i>
-                                            </button>
-                                            <a href="<?= BASE_URL ?>clients.php?action=create" class="btn btn-outline-success"
-                                               id="btnNewClient" title="Crear nuevo cliente">
-                                                <i class="bi bi-person-plus"></i> <span class="d-none d-sm-inline">Nuevo Cliente</span>
-                                            </a>
-                                        </div>
-                                        <div id="clientResults" class="list-group mt-2"
-                                            style="max-height: 250px; overflow-y: auto;"></div>
-                                        <div id="selectedClient" class="mt-2"></div>
+                                <div id="clientSearchSection">
+                                    <label class="form-label small fw-semibold text-muted">Buscar Cliente / Mascota</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" id="clientSearch" class="form-control" placeholder="Nombre o cédula...">
+                                        <button class="btn btn-primary" type="button" id="clientSearchBtn">
+                                            <i class="bi bi-search"></i>
+                                        </button>
+                                        <a href="<?= BASE_URL ?>clients.php?action=create" class="btn btn-outline-success" id="btnNewClient" title="Nuevo cliente">
+                                            <i class="bi bi-person-plus"></i>
+                                        </a>
                                     </div>
+                                    <div id="clientResults" class="list-group mt-2" style="max-height:260px;overflow-y:auto"></div>
+                                    <div id="selectedClient" class="mt-2"></div>
+                                </div>
 
-                                    <!-- Badge Consumidor Final -->
-                                    <div id="cfBadgeSection" style="display:none;">
-                                        <div class="alert alert-warning py-2 mb-0">
-                                            <i class="bi bi-receipt me-1"></i>
-                                            <strong>CONSUMIDOR FINAL</strong><br>
+                                <div id="cfBadgeSection" style="display:none;">
+                                    <div class="card border-warning bg-warning-subtle">
+                                        <div class="card-body py-2 px-3 text-center">
+                                            <i class="bi bi-receipt fs-4 text-warning"></i>
+                                            <div class="fw-semibold mt-1">CONSUMIDOR FINAL</div>
                                             <small class="text-muted">RUC: 9999999999999</small>
                                         </div>
                                     </div>
+                                </div>
 
-                                    <!-- Alerta $150 -->
-                                    <div id="cfLimitAlert" class="alert alert-danger py-2 mt-2" style="display:none;">
-                                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                                        <strong>El monto supera $150.00</strong><br>
-                                        <small>Para facturación electrónica como Consumidor Final, el SRI exige un máximo de $150. Debe registrar un cliente.</small>
-                                    </div>
+                                <div id="cfLimitAlert" class="alert alert-danger py-2 mt-2" style="display:none;">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                    <strong>Límite $150 superado</strong><br>
+                                    <small>El SRI exige un máximo de $150 para Consumidor Final. Debe registrar un cliente.</small>
+                                </div>
 
-                                    <input type="hidden" name="id_client" id="clientId">
-                                    <input type="hidden" id="cfClientId" value="<?= $cfPlaceholderId ?? '' ?>">
+                                <input type="hidden" name="id_client" id="clientId">
+                                <input type="hidden" id="cfClientId" value="<?= $cfPlaceholderId ?? '' ?>">
 
-                                    <!-- Observaciones -->
-                                    <div class="mb-3 mt-3">
-                                        <label class="form-label">Observaciones</label>
-                                        <textarea name="observations" class="form-control" rows="2"></textarea>
-                                    </div>
-                                    <hr>
-
-                                    <!-- Buscador de medicamentos -->
-                                    <div class="mb-3">
-                                        <label class="form-label text-success">Buscar Medicamento</label>
-                                        <div class="input-group">
-                                            <input type="text" id="medSearch" class="form-control"
-                                                placeholder="Código o nombre...">
-                                            <button class="btn btn-success" type="button" id="searchBtn"><i
-                                                    class="bi bi-search"></i></button>
-                                        </div>
-                                        <div id="searchResults" class="list-group mt-2"
-                                            style="max-height: 300px; overflow-y: auto;"></div>
-                                    </div>
+                                <div class="mt-3">
+                                    <label class="form-label small fw-semibold text-muted">Observaciones</label>
+                                    <textarea name="observations" class="form-control form-control-sm" rows="2" placeholder="Opcional..."></textarea>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="col-md-8">
-                            <div class="card shadow-sm mb-4">
-                                <div class="card-header bg-white fw-bold">Detalle de la Venta</div>
-                                <div class="card-body p-0">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover m-0">
-                                            <thead class="table-dark">
+                        <!-- Card: Buscar Medicamento -->
+                        <div class="card shadow-sm mb-3">
+                            <div class="card-header bg-success text-white d-flex align-items-center gap-2 py-2">
+                                <i class="bi bi-capsule fs-5"></i>
+                                <span class="fw-semibold">Buscar Medicamento</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="input-group input-group-sm mb-2">
+                                    <input type="text" id="medSearch" class="form-control" placeholder="Código o nombre...">
+                                    <button class="btn btn-success" type="button" id="searchBtn">
+                                        <i class="bi bi-search"></i>
+                                    </button>
+                                </div>
+                                <div id="searchResults" class="list-group" style="max-height:320px;overflow-y:auto"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right column: Carrito + Totales -->
+                    <div class="col-lg-8">
+                        <!-- Card: Detalle de Venta -->
+                        <div class="card shadow-sm mb-3">
+                            <div class="card-header bg-dark text-white d-flex align-items-center gap-2 py-2">
+                                <i class="bi bi-cart3 fs-5"></i>
+                                <span class="fw-semibold">Detalle de la Venta</span>
+                                <span class="badge bg-light text-dark ms-auto" id="itemCount">0 items</span>
+                            </div>
+                            <div class="card-body p-0">
+                                <!-- Desktop table -->
+                                <div class="table-responsive cart-table-desktop">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-secondary">
+                                            <tr>
                                                 <th>Producto</th>
-                                                <th width="100">Cant.</th>
-                                                <th width="130">P.Unitario</th>
-                                                <th width="130">Total</th>
-                                                <th width="80">Acción</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="cartItems"></tbody>
-                                        </table>
+                                                <th style="width:90px" class="text-center">Cant.</th>
+                                                <th style="width:120px" class="d-none d-sm-table-cell text-end">P.Unitario</th>
+                                                <th style="width:120px" class="text-end">Total</th>
+                                                <th style="width:60px" class="text-center">Acción</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="cartItems"></tbody>
+                                    </table>
+                                </div>
+                                <!-- Mobile cards -->
+                                <div id="cartMobileItems" class="cart-mobile-card p-2"></div>
+                                <!-- Empty state -->
+                                <div id="cartEmpty" class="text-center py-5 text-muted">
+                                    <i class="bi bi-cart-x fs-1 d-block mb-2"></i>
+                                    <span>El carrito está vacío</span><br>
+                                    <small>Busque medicamentos para agregar a la venta</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Totales + Botones -->
+                        <div class="row g-3">
+                            <div class="col-md-7">
+                                <div class="card bg-light border-0 shadow-sm">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span class="text-muted">Subtotal:</span>
+                                            <span class="fw-semibold" id="subtotal">$0.00</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2 align-items-center">
+                                            <span class="text-muted">Descuento:</span>
+                                            <div class="d-flex align-items-center gap-1">
+                                                <input type="number" id="discountPercent"
+                                                    class="form-control form-control-sm text-end border-0 bg-white shadow-sm"
+                                                    style="width:70px" value="0" step="0.01" min="0" max="100">
+                                                <span class="text-muted small">%</span>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span class="text-muted">IVA (15%):</span>
+                                            <span class="fw-semibold" id="iva">$0.00</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <span class="text-muted">Exento de IVA:</span>
+                                            <div class="form-check form-switch mb-0">
+                                                <input class="form-check-input" type="checkbox" id="ivaExemptSwitch">
+                                                <label class="form-check-label small text-muted" for="ivaExemptSwitch">Activar</label>
+                                            </div>
+                                        </div>
+                                        <hr class="my-2">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h5 class="fw-bold mb-0">Total:</h5>
+                                            <h5 class="fw-bold text-primary mb-0" id="total">$0.00</h5>
+                                        </div>
+                                        <div class="mt-3">
+                                            <label class="form-label small text-muted fw-semibold mb-1">
+                                                <i class="bi bi-credit-card me-1"></i>Método de Pago
+                                            </label>
+                                            <select name="payment_method" class="form-select form-select-sm border-0 bg-white shadow-sm">
+                                                <option value="cash">Efectivo</option>
+                                                <option value="card">Tarjeta</option>
+                                                <option value="transfer">Transferencia</option>
+                                                <option value="credit">Crédito</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="row justify-content-end">
-                                <div class="col-md-5">
-                                    <div class="card shadow-sm border-primary">
-                                        <div class="card-body">
-                                            <div class="d-flex justify-content-between mb-2">
-                                                <span>Subtotal:</span>
-                                                <span id="subtotal">$0.00</span>
-                                            </div>
-                                            <div class="d-flex justify-content-between mb-2 align-items-center">
-                                                <span>Descuento (%):</span>
-                                                <input type="number" id="discountPercent"
-                                                    class="form-control form-control-sm w-25 text-end" value="0"
-                                                    step="0.01">
-                                            </div>
-                                            <div class="d-flex justify-content-between mb-2">
-                                                <span>IVA (15%):</span>
-                                                <span id="iva">$0.00</span>
-                                            </div>
-                                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <span>Exento de IVA:</span>
-                                                <div class="form-check form-switch">
-                                                    <input class="form-check-input" type="checkbox"
-                                                        id="ivaExemptSwitch">
-                                                    <label class="form-check-label" for="ivaExemptSwitch"></label>
-                                                </div>
-                                            </div>
-                                            <hr>
-                                            <div class="d-flex justify-content-between">
-                                                <h4 class="fw-bold text-primary">Total a Pagar:</h4>
-                                                <h4 class="fw-bold text-primary" id="total">$0.00</h4>
-                                            </div>
-                                            <div class="mt-3">
-                                                <label class="form-label">Método de Pago</label>
-                                                <select name="payment_method" class="form-select">
-                                                    <option value="cash">Efectivo</option>
-                                                    <option value="card">Tarjeta</option>
-                                                    <option value="transfer">Transferencia</option>
-                                                    <option value="credit">Crédito</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="mt-3 d-flex justify-content-center gap-3 mb-4">
-                                        <a href="<?= BASE_URL ?>sales.php"
-                                            class="btn btn-outline-danger px-4 py-2 d-flex align-items-center justify-content-center">
-                                            <i class="bi bi-x-circle me-1"></i> Cancelar
-                                        </a>
-
-                                        <button type="submit"
-                                            class="btn btn-primary px-4 py-2 d-flex align-items-center justify-content-center"
-                                            id="submitSale">
-                                            <i class="bi bi-check-lg me-1"></i> Registrar Venta
-                                        </button>
-                                    </div>
-
+                            <div class="col-md-5 d-flex flex-column justify-content-end">
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-primary btn-lg shadow-sm" id="submitSale">
+                                        <i class="bi bi-check-lg me-1"></i> Registrar Venta
+                                    </button>
+                                    <a href="<?= BASE_URL ?>sales.php" class="btn btn-outline-danger">
+                                        <i class="bi bi-x-circle me-1"></i> Cancelar
+                                    </a>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <input type="hidden" name="cart" id="cartData" value="">
-                    <input type="hidden" name="subtotal" id="subtotalInput">
-                    <input type="hidden" name="tax_total" id="taxTotalInput">
-                    <input type="hidden" name="total" id="totalInput">
-                    <input type="hidden" name="discount" id="discountInput">
-                </form>
-            </div>
+                </div>
+
+                <input type="hidden" name="cart" id="cartData" value="">
+                <input type="hidden" name="subtotal" id="subtotalInput">
+                <input type="hidden" name="tax_total" id="taxTotalInput">
+                <input type="hidden" name="total" id="totalInput">
+                <input type="hidden" name="discount" id="discountInput">
+            </form>
         </main>
     </div>
 </div>
@@ -213,7 +251,7 @@ $newClientIdentification = urldecode($_GET['client_identification'] ?? '');
     let currentTotal = 0;
 
     // =========================
-    // CART PERSISTENCE (localStorage)
+    // CART PERSISTENCE
     // =========================
     function saveCartToStorage() {
         localStorage.setItem('vetapp_cart', JSON.stringify(cart));
@@ -259,30 +297,31 @@ $newClientIdentification = urldecode($_GET['client_identification'] ?? '');
             .then(data => {
                 resultsDiv.innerHTML = '';
                 if (data.length === 0) {
-                    resultsDiv.innerHTML = '<div class="list-group-item text-muted">No se encontraron medicamentos.</div>';
+                    resultsDiv.innerHTML = '<div class="list-group-item text-center text-muted py-3">No se encontraron medicamentos</div>';
                     return;
                 }
                 data.forEach(med => {
                     const btn = document.createElement('button');
                     btn.type = 'button';
-                    btn.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
+                    btn.className = 'list-group-item list-group-item-action d-flex align-items-center gap-3 py-2';
+                    const stockClass = med.stock <= 0 ? 'bg-danger' : med.stock < 5 ? 'bg-warning text-dark' : 'bg-success';
                     btn.innerHTML = `
-                        <div>
-                            <strong>${med.name}</strong><br>
-                            <small>${med.code}</small><br>
-                            <small class="text-${med.stock < 5 ? 'danger' : 'muted'}">
-                                Stock: ${med.stock} | $${med.sale_price}
-                            </small>
+                        <div class="flex-grow-1 min-w-0">
+                            <div class="fw-semibold text-truncate">${med.name}</div>
+                            <small class="text-muted">${med.code}</small>
                         </div>
-                        <i class="bi bi-plus-circle text-success fs-5"></i>
+                        <div class="text-end flex-shrink-0">
+                            <span class="badge ${stockClass} me-1">${med.stock}</span>
+                            <div class="small fw-bold text-primary">$${parseFloat(med.sale_price).toFixed(2)}</div>
+                        </div>
+                        <i class="bi bi-plus-circle-fill text-success fs-5"></i>
                     `;
                     btn.addEventListener('click', () => addToCart(med));
                     resultsDiv.appendChild(btn);
                 });
             })
-            .catch(err => {
-                console.error(err);
-                resultsDiv.innerHTML = '<div class="list-group-item text-danger">Error al buscar medicamentos.</div>';
+            .catch(() => {
+                resultsDiv.innerHTML = '<div class="list-group-item text-center text-danger py-3">Error al buscar medicamentos</div>';
             });
     }
 
@@ -313,30 +352,70 @@ $newClientIdentification = urldecode($_GET['client_identification'] ?? '');
 
     function renderCart() {
         const tbody = document.getElementById('cartItems');
+        const mobileDiv = document.getElementById('cartMobileItems');
+        const emptyDiv = document.getElementById('cartEmpty');
         tbody.innerHTML = '';
+        mobileDiv.innerHTML = '';
         let subtotal = 0;
+
+        if (cart.length === 0) {
+            emptyDiv.style.display = '';
+            document.getElementById('itemCount').textContent = '0 items';
+            calculateTotals(0);
+            return;
+        }
+        emptyDiv.style.display = 'none';
+        document.getElementById('itemCount').textContent = cart.length + ' item' + (cart.length > 1 ? 's' : '');
 
         cart.forEach((item, index) => {
             const lineTotal = item.unit_price * item.quantity;
             subtotal += lineTotal;
-            tbody.innerHTML += `
-                <tr>
-                    <td>${item.name}</td>
-                    <td>
-                        <input type="number" class="form-control form-control-sm text-center"
-                            value="${item.quantity}" min="1"
-                            onchange="updateQty(${index}, this.value)">
-                    </td>
-                    <td>$${item.unit_price.toFixed(2)}</td>
-                    <td class="fw-bold">$${lineTotal.toFixed(2)}</td>
-                    <td>
-                        <button type="button" class="btn btn-danger btn-sm"
-                            onclick="removeItem(${index})">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </td>
-                </tr>
+
+            // Desktop row
+            const tr = document.createElement('tr');
+            tr.className = 'item-enter';
+            tr.innerHTML = `
+                <td><span class="fw-semibold">${item.name}</span></td>
+                <td class="text-center">
+                    <input type="number" class="form-control form-control-sm text-center mx-auto"
+                        style="width:70px" value="${item.quantity}" min="1"
+                        onchange="updateQty(${index}, this.value)">
+                </td>
+                <td class="d-none d-sm-table-cell text-end text-muted">$${item.unit_price.toFixed(2)}</td>
+                <td class="text-end fw-semibold">$${lineTotal.toFixed(2)}</td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeItem(${index})" title="Eliminar">
+                        <i class="bi bi-trash3"></i>
+                    </button>
+                </td>
             `;
+            tbody.appendChild(tr);
+
+            // Mobile card
+            const card = document.createElement('div');
+            card.className = 'card border-light shadow-sm mb-2 item-enter';
+            card.innerHTML = `
+                <div class="card-body py-2 px-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="fw-semibold small">${item.name}</div>
+                        <button type="button" class="btn btn-outline-danger btn-sm py-0 px-1" onclick="removeItem(${index})" title="Eliminar">
+                            <i class="bi bi-trash3"></i>
+                        </button>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-1">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-muted small">Cant:</span>
+                            <input type="number" class="form-control form-control-sm text-center" style="width:60px"
+                                value="${item.quantity}" min="1" onchange="updateQty(${index}, this.value)">
+                        </div>
+                        <div class="text-end">
+                            <div class="small text-muted">$${item.unit_price.toFixed(2)} c/u</div>
+                            <div class="fw-bold small">$${lineTotal.toFixed(2)}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            mobileDiv.appendChild(card);
         });
 
         calculateTotals(subtotal);
@@ -435,7 +514,6 @@ $newClientIdentification = urldecode($_GET['client_identification'] ?? '');
             cfBadgeSection.style.display = 'none';
             cfLimitAlert.style.display = 'none';
             clientTypeCF.disabled = false;
-            clientTypeCF.parentElement.classList.remove('opacity-50');
         }
     }
 
@@ -456,7 +534,7 @@ $newClientIdentification = urldecode($_GET['client_identification'] ?? '');
             toggleClientType();
             Swal.fire({
                 title: 'Límite Consumidor Final',
-                html: 'El total de la venta ($<strong>' + currentTotal.toFixed(2) + '</strong>) supera el límite de $150.00 establecido por el SRI.<br><br>Debe registrar un cliente con identificación real.',
+                html: 'El total ($<strong>' + currentTotal.toFixed(2) + '</strong>) supera el límite de $150.00 del SRI.<br><br>Debe usar un cliente registrado.',
                 icon: 'warning',
                 confirmButtonText: 'Entendido'
             });
@@ -494,12 +572,12 @@ $newClientIdentification = urldecode($_GET['client_identification'] ?? '');
                 clientResults.innerHTML = '';
 
                 if (data.length === 0) {
-                    clientResults.innerHTML = '<div class="list-group-item text-muted">Sin resultados</div>';
+                    clientResults.innerHTML = '<div class="list-group-item text-center text-muted py-3">Sin resultados</div>';
 
                     Swal.fire({
                         title: 'Cliente no encontrado',
                         html: 'No se encontraron resultados para "<strong>' + q + '</strong>".<br>¿Desea registrar un nuevo cliente?',
-                        icon: 'warning',
+                        icon: 'question',
                         showCancelButton: true,
                         confirmButtonColor: '#0d6efd',
                         cancelButtonText: 'Seguir buscando',
@@ -515,27 +593,56 @@ $newClientIdentification = urldecode($_GET['client_identification'] ?? '');
                 data.forEach(item => {
                     const btn = document.createElement('button');
                     btn.type = 'button';
-                    btn.className = 'list-group-item list-group-item-action';
+                    btn.className = 'list-group-item list-group-item-action client-result py-2';
+                    const initial = (item.client_name || '?').charAt(0).toUpperCase();
                     btn.innerHTML = `
-                        <strong>${item.client_name}</strong><br>
-                        <small>Mascota: ${item.pet_name ? item.pet_name : '—'}</small>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0"
+                                 style="width:36px;height:36px;font-size:14px;font-weight:600;">
+                                ${initial}
+                            </div>
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="fw-semibold text-truncate">${item.client_name}</div>
+                                <small class="text-muted">
+                                    <i class="bi bi-heart-pulse me-1"></i>${item.pet_name ? item.pet_name : 'Sin mascota'}
+                                </small>
+                            </div>
+                            <i class="bi bi-chevron-right text-muted"></i>
+                        </div>
                     `;
                     btn.addEventListener('click', () => selectClient(item));
                     clientResults.appendChild(btn);
                 });
             })
-            .catch(err => {
-                console.error(err);
+            .catch(() => {
                 Swal.fire('Error', 'Fallo al buscar clientes', 'error');
             });
     }
 
     function selectClient(item) {
         clientIdInput.value = item.id_client;
+        const initial = (item.client_name || '?').charAt(0).toUpperCase();
         selectedClientDiv.innerHTML = `
-            <div class="alert alert-success p-2">
-                <strong>${item.client_name}</strong><br>
-                <small>Mascota: ${item.pet_name ? item.pet_name : '—'}</small>
+            <div class="card border-success bg-success-subtle">
+                <div class="card-body py-2 px-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center flex-shrink-0"
+                                 style="width:36px;height:36px;font-size:14px;font-weight:600;">
+                                ${initial}
+                            </div>
+                            <div>
+                                <div class="fw-semibold small">${item.client_name}</div>
+                                <small class="text-muted">
+                                    <i class="bi bi-heart-pulse me-1"></i>${item.pet_name ? item.pet_name : 'Sin mascota'}
+                                </small>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1" onclick="clearClientSelection(); document.getElementById('clientId').value='';" title="Cambiar cliente">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
         `;
         clientResults.innerHTML = '';
@@ -547,7 +654,6 @@ $newClientIdentification = urldecode($_GET['client_identification'] ?? '');
         window.location.href = '<?= BASE_URL ?>clients.php?action=create';
     }
 
-    // New client button
     document.getElementById('btnNewClient').addEventListener('click', function(e) {
         e.preventDefault();
         navigateToCreateClient();
@@ -563,7 +669,7 @@ $newClientIdentification = urldecode($_GET['client_identification'] ?? '');
             e.preventDefault();
             Swal.fire({
                 title: 'Cliente requerido',
-                html: 'Debe seleccionar un cliente o usar Consumidor Final para continuar.',
+                html: 'Debe seleccionar un cliente o usar Consumidor Final.',
                 icon: 'error',
                 showCancelButton: true,
                 confirmButtonColor: '#0d6efd',
@@ -597,8 +703,6 @@ $newClientIdentification = urldecode($_GET['client_identification'] ?? '');
         }));
 
         document.getElementById('cartData').value = JSON.stringify(cartForBackend);
-
-        // Clear cart after submit
         clearCartFromStorage();
     });
 
