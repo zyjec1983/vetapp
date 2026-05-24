@@ -86,6 +86,12 @@ $currentUser = currentUser() ?? [];
                         <i class="bi bi-cart-plus me-2"></i> Nueva Venta
                     </a>
                 </li>
+
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="<?= BASE_URL ?>credit_notes.php">
+                        <i class="bi bi-arrow-return-left me-2"></i> Notas de Crédito
+                    </a>
+                </li>
             <?php endif; ?>
         </ul>
         <hr class="text-white">

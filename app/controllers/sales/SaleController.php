@@ -194,6 +194,17 @@ class SaleController extends BaseController
             header('Location: ' . BASE_URL . 'sales.php');
             exit;
         }
+
+        // Verificar si tiene factura electrónica autorizada
+        require_once __DIR__ . '/../../repositories/ElectronicInvoiceRepository.php';
+        $invoiceRepo = new ElectronicInvoiceRepository();
+        $invoice = $invoiceRepo->findBySaleId($id);
+        if ($invoice && $invoice['estado_sri'] === 'autorizada') {
+            $_SESSION['error'] = 'No se puede cancelar una venta con factura electrónica autorizada. Emita una Nota de Crédito.';
+            header('Location: ' . BASE_URL . 'sales.php?action=show&id=' . $id);
+            exit;
+        }
+
         if ($this->saleRepo->cancel($id)) {
             $_SESSION['success'] = 'Venta cancelada.';
         } else {

@@ -50,14 +50,15 @@ function getSiguienteSecuencialSRI($db, $companyId) {
  * @param int $secuencial Número secuencial
  * @param string $codigoNumerico Código numérico aleatorio (8 dígitos)
  * @param string $ambiente 'pruebas' o 'produccion'
+ * @param string $tipoComprobante '01' = Factura, '04' = Nota de Crédito
  * @return string Clave de acceso de 49 dígitos
  */
-function generarClaveAccesoSRI($fecha, $ruc, $establecimiento, $puntoEmision, $secuencial, $codigoNumerico = '', $ambiente = 'pruebas') {
+function generarClaveAccesoSRI($fecha, $ruc, $establecimiento, $puntoEmision, $secuencial, $codigoNumerico = '', $ambiente = 'pruebas', $tipoComprobante = '01') {
     // Fecha en formato DDMMYYYY
     $fechaFormateada = date('dmY', strtotime($fecha));
 
-    // Tipo de comprobante: 01 = Factura
-    $tipoComprobante = '01';
+    // Tipo de comprobante: 01 = Factura, 04 = Nota de Crédito
+    $tipoComprobante = $tipoComprobante;
 
     // Ambiente: 1 = pruebas, 2 = producción
     $ambienteCodigo = ($ambiente === 'pruebas') ? '1' : '2';
@@ -154,4 +155,29 @@ function getTipoIdentificacionSRI($tipo) {
         'Consumidor Final' => '07',
     ];
     return $mapa[$tipo] ?? '07';
+}
+
+/**
+ * Genera el número de nota de crédito en formato SRI.
+ * Formato: EEE-PPP-SSSSSSSSS (3-3-9 = 17 caracteres)
+ */
+function generarNumeroNotaCreditoSRI($establecimiento, $puntoEmision, $secuencial) {
+    return sprintf('%s-%s-%09d', $establecimiento, $puntoEmision, $secuencial);
+}
+
+/**
+ * Obtiene el siguiente secuencial de nota de crédito desde la BD.
+ *
+ * @param PDO $db Conexión a base de datos
+ * @param int $companyId ID de la empresa
+ * @return int Siguiente secuencial
+ */
+function getSiguienteSecuencialNC($db, $companyId) {
+    $sql = "SELECT COALESCE(MAX(CAST(SUBSTRING(numero_nota_credito, 9) AS UNSIGNED)), 0) + 1 as next_seq
+            FROM credit_notes
+            WHERE company_id = :company_id";
+    $stmt = $db->prepare($sql);
+    $stmt->execute([':company_id' => $companyId]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    return (int)($row['next_seq'] ?? 1);
 }

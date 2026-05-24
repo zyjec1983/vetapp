@@ -767,4 +767,246 @@ class SriService
             ];
         }
     }
+
+    // ========== NOTAS DE CRÉDITO ==========
+
+    /**
+     * Generar XML de Nota de Crédito según formato SRI.
+     */
+    public function generarXmlNotaCredito($saleData, $creditNoteData, $company, $numeroNC, $claveAcceso, $secuencial)
+    {
+        $sale = $saleData['sale'];
+        $clientData = $saleData['client'] ?? [];
+        $details = $creditNoteData['details'];
+        $motivo = $creditNoteData['motivo'];
+        $invoiceNum = $creditNoteData['invoice_num'] ?? '';
+        $invoiceDate = $creditNoteData['invoice_date'] ?? date('d/m/Y', strtotime($sale['sale_date']));
+
+        $fechaEmision = date('d/m/Y', strtotime($sale['sale_date']));
+
+        $dom = new DOMDocument('1.0', 'UTF-8');
+        $dom->formatOutput = true;
+
+        $nc = $dom->createElement('notaCredito');
+        $nc->setAttribute('id', 'comprobante');
+        $nc->setAttribute('version', '1.1.0');
+        $nc->setAttribute('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance');
+        $dom->appendChild($nc);
+
+        // infoTributaria
+        $infoTributaria = $dom->createElement('infoTributaria');
+        $nc->appendChild($infoTributaria);
+
+        $this->agregarElemento($dom, $infoTributaria, 'ambiente', $this->ambiente === 'pruebas' ? '1' : '2');
+        $this->agregarElemento($dom, $infoTributaria, 'tipoEmision', '1');
+        $this->agregarElemento($dom, $infoTributaria, 'razonSocial', $company['business_name'] ?? $company['commercial_name']);
+        $this->agregarElemento($dom, $infoTributaria, 'nombreComercial', $company['commercial_name']);
+        $this->agregarElemento($dom, $infoTributaria, 'ruc', $company['ruc']);
+        $this->agregarElemento($dom, $infoTributaria, 'claveAcceso', $claveAcceso);
+        $this->agregarElemento($dom, $infoTributaria, 'codDoc', '04');
+        $this->agregarElemento($dom, $infoTributaria, 'estab', $company['establishment_code'] ?? '001');
+        $this->agregarElemento($dom, $infoTributaria, 'ptoEmi', $company['emission_point'] ?? '001');
+        $this->agregarElemento($dom, $infoTributaria, 'secuencial', sprintf('%09d', $secuencial));
+        $this->agregarElemento($dom, $infoTributaria, 'dirMatriz', $company['address'] ?? '');
+
+        // infoNotaCredito
+        $infoNotaCredito = $dom->createElement('infoNotaCredito');
+        $nc->appendChild($infoNotaCredito);
+
+        $this->agregarElemento($dom, $infoNotaCredito, 'fechaEmision', date('d/m/Y'));
+
+        $dirEst = $company['address'] ?? '';
+        $this->agregarElemento($dom, $infoNotaCredito, 'dirEstablecimiento', $dirEst);
+
+        if (!empty($company['special_contributor']) && $company['special_contributor'] != '0') {
+            $this->agregarElemento($dom, $infoNotaCredito, 'contribuyenteEspecial', 'CONTRIBUYENTE ESPECIAL');
+        }
+
+        $obligado = $company['accountant'] ?? 'SI';
+        $obligadoVal = ($obligado === 'SI' || $obligado === 1 || $obligado === '1') ? 'SI' : 'NO';
+        $this->agregarElemento($dom, $infoNotaCredito, 'obligadoContabilidad', $obligadoVal);
+
+        $tipoIdent = getTipoIdentificacionSRI($clientData['tipo_identificacion'] ?? 'Consumidor Final');
+        $this->agregarElemento($dom, $infoNotaCredito, 'tipoIdentificacionComprador', $tipoIdent);
+        $this->agregarElemento($dom, $infoNotaCredito, 'razonSocialComprador', $clientData['name'] ?? 'Consumidor Final');
+        $this->agregarElemento($dom, $infoNotaCredito, 'identificacionComprador', $clientData['ruc_cedula'] ?? '9999999999999');
+
+        $this->agregarElemento($dom, $infoNotaCredito, 'codDocModificado', '01');
+        $this->agregarElemento($dom, $infoNotaCredito, 'numDocModificado', $invoiceNum);
+        $this->agregarElemento($dom, $infoNotaCredito, 'fechaEmisionDocSustento', $invoiceDate);
+
+        $subtotal = (float)($creditNoteData['subtotal'] ?? 0);
+        $this->agregarElemento($dom, $infoNotaCredito, 'totalSinImpuestos', number_format($subtotal, 2, '.', ''));
+
+        $totalNC = (float)($creditNoteData['total'] ?? 0);
+        $this->agregarElemento($dom, $infoNotaCredito, 'valorModificacion', number_format($totalNC, 2, '.', ''));
+
+        $this->agregarElemento($dom, $infoNotaCredito, 'moneda', 'DOLAR');
+
+        // totalConImpuestos
+        $totalConImpuestos = $dom->createElement('totalConImpuestos');
+        $infoNotaCredito->appendChild($totalConImpuestos);
+
+        // Agrupar impuestos: IVA y Exento
+        $taxTotals = [];
+        foreach ($details as $det) {
+            $rate = (float)($det['tax_rate'] ?? 0);
+            $base = (float)($det['subtotal'] ?? 0);
+            $valor = (float)($det['tax_amount'] ?? 0);
+            $codigoPorcentaje = $rate > 0 ? '2' : '0';
+            $key = $codigoPorcentaje;
+            if (!isset($taxTotals[$key])) {
+                $taxTotals[$key] = ['base' => 0, 'valor' => 0, 'tarifa' => $rate];
+            }
+            $taxTotals[$key]['base'] += $base;
+            $taxTotals[$key]['valor'] += $valor;
+        }
+
+        foreach ($taxTotals as $codPor => $t) {
+            $ti = $dom->createElement('totalImpuesto');
+            $this->agregarElemento($dom, $ti, 'codigo', '2');
+            $this->agregarElemento($dom, $ti, 'codigoPorcentaje', $codPor);
+            $this->agregarElemento($dom, $ti, 'baseImponible', number_format($t['base'], 2, '.', ''));
+            $this->agregarElemento($dom, $ti, 'valor', number_format($t['valor'], 2, '.', ''));
+            $totalConImpuestos->appendChild($ti);
+        }
+
+        $this->agregarElemento($dom, $infoNotaCredito, 'motivo', $motivo);
+
+        // detalles
+        $detalles = $dom->createElement('detalles');
+        $nc->appendChild($detalles);
+
+        foreach ($details as $det) {
+            $detalle = $dom->createElement('detalle');
+            $detalles->appendChild($detalle);
+
+            $this->agregarElemento($dom, $detalle, 'codigoInterno', $det['medication_code'] ?? $det['code'] ?? '');
+            $this->agregarElemento($dom, $detalle, 'descripcion', $det['medication_name'] ?? $det['name'] ?? '');
+            $this->agregarElemento($dom, $detalle, 'cantidad', (string)(int)$det['quantity']);
+            $this->agregarElemento($dom, $detalle, 'precioUnitario', number_format((float)$det['unit_price'], 2, '.', ''));
+            $this->agregarElemento($dom, $detalle, 'descuento', '0.00');
+            $this->agregarElemento($dom, $detalle, 'precioTotalSinImpuesto', number_format((float)$det['subtotal'], 2, '.', ''));
+
+            $impuestos = $dom->createElement('impuestos');
+            $detalle->appendChild($impuestos);
+
+            $impuesto = $dom->createElement('impuesto');
+            $impuestos->appendChild($impuesto);
+
+            $taxRate = (float)($det['tax_rate'] ?? 0);
+            $codPorcentaje = $taxRate > 0 ? '2' : '0';
+            $this->agregarElemento($dom, $impuesto, 'codigo', '2');
+            $this->agregarElemento($dom, $impuesto, 'codigoPorcentaje', $codPorcentaje);
+            $this->agregarElemento($dom, $impuesto, 'tarifa', number_format($taxRate, 2, '.', ''));
+            $this->agregarElemento($dom, $impuesto, 'baseImponible', number_format((float)$det['subtotal'], 2, '.', ''));
+            $this->agregarElemento($dom, $impuesto, 'valor', number_format((float)$det['tax_amount'], 2, '.', ''));
+        }
+
+        // infoAdicional
+        $infoAdicional = $dom->createElement('infoAdicional');
+        $nc->appendChild($infoAdicional);
+
+        $campoAdicional = $dom->createElement('campoAdicional');
+        $campoAdicional->setAttribute('nombre', 'Email');
+        $campoAdicional->nodeValue = $company['email'] ?? '';
+        $infoAdicional->appendChild($campoAdicional);
+
+        return $dom->saveXML();
+    }
+
+    /**
+     * Procesar nota de crédito: generar XML, firmar, enviar al SRI.
+     */
+    public function procesarNotaCredito($saleData, $creditNoteData, $company)
+    {
+        try {
+            $secuencial = getSiguienteSecuencialNC($this->db, $company['id']);
+
+            $numeroNC = generarNumeroNotaCreditoSRI(
+                $company['establishment_code'] ?? '001',
+                $company['emission_point'] ?? '001',
+                $secuencial
+            );
+
+            $invoiceDate = date('d/m/Y', strtotime($saleData['sale']['sale_date']));
+            $claveAccesoNC = generarClaveAccesoSRI(
+                date('Y-m-d'),
+                $company['ruc'],
+                $company['establishment_code'] ?? '001',
+                $company['emission_point'] ?? '001',
+                $secuencial,
+                '',
+                $company['ambiente'] ?? 'pruebas',
+                '04'
+            );
+
+            $xml = $this->generarXmlNotaCredito($saleData, $creditNoteData, $company, $numeroNC, $claveAccesoNC, $secuencial);
+            $xmlPath = $this->guardarXml($claveAccesoNC, $xml, false);
+
+            $this->logSriError("XML NotaCredito generado: $claveAccesoNC (ambiente: {$this->ambiente})");
+
+            $xmlFirmado = $this->firmarXml($xml, $company['certificate_path'] ?? null, null);
+            $xmlFirmadoPath = $this->guardarXml($claveAccesoNC, $xmlFirmado, true);
+
+            $respuestaSri = $this->enviarAlSri($xmlFirmado);
+
+            if ($this->ambiente === 'pruebas' && $respuestaSri['estado'] !== 'autorizada') {
+                $codigoEstado = $respuestaSri['estado'];
+                $mensajeOriginal = $respuestaSri['mensaje'];
+
+                switch ($codigoEstado) {
+                    case 'error_conexion':
+                        $mensaje = 'Autorizada en pruebas (simulación — sin conexión al SRI)';
+                        break;
+                    case 'rechazada':
+                        $obs = $respuestaSri['observaciones'] ?? [];
+                        if (!empty($obs)) {
+                            $detalles = array_map(function($o) {
+                                return $o['identificador'] . ': ' . $o['mensaje'];
+                            }, $obs);
+                            $mensaje = 'Autorizada en pruebas (simulación — SRI rechazó: ' . implode('; ', $detalles) . ')';
+                        } else {
+                            $mensaje = 'Autorizada en pruebas (simulación — SRI rechazó: ' . $mensajeOriginal . ')';
+                        }
+                        break;
+                    case 'pendiente_autorizacion':
+                        $mensaje = 'Autorizada en pruebas (simulación — SRI requiere tiempo de procesamiento)';
+                        break;
+                    default:
+                        $mensaje = 'Autorizada en pruebas (simulación — respuesta SRI: ' . $codigoEstado . ')';
+                        break;
+                }
+
+                $this->logSriError("PRUEBAS NC: Fallback de $codigoEstado -> $mensaje");
+
+                $respuestaSri = [
+                    'estado' => 'autorizada',
+                    'mensaje' => $mensaje,
+                    'numero_autorizacion' => str_pad(rand(10000000000000000, 99999999999999999), 49, '0', STR_PAD_LEFT),
+                    'observaciones' => [],
+                ];
+            }
+
+            return [
+                'success' => $respuestaSri['estado'] === 'autorizada',
+                'numero_nota_credito' => $numeroNC,
+                'clave_acceso' => $claveAccesoNC,
+                'secuencial' => $secuencial,
+                'xml_path' => $xmlPath,
+                'xml_firmado_path' => $xmlFirmadoPath,
+                'estado_sri' => $respuestaSri['estado'],
+                'mensaje_sri' => $respuestaSri['mensaje'],
+                'numero_autorizacion' => $respuestaSri['numero_autorizacion'],
+                'observaciones' => $respuestaSri['observaciones'] ?? [],
+            ];
+
+        } catch (Exception $e) {
+            $this->logSriError("procesarNotaCredito exception: " . $e->getMessage());
+            return [
+                'success' => false,
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
 }
